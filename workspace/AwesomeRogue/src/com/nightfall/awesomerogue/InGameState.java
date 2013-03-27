@@ -23,7 +23,7 @@ public class InGameState extends GameState {
 	
 	private class Tile {
 		public boolean blocker = false;
-		public boolean visible = false, seen = false;
+		public boolean visible = true, seen = true;
 		public BufferedImage image;
 		public Tile(BufferedImage img) {
 			image = img;
@@ -119,50 +119,5 @@ public class InGameState extends GameState {
 	}
 	
 	private void calculateLighting() {
-		int x = mainChar.getX(), y = mainChar.getY();
-		map[x][y].visible = true;
-		for(int tx=0;tx<map.length;tx++) {
-			for(int ty=0;ty<map[0].length;ty++) {
-				map[tx][ty].visible = false;
-			}
-		}
-
-		// Orthogonal directions first
-		for(int dx = 1; x+dx < map.length && !map[x+dx][y].blocker; dx ++) {
-			map[x+dx][y].visible = true;
-			map[x+dx][y].seen = true;
-		}
-		for(int dy = 1; y+dy < map[0].length && !map[x][y+dy].blocker; dy ++) {
-			map[x][y+dy].visible = true;
-			map[x][y+dy].seen = true;
-		}
-		
-		// Now we throw a bunch of rays of different angles
-		for(int slope = 1; slope <= 31; slope ++) {
-			// Initialize v coordinate and set beam size to max
-			int v = slope;
-			int mini = 0;
-			int maxi = 31;
-			
-			for(int u=1; mini<= maxi && u < 100; u ++) {
-				int ty = v>>5-y;
-				int tx = u - (y+ty) - x;
-				//if(tx >= map.length+1 || tx < 0 || ty >= map[0].length || ty < -1) continue;
-				int cor = 32 - (v&31);
-				
-				if(mini < cor && tx < map.length && tx >= 0 && ty >= 0 && ty < map[0].length) {
-					map[tx][ty].visible = true;
-					map[tx][ty].seen = true;
-					if(map[tx][ty].blocker) mini = cor;
-				}
-				if(maxi > cor && tx < map.length+1 && tx >= 1 && ty >= -1 && ty < map[0].length-1) {
-					map[tx-1][ty+1].visible = true;
-					map[tx-1][ty+1].seen = true;
-					if(map[tx-1][ty+1].blocker) mini = cor;
-				}
-				
-				v += slope;
-			}
-		}
 	}
 }
