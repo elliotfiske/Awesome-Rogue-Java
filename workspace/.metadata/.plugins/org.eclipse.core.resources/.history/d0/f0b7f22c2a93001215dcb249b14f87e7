@@ -1,0 +1,9 @@
+package com.nightfall.awesomerogue;
+
+public class Tile {
+	private boolean blocker;
+	private BufferedImage image;
+	public Tile() {
+		
+	}
+}

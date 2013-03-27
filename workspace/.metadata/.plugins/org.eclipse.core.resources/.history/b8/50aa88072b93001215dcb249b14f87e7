@@ -1,0 +1,15 @@
+package com.nightfall.awesomerogue;
+
+import java.awt.image.BufferedImage;
+import java.io.File;
+
+import javax.imageio.ImageIO;
+
+public class Tile {
+	private boolean blocker;
+	private BufferedImage image;
+	public Tile() {
+		image = ImageIO.read(new File("img/background.png"));
+		blocker = false;
+	}
+}

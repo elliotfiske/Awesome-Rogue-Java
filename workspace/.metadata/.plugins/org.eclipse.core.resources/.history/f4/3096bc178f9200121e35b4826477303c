@@ -1,0 +1,5 @@
+package com.nightfall.gameEngine;
+
+public abstract class GameState {
+	public void update();
+}

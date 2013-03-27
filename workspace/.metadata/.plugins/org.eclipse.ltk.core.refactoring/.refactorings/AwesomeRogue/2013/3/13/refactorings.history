@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename local variable &apos;y&apos; in &apos;com.nightfall.awesomerogue.InGameState.calculateLighting()&apos; to &apos;ty&apos;&#x0D;&#x0A;- Original project: &apos;AwesomeRogue&apos;&#x0D;&#x0A;- Original element: &apos;com.nightfall.awesomerogue.InGameState.calculateLighting().y&apos;&#x0D;&#x0A;- Renamed element: &apos;y&apos;&#x0D;&#x0A;- Update references to refactored element" description="Rename local variable &apos;y&apos;" id="org.eclipse.jdt.ui.rename.local.variable" input="/src&lt;com.nightfall.awesomerogue{InGameState.java[InGameState~calculateLighting@y!3089!3095!3093!3093!I!0!false" name="ty" references="true" stamp="1364287104883" version="1.0"/>
+</session>

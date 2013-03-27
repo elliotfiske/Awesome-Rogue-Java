@@ -1,0 +1,27 @@
+package com.nightfall.awesomerogue;
+
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.event.KeyEvent;
+
+public class TitlePageState extends GameState {
+	private Font gameFont;
+	
+	public TitlePageState(GamePanel parentPanel) {
+		super(parentPanel);
+		
+		gameFont = Font.createFont(0, new File("assets/FUTRFW.TTF"));
+	}
+
+	public void update() {
+	}
+
+	public void render(Graphics g) {
+		
+	}
+
+	public void keyPress(KeyEvent e) {
+		
+	}
+
+}

@@ -1,0 +1,25 @@
+package com.nightfall.awesomerogue;
+
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+
+public class Tile {
+	private boolean blocker;
+	private BufferedImage image;
+	public Tile() {
+		try {
+			image = ImageIO.read(new File("img/blankTile.png"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		blocker = false;
+	}
+	
+	public BufferedImage getImage() {
+		return image;
+	}
+}

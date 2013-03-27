@@ -1,0 +1,11 @@
+package com.nightfall.awesomerogue;
+
+import java.awt.image.BufferedImage;
+
+public class Tile {
+	private boolean blocker;
+	private BufferedImage image;
+	public Tile() {
+		image = 
+	}
+}

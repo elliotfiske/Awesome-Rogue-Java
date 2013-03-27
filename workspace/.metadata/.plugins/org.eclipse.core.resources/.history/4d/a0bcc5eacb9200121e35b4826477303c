@@ -1,0 +1,23 @@
+package com.nightfall.awesomerogue;
+
+import java.awt.Graphics;
+import java.awt.event.KeyEvent;
+
+public class TitlePageState extends GameState {
+	
+	public TitlePageState(GamePanel parentPanel) {
+		super(parentPanel);
+	}
+
+	public void update() {
+	}
+
+	public void render(Graphics g) {
+		
+	}
+
+	public void keyPress(KeyEvent e) {
+		
+	}
+
+}

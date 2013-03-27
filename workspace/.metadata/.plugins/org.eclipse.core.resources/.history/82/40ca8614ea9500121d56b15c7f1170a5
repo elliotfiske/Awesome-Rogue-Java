@@ -1,0 +1,21 @@
+package com.nightfall.awesomerogue;
+
+public class Character {
+	private int x, y;
+	private int awesome;
+	
+	public Character(int x, int y) {
+		awesome = 100;
+		this.x = x;
+		this.y = y;
+	}
+	
+	public void move(int dx, int dy) {
+		x += dx;
+		y += dy;
+	}
+	
+	public int getX() { return x; }
+	public int getY() { return y; }
+	public int getAwesome() { return awesome; }
+}

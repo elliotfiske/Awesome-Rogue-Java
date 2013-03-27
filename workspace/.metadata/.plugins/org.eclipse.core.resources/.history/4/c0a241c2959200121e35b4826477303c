@@ -1,0 +1,20 @@
+package com.nightfall.gameEngine;
+
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
+
+public class DefaultGameState extends GameState {
+	private BufferedImage background;
+	private BufferedImage sprite;
+	
+	public DefaultGameState() {
+		background = 
+	}
+	
+	public void update() {
+	}
+
+	public void render(Graphics g) {
+	}
+
+}
