@@ -6,6 +6,7 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
@@ -15,11 +16,14 @@ public class InGameState extends GameState {
 	public static final int INGAME_WINDOW_WIDTH = 60;		// In cells, not pixels
 	public static final int INGAME_WINDOW_HEIGHT = 40;		// In cells, not pixels
 	
-	private Tile[][] map;
+	private static Tile[][] map;
 	
 	private Character mainChar;
 	
 	private BufferedImage[] tileImages;
+	
+	public static ArrayList<String> waitingOn;
+	boolean suspended = false; //we could just check if waitingOn.size() == 0, but this is faster
 	
 	private class Tile {
 		public boolean blocker = false;
@@ -40,6 +44,8 @@ public class InGameState extends GameState {
 		tileImages = new BufferedImage[10];
 		tileImages[0] = ImageIO.read(new File("img/blankTile.png"));
 		tileImages[1] = ImageIO.read(new File("img/blankTile2.png"));
+		
+		waitingOn = new ArrayList<String>();
 
 		mainChar = new Character(0,0);
 		
@@ -86,6 +92,9 @@ public class InGameState extends GameState {
 
 	public void keyPress(KeyEvent e) {
 		calculateLighting();
+		
+		
+		
 		switch(e.getKeyCode()) {
 		case KeyEvent.VK_UP:
 			mainChar.move(0, -1);
@@ -119,5 +128,9 @@ public class InGameState extends GameState {
 	}
 	
 	private void calculateLighting() {
+	}
+
+	public static Tile[][] getMap() {
+		return map;
 	}
 }
