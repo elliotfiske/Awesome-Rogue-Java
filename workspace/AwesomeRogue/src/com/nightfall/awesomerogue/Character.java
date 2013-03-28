@@ -3,6 +3,8 @@ package com.nightfall.awesomerogue;
 import java.awt.Graphics2D;
 
 public class Character {
+	public static final int VISIONRANGE = 7;
+	
 	private int x, y;
 	private int awesome;
 	

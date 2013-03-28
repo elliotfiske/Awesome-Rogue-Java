@@ -41,7 +41,7 @@ public class InGameState extends GameState {
 		tileImages[0] = ImageIO.read(new File("img/blankTile.png"));
 		tileImages[1] = ImageIO.read(new File("img/blankTile2.png"));
 
-		mainChar = new Character(0,0);
+		mainChar = new Character(1,1);
 		
 		initLevel(1);
 	}
@@ -99,6 +99,7 @@ public class InGameState extends GameState {
 		case KeyEvent.VK_RIGHT:
 			mainChar.move(1, 0);
 			break;
+		case KeyEvent.VK_SPACE:
 		}
 		calculateLighting();
 	}
@@ -108,14 +109,12 @@ public class InGameState extends GameState {
 		for(int i = 0; i < map.length; i ++) {
 			for(int j = 0; j < map[0].length; j ++) {
 				map[i][j] = new Tile(tileImages[0]);
-				if(i*i+j*j == 25 || i == 0 || i == 5 || j == 0 || j == 5) {
+				if(i == 0 || i == 5 || j == 0 || j == 5 || i == map.length-1 || j == map[0].length-1) {
 					map[i][j].image = tileImages[1];
 					map[i][j].blocker = true;
 				}
 			}
 		}
-		map[4][4].image = tileImages[1];
-		map[4][4].blocker = true;
 
 		map[10][4].image = tileImages[0];
 		map[10][4].blocker = false;
@@ -136,44 +135,55 @@ public class InGameState extends GameState {
 		for(int ix = 1; ix >= -1; ix -= 2) {
 		for(int iy = 1; iy >= -1; iy -= 2) {
 			// Orthogonal directions first
-			for(int dx = 1; x+dx*ix < map.length && x+dx*ix > 0; dx ++) {
+			for(int dx = 1; x+dx*ix < map.length && x+dx*ix > 0 && Math.abs(dx) <= Character.VISIONRANGE; dx ++) {
 				map[x+dx*ix][y].visible = true;
 				map[x+dx*ix][y].seen = true;
 				if(map[x+dx*ix][y].blocker) break;
 			}
-			for(int dy = 1; y+dy*iy < map[0].length && y+dy*iy > 0; dy ++) {
+			for(int dy = 1; y+dy*iy < map[0].length && y+dy*iy > 0 && Math.abs(dy) <= Character.VISIONRANGE; dy ++) {
 				map[x][y+dy*iy].visible = true;
 				map[x][y+dy*iy].seen = true;
 				if(map[x][y+dy*iy].blocker) break;
 			}
 			
 			// Now we throw a bunch of rays of different angles
-			for(int slope = 1; slope <= 31; slope ++) {
+			for(int slope = 1; slope <=31; slope ++) {
 				// Initialize v coordinate and set beam size to max
 				int v = slope;
 				int mini = 0;
 				int maxi = 31;
 				
-				for(int u=1; mini<= maxi && u < 50; u ++) {
-					int ty = v>>5;
-					int tx = u - ty;
+				for(int u=1; mini <= maxi; u ++) {
+					int dy = v>>5;
+					int dx = u - dy;
+					
+					if(dx*dx+dy*dy > Character.VISIONRANGE*Character.VISIONRANGE) break;
+
+					int tx = x+dx*ix;
+					int ty = y+dy*iy;
 					int cor = 32 - (v&31);
 					
-					if(mini < cor && x+tx*ix < map.length && x+tx*ix >= 0 && y+ty*iy >= 0 && y+ty*iy < map[0].length) {
-						map[x+tx*ix][y+ty*iy].visible = true;
-						map[x+tx*ix][y+ty*iy].seen = true;
-						if(map[x+tx*ix][y+ty*iy].blocker) mini = cor;
+					if(mini < cor && checkCoords(tx, ty)) {
+						map[tx][ty].visible = true;
+						map[tx][ty].seen = true;
+						if(map[tx][ty].blocker) mini = cor;
 					}
-					if(maxi > cor && x+(tx-1)*ix < map.length && x+(tx-1)*ix >= 0 && y+(ty-1)*iy >= 0 && y+(ty-1)*iy < map[0].length) {
-						map[x+(tx-1)*ix][y+(ty-1)*iy].visible = true;
-						map[x+(tx-1)*ix][y+(ty-1)*iy].seen = true;
-						if(map[x+(tx-1)*ix][y+(ty-1)*iy].blocker) maxi = cor;
+					if(maxi > cor && checkCoords(tx+ix, ty+iy)) {
+						map[tx-ix][ty+iy].visible = true;
+						map[tx-ix][ty+iy].seen = true;
+						if(map[tx-ix][ty+iy].blocker) maxi = cor;
 					}
 					
 					v += slope;
+					
+					if(!checkCoords(tx, ty)) break;
 				}
 			}
 		}
 		}
+	}
+	
+	private boolean checkCoords(int x, int y) {
+		return x >= 0 && x < map.length && y >= 0 && y < map[0].length;
 	}
 }
