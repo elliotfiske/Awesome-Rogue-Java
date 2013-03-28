@@ -1,1 +1,5 @@
-workspace/metadata/*
+workspace/.metadata/
+workspace/AwesomeRogue/.settings/
+workspace/AwesomeRogue/bin/
+workspace/AwesomeRogue/.classpath
+workspace/AwesomeRogue/.project

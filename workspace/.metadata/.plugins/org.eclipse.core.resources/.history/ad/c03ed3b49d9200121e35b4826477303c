@@ -1,9 +1,0 @@
-package com.nightfall.gameEngine;
-
-import java.awt.Graphics;
-
-public abstract class GameState {
-	public abstract void update();
-	public abstract void render(Graphics g);
-	public abstract void keyPress(KeyEvent e);
-}

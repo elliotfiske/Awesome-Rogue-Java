@@ -1,7 +1,0 @@
-package com.nightfall.awesomerogue;
-
-import GameStatw;
-
-public class TitlePageState extends GameStatw {
-
-}
