@@ -1,5 +1,0 @@
-package com.nightfall.awesomerogue;
-
-public interface Tile {
-	public void doAction();
-}

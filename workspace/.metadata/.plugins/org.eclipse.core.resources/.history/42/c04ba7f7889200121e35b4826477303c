@@ -1,5 +1,0 @@
-package com.nightfall.gameEngine;
-
-public abstract interface GameState {
-
-}

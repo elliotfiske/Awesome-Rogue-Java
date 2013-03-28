@@ -1,5 +1,0 @@
-package com.nightfall.awesomerogue;
-
-public class TitlePageState extends GameState {
-
-}
