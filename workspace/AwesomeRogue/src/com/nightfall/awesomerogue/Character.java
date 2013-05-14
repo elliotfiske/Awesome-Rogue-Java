@@ -2,11 +2,14 @@ package com.nightfall.awesomerogue;
 
 import java.awt.Graphics2D;
 
+import com.nightfall.awesomerogue.InGameState.Tile;
+
 public class Character {
 	public static final int VISIONRANGE = 7;
 	
 	private int x, y;
 	private int awesome;
+	
 	
 	public Character(int x, int y) {
 		awesome = 100;
@@ -14,9 +17,17 @@ public class Character {
 		this.y = y;
 	}
 	
-	public void move(int dx, int dy) {
-		x += dx;
-		y += dy;
+	public void move(int dx, int dy, Tile[][] map) {
+		int targetX = x + dx;
+		int targetY = y + dy;
+		
+		if(map[targetX][targetY].blocker == false) {
+			x = targetX;
+			y = targetY;
+		} else {
+			System.out.println("You bump into a wall. Idiot.");
+		}
+		
 	}
 	
 	public int getX() { return x; }
