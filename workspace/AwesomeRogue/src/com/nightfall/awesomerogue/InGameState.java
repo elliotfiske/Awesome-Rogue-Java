@@ -14,8 +14,13 @@ import javax.imageio.ImageIO;
 public class InGameState extends GameState {
 	public static final int INGAME_WINDOW_OFFSET_X = 66;	// In pixels, not cells
 	public static final int INGAME_WINDOW_OFFSET_Y = 26;	// In pixels, not cells
-	public static final int INGAME_WINDOW_WIDTH = 50;		// In cells, not pixels
-	public static final int INGAME_WINDOW_HEIGHT = 50;		// In cells, not pixels
+	public static final int INGAME_WINDOW_WIDTH = 54;		// In cells, not pixels
+	public static final int INGAME_WINDOW_HEIGHT = 55;		// In cells, not pixels
+	public static final int INGAME_SCROLL_PADDING = 10;		// Padding to scroll the viewing window
+	public static final int INGAME_SCROLL_MINX = INGAME_SCROLL_PADDING;
+	public static final int INGAME_SCROLL_MAXX = INGAME_WINDOW_WIDTH - INGAME_SCROLL_PADDING;
+	public static final int INGAME_SCROLL_MINY = INGAME_SCROLL_PADDING;
+	public static final int INGAME_SCROLL_MAXY = INGAME_WINDOW_HEIGHT - INGAME_SCROLL_PADDING;
 	
 	/**
 	 * Describes the cell location of the upper lefthand corner of the area
@@ -82,7 +87,7 @@ public class InGameState extends GameState {
 		
 		waitingOn = new ArrayList<String>();
 
-		mainChar = new Character(5,5);
+		mainChar = new Character(1,1);
 		
 		enemies = new ArrayList<Enemy>();
 		
@@ -102,20 +107,29 @@ public class InGameState extends GameState {
 		g2.setColor(Color.white);
 		
 		// Draw the map in the viewing window
-		for(int i = CAMERA_X; i < CAMERA_X + INGAME_WINDOW_WIDTH - 1; i++) {
-			for(int j = CAMERA_Y; j < CAMERA_Y + INGAME_WINDOW_HEIGHT - 1; j++) {
-				
+		for(int i = CAMERA_X; i < CAMERA_X + INGAME_WINDOW_WIDTH && i < map.length; i++) {
+			for(int j = CAMERA_Y; j < CAMERA_Y + INGAME_WINDOW_HEIGHT && j < map[0].length; j++) {
 				if(map[i][j].visible) {
-					g2.drawImage(map[i][j].image, i*12+INGAME_WINDOW_OFFSET_X,
-													j*12+INGAME_WINDOW_OFFSET_Y, null);
+					g2.drawImage(map[i][j].image, (i-CAMERA_X)*12+INGAME_WINDOW_OFFSET_X,
+													(j-CAMERA_Y)*12+INGAME_WINDOW_OFFSET_Y, null);
 				}
 			}
 		}
 
-		mainChar.draw(g2);
+		mainChar.draw(g2, CAMERA_X, CAMERA_Y);
 		
 		for(int i = 0; i < enemies.size(); i++) {
 			enemies.get(i).draw(g2);
+		}
+	}
+	// Character calls this if the camera needs to be moved.
+	// Also useful for shaking!
+	public void moveCamera(int dx, int dy) {
+		if(CAMERA_X + dx >= 0 && CAMERA_X + dx + INGAME_WINDOW_WIDTH <= map.length) {
+			CAMERA_X += dx;
+		}
+		if(CAMERA_Y + dy >= 0 && CAMERA_Y + dy + INGAME_WINDOW_HEIGHT <= map[0].length) {
+			CAMERA_Y += dy;
 		}
 	}
 
@@ -125,6 +139,19 @@ public class InGameState extends GameState {
 		Point p = getDirection(e);
 		
 		mainChar.move(p.x, p.y, map);
+		if(mainChar.getX() - CAMERA_X < INGAME_SCROLL_MINX) {
+			moveCamera(-1, 0);
+		}
+		else if(mainChar.getX() - CAMERA_X > INGAME_SCROLL_MAXX) {
+			moveCamera(1, 0);
+		}
+		
+		if(mainChar.getY() - CAMERA_Y < INGAME_SCROLL_MINY) {
+			moveCamera(0, -1);
+		}
+		else if(mainChar.getY() - CAMERA_Y > INGAME_SCROLL_MAXY) {
+			moveCamera(0, 1);
+		}
 
 		calculateLighting();
 	}
@@ -222,6 +249,12 @@ public class InGameState extends GameState {
 		map[10][4].image = tileImages[0];
 		map[10][4].blocker = false;
 		
+		map[5][4].image = tileImages[0];
+		map[5][4].blocker = false;
+		
+		map[15][5].image = tileImages[0];
+		map[15][5].blocker = false;
+		
 		calculateLighting();
 	}
 	
@@ -250,21 +283,21 @@ public class InGameState extends GameState {
 			}
 			
 			// Now we throw a bunch of rays of different angles
-			for(int slope = 1; slope <=31; slope ++) {
+			for(int slope = 1; slope <=63; slope ++) {
 				// Initialize v coordinate and set beam size to max
 				int v = slope;
 				int mini = 0;
-				int maxi = 31;
+				int maxi = 63;
 				
 				for(int u=1; mini <= maxi; u ++) {
-					int dy = v>>5;
+					int dy = v>>6;
 					int dx = u - dy;
 					
 					if(dx*dx+dy*dy > Character.VISIONRANGE*Character.VISIONRANGE) break;
 
 					int tx = x+dx*ix;
 					int ty = y+dy*iy;
-					int cor = 32 - (v&31);
+					int cor = 64 - (v&63);
 					
 					if(mini < cor && checkCoords(tx, ty)) {
 						map[tx][ty].visible = true;
@@ -289,6 +322,7 @@ public class InGameState extends GameState {
 	private boolean checkCoords(int x, int y) {
 		return x >= 0 && x < map.length && y >= 0 && y < map[0].length;
 	}
+	
 }
 
 //TODO in the next 30 minutes implement the interface you drew.

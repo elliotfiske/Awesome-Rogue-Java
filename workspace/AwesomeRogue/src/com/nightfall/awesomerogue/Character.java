@@ -5,7 +5,7 @@ import java.awt.Graphics2D;
 import com.nightfall.awesomerogue.InGameState.Tile;
 
 public class Character {
-	public static final int VISIONRANGE = 7;
+	public static final int VISIONRANGE = 25;
 	
 	private int x, y;
 	private int awesome;
@@ -34,7 +34,7 @@ public class Character {
 	public int getY() { return y; }
 	public int getAwesome() { return awesome; }
 	
-	public void draw(Graphics2D g2) {
-		g2.drawString("@", (x*12+InGameState.INGAME_WINDOW_OFFSET_X), (y*12+12+InGameState.INGAME_WINDOW_OFFSET_X));
+	public void draw(Graphics2D g2, int camX, int camY) {
+		g2.drawString("@", ((x-camX)*12+InGameState.INGAME_WINDOW_OFFSET_X), ((y-camY)*12+12+InGameState.INGAME_WINDOW_OFFSET_Y));
 	}
 }
