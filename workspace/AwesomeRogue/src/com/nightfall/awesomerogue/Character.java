@@ -2,8 +2,6 @@ package com.nightfall.awesomerogue;
 
 import java.awt.Graphics2D;
 
-import com.nightfall.awesomerogue.InGameState.Tile;
-
 public class Character {
 	public static final int VISIONRANGE = 25;
 	

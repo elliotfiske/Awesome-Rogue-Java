@@ -2,8 +2,6 @@ package com.nightfall.awesomerogue;
 
 import java.awt.Graphics2D;
 
-import com.nightfall.awesomerogue.InGameState.Tile;
-
 public class Enemy {
 
 	public static final int ANGRY_MUSHROOM = 0;
