@@ -66,10 +66,23 @@ public class Enemy {
 	public void pathToHeroAndMove(int targetX, int targetY, Tile[][] map) {
 	}
 
+	/**
+	 * Render the enemy to the screen.
+	 * 
+	 * @param g2 The Graphics2D handle it uses to draw itself.
+	 */
 	public void draw(Graphics2D g2) {
 		g2.drawString(icon, (x*12 + InGameState.INGAME_WINDOW_OFFSET_X),
 				(y*12 + 12 + InGameState.INGAME_WINDOW_OFFSET_X));	
 	}
+	
+	/**
+	 * Enemies have hit points (unlike the player's "Awesome level.")
+	 * 
+	 * This takes them away.  It also check's if they're dead.
+	 * 
+	 * @param damage How much damage to do to the monster.
+	 */
 	public void getHit(int damage) {
 		health -= damage;
 		if(health <= 0) {

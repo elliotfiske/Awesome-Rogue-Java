@@ -54,6 +54,7 @@ public class InGameState extends GameState {
 		public boolean blocker = false;
 		public boolean visible = false, seen = false;
 		public BufferedImage image;
+		
 		public Tile(int type) {
 			switch(type) {
 			case FLOOR:
@@ -103,9 +104,8 @@ public class InGameState extends GameState {
 		//draw the GUI elements
 		imgSFX.drawResizedImage(g2, guiBG, 0, 0, GamePanel.PWIDTH, GamePanel.PHEIGHT);
 
-
 		g2.setColor(Color.white);
-
+		
 		// Draw the map in the viewing window
 		for(int i = CAMERA_X; i < CAMERA_X + INGAME_WINDOW_WIDTH && i < map.length; i++) {
 			for(int j = CAMERA_Y; j < CAMERA_Y + INGAME_WINDOW_HEIGHT && j < map[0].length; j++) {
@@ -122,8 +122,13 @@ public class InGameState extends GameState {
 			enemies.get(i).draw(g2);
 		}
 	}
-	// Character calls this if the camera needs to be moved.
-	// Also useful for shaking!
+	
+	/**
+	 * Character calls this if the camera needs to be moved.
+	 * Also useful for shaking!
+	 * @param dx How much to move the camera by (x)
+	 * @param dy How much to move the camera by (y)
+	 */
 	public void moveCamera(int dx, int dy) {
 		if(CAMERA_X + dx >= 0 && CAMERA_X + dx + INGAME_WINDOW_WIDTH <= map.length) {
 			CAMERA_X += dx;
@@ -134,7 +139,6 @@ public class InGameState extends GameState {
 	}
 
 	public void keyPress(KeyEvent e) {
-		calculateLighting();
 
 		//Parse the direction from the given KeyPress
 		Point p = getDirection(e);
@@ -165,7 +169,7 @@ public class InGameState extends GameState {
 	}
 
 	/**
-	 * Tells you which direction you should go based on a specified key.
+	 * Tells you which direction you should go based on a specified key. 
 	 * @param e - KeyEvent with desired key.
 	 * @return Point where x is the dx component and y is the dy component.
 	 */
