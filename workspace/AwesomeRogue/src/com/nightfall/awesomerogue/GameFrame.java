@@ -28,7 +28,7 @@ public class GameFrame extends JFrame implements WindowListener {
 		makeGUI(period);
 	}
 	
-	/* put functions here that have to do with JTextFields and shit
+	/* put functions here that have to do with JTextFields and stuff
 	 * if you ever add them to your game. You would initialize them
 	 * when you call the constructor, and then make a function here
 	 * to change them to whatever value.

@@ -77,10 +77,8 @@ public class GamePanel extends JPanel implements Runnable {
 			// *******************************************************************************
 			currentGameState = new InGameState(this);
 		} catch (FontFormatException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
