@@ -15,7 +15,7 @@ public class InGameState extends GameState {
 	public static final int INGAME_WINDOW_OFFSET_X = 66;	// In pixels, not cells
 	public static final int INGAME_WINDOW_OFFSET_Y = 26;	// In pixels, not cells
 	public static final int INGAME_WINDOW_WIDTH = 54;		// In cells, not pixels
-	public static final int INGAME_WINDOW_HEIGHT = 55;		// In cells, not pixels
+	public static final int INGAME_WINDOW_HEIGHT = 50;		// In cells, not pixels
 	public static final int INGAME_SCROLL_PADDING = 10;		// Padding to scroll the viewing window
 	public static final int INGAME_SCROLL_MINX = INGAME_SCROLL_PADDING;
 	public static final int INGAME_SCROLL_MAXX = INGAME_WINDOW_WIDTH - INGAME_SCROLL_PADDING;
@@ -58,7 +58,9 @@ public class InGameState extends GameState {
 
 		tileImages = new BufferedImage[10];
 		tileImages[0] = ImageIO.read(new File("img/blankTile.png"));
-		tileImages[1] = ImageIO.read(new File("img/blankTile2.png"));
+		tileImages[1] = ImageIO.read(new File("img/blankTile_dark.png"));
+		tileImages[2] = ImageIO.read(new File("img/blankTile2.png"));
+		tileImages[3] = ImageIO.read(new File("img/blankTile2_dark.png"));
 
 		guiBG = ImageIO.read(new File("img/guiBG.png"));
 
@@ -74,6 +76,8 @@ public class InGameState extends GameState {
 		mapImg_t = new BufferedImage(INGAME_WINDOW_WIDTH*12, INGAME_WINDOW_HEIGHT*12, BufferedImage.TYPE_INT_ARGB);
 
 		initLevel(1);
+		
+		draw();
 	}
 
 	public void update() {
@@ -101,19 +105,19 @@ public class InGameState extends GameState {
 
 					//Draw the tile image (its type should correspond to the index in tileImages[] that
 					//represents it)
-					g2.drawImage(tileImages[ map[i][j].type ], (i-CAMERA_X)*12+INGAME_WINDOW_OFFSET_X,
-							(j-CAMERA_Y)*12+INGAME_WINDOW_OFFSET_Y, null);
+					g2.drawImage(tileImages[ map[i][j].type*2 ], (i-CAMERA_X)*12,
+							(j-CAMERA_Y)*12, null);
 
 					if(map[i][j].getID() != 0) {
-						g2.drawString(Integer.toString(map[i][j].getID() % 10), (i-CAMERA_X)*12+INGAME_WINDOW_OFFSET_X,
-								(j-CAMERA_Y)*12+INGAME_WINDOW_OFFSET_Y + 12);
+						g2.drawString(Integer.toString(map[i][j].getID() % 10), (i-CAMERA_X)*12,
+								(j-CAMERA_Y)*12 + 12);
 					}
 
 				} else if(map[i][j].seen) {
 					//The tile is in our memory.  Draw it, but darkened.
 
 					//TODO: actually darken the tile.  Dunno how to do it right now.
-					g2.drawImage(tileImages[ map[i][j].type ], (i-CAMERA_X)*12,
+					g2.drawImage(tileImages[ map[i][j].type*2+1 ], (i-CAMERA_X)*12,
 							(j-CAMERA_Y)*12, null);
 				}
 			}
@@ -252,8 +256,8 @@ public class InGameState extends GameState {
 		map[15][5] = new Tile(Tile.FLOOR);
 		
 		//Generate a sweet new Caves level.
-		/* map = new Tile[60][40];
-		levelGen.makeLevel(map, LevelGenerator.CAVE, 60, 40); */
+		//map = new Tile[80][70];
+		//levelGen.makeLevel(map, LevelGenerator.CAVE, 80, 70);
 
 		calculateLighting();
 	}
@@ -283,21 +287,21 @@ public class InGameState extends GameState {
 				}
 
 				// Now we throw a bunch of rays of different angles
-				for(int slope = 1; slope <=63; slope ++) {
+				for(int slope = 1; slope <=127; slope ++) {
 					// Initialize v coordinate and set beam size to max
 					int v = slope;
 					int mini = 0;
-					int maxi = 63;
+					int maxi = 127;
 
 					for(int u=1; mini <= maxi; u ++) {
-						int dy = v>>6;
+						int dy = v>>7;
 					int dx = u - dy;
 
 					if(dx*dx+dy*dy > Character.VISIONRANGE*Character.VISIONRANGE) break;
 
 					int tx = x+dx*ix;
 					int ty = y+dy*iy;
-					int cor = 64 - (v&63);
+					int cor = 128 - (v&127);
 
 					if(mini < cor && checkCoords(tx, ty)) {
 						map[tx][ty].visible = true;

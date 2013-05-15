@@ -75,7 +75,7 @@ public class GamePanel extends JPanel implements Runnable {
 			// DO WITH ANY OF THESE CLASSES IN ORDER FOR THE BASIC ENGINE TO WORK. ALL OF IT.
 			// *******************************************************************************
 			// *******************************************************************************
-			//currentGameState = new InGameState(this);
+			currentGameState = new InGameState(this);
 		} catch (FontFormatException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -226,7 +226,6 @@ public class GamePanel extends JPanel implements Runnable {
 		dbg.setFont(gameFont);
 		dbg.setColor(Color.black);
 		dbg.fillRect(0, 0, PWIDTH, PHEIGHT);
-
 		
 		if(currentGameState != null) {
 			currentGameState.render((Graphics2D) dbg);

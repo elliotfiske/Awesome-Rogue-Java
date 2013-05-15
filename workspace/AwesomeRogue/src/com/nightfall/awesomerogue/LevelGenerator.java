@@ -9,7 +9,7 @@ public class LevelGenerator {
 	public static final int ROOMS = 1;
 	public static final int CATACOMBS = 2;
 
-	private static final int SEED = 22;
+	private static final int SEED = 20;
 
 	//---------------------------CAVE GENERATION CONSTANTS--------------------------------//
 	/**
@@ -20,7 +20,7 @@ public class LevelGenerator {
 	/**
 	 * How many times should we Conway-ify the cave level?
 	 */
-	private static final int CAVE_ITERATIONS = 7;
+	private static final int CAVE_ITERATIONS = 8;
 
 
 
@@ -86,7 +86,7 @@ public class LevelGenerator {
 								//Don't count the tile itself!
 								if(dx != 0 || dy != 0) {
 
-									if(numMap[x + dx][y + dy] == 1 ) {
+									if(numMap[x + dx][y + dy] == Tile.WALL ) {
 										adjacentWalls++;
 									}
 
@@ -96,12 +96,12 @@ public class LevelGenerator {
 					}
 
 					//adjacentWalls now contains the number of walls adjacent to the cell we're looking at.
-					if(adjacentWalls >= SMOOTHNESS - 1 && numMap[x][y] == 1) {
-						tempMap[x][y] = 1;
-					} else if(adjacentWalls >= SMOOTHNESS && numMap[x][y] == 0) {	
-						tempMap[x][y] = 1;
+					if(adjacentWalls >= SMOOTHNESS - 1 && numMap[x][y] == Tile.WALL) {
+						tempMap[x][y] = Tile.WALL;
+					} else if(adjacentWalls >= SMOOTHNESS && numMap[x][y] == Tile.FLOOR) {	
+						tempMap[x][y] = Tile.WALL;
 					} else {
-						tempMap[x][y] = 0;
+						tempMap[x][y] = Tile.FLOOR;
 					}
 				}
 			}
@@ -170,7 +170,7 @@ public class LevelGenerator {
 		//So at listOfLists[37], there is a list of all the Tiles that have the ID #37.
 		ArrayList<ArrayList<Tile>> listOfLists = new ArrayList<ArrayList<Tile>>(width * height);	
 		
-		while(listOfLists.size() < 1000) listOfLists.add(null);
+		while(listOfLists.size() < width*height) listOfLists.add(null);
 		
 		for(int x = 0; x < width; x++) {
 			for(int y = 0; y < height; y++) {
