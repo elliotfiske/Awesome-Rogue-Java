@@ -11,6 +11,9 @@ public class Tile {
 	
 	public int type;
 	
+	//ID used for map generation
+	private int id;
+	
 	public Tile(int type) {
 		switch(type) {
 		case FLOOR:
@@ -24,7 +27,20 @@ public class Tile {
 		this.type = type;
 	}
 
+	public Tile(int type, int id) {
+		this(type);
+		this.id = id;
+	}
+
 	public void doAction() {
 
+	}
+	
+	public void setID(int id) {
+		this.id = id;
+	}
+	
+	public int getID() {
+		return id;
 	}
 }

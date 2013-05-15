@@ -7,10 +7,10 @@ import javax.swing.JFrame;
 
 @SuppressWarnings("serial")
 public class GameFrame extends JFrame implements WindowListener {
-	public static final int DEFAULT_FPS = 80;
+	public static final int DEFAULT_FPS = 60;
 	private GamePanel gamePanel;
 	
-	/* public static void main(String[] args) {
+	public static void main(String[] args) {
 		// Set FPS to default or user-given value
 		int fps = DEFAULT_FPS;
 		if(args.length != 0) fps = Integer.parseInt(args[0]);
@@ -18,7 +18,7 @@ public class GameFrame extends JFrame implements WindowListener {
 		long period = (long) 1000.0/fps;
 		
 		new GameFrame(period);
-	} */
+	}
 	
 	public GameFrame(long period) {
 		gamePanel = new GamePanel(this, period);

@@ -39,7 +39,7 @@ public class InGameState extends GameState {
 	private ImageSFX imgSFX;
 
 	private BufferedImage guiBG;
-	
+
 	private LevelGenerator levelGen;
 	
 	private BufferedImage mapImg;
@@ -51,7 +51,7 @@ public class InGameState extends GameState {
 
 	public static ArrayList<Enemy> enemies;
 
-	public InGameState(GameCanvas gameCanvas) throws IOException {
+	public InGameState(GamePanel gameCanvas) throws IOException {
 		super(gameCanvas);
 
 		imgSFX = new ImageSFX();
@@ -67,7 +67,7 @@ public class InGameState extends GameState {
 		mainChar = new Character(1,1);
 
 		levelGen = new LevelGenerator();
-		
+
 		enemies = new ArrayList<Enemy>();
 		
 		mapImg = new BufferedImage(INGAME_WINDOW_WIDTH*12, INGAME_WINDOW_HEIGHT*12, BufferedImage.TYPE_INT_ARGB);
@@ -93,20 +93,25 @@ public class InGameState extends GameState {
 		g2.setColor(Color.black);
 		g2.clearRect(0,0,GamePanel.PWIDTH, GamePanel.PHEIGHT);
 		g2.setColor(Color.white);
-		
+
 		// Draw the tiles of the map.
 		for(int i = CAMERA_X; i < CAMERA_X + INGAME_WINDOW_WIDTH && i < map.length; i++) {
 			for(int j = CAMERA_Y; j < CAMERA_Y + INGAME_WINDOW_HEIGHT && j < map[0].length; j++) {
 				if(map[i][j].visible) {
-					
+
 					//Draw the tile image (its type should correspond to the index in tileImages[] that
 					//represents it)
-					g2.drawImage(tileImages[ map[i][j].type ], (i-CAMERA_X)*12,
-							(j-CAMERA_Y)*12, null);
-					
-				} else if(map[i][j].seen && false) {
+					g2.drawImage(tileImages[ map[i][j].type ], (i-CAMERA_X)*12+INGAME_WINDOW_OFFSET_X,
+							(j-CAMERA_Y)*12+INGAME_WINDOW_OFFSET_Y, null);
+
+					if(map[i][j].getID() != 0) {
+						g2.drawString(Integer.toString(map[i][j].getID() % 10), (i-CAMERA_X)*12+INGAME_WINDOW_OFFSET_X,
+								(j-CAMERA_Y)*12+INGAME_WINDOW_OFFSET_Y + 12);
+					}
+
+				} else if(map[i][j].seen) {
 					//The tile is in our memory.  Draw it, but darkened.
-					
+
 					//TODO: actually darken the tile.  Dunno how to do it right now.
 					g2.drawImage(tileImages[ map[i][j].type ], (i-CAMERA_X)*12,
 							(j-CAMERA_Y)*12, null);
@@ -125,7 +130,7 @@ public class InGameState extends GameState {
 		Graphics2D g = (Graphics2D) mapImg.getGraphics();
 		g.drawImage(mapImg_t,  0,  0,  null);
 	}
-	
+
 	/**
 	 * Character calls this if the camera needs to be moved.
 	 * Also useful for shaking!
@@ -232,9 +237,7 @@ public class InGameState extends GameState {
 	}
 
 	private void initLevel(int levelNum) {
-		
 		map = new Tile[60][40];
-		
 		for(int i = 0; i < map.length; i ++) {
 			for(int j = 0; j < map[0].length; j ++) {
 				map[i][j] = new Tile(Tile.FLOOR);
@@ -310,7 +313,7 @@ public class InGameState extends GameState {
 					v += slope;
 
 					if(!checkCoords(tx, ty)) break;
-					
+
 					}
 				}
 			}

@@ -5,9 +5,9 @@ import java.awt.event.KeyEvent;
 
 public abstract class GameState {
 	@SuppressWarnings("unused")
-	private GameCanvas parentPanel;
+	private GamePanel parentPanel;
 	
-	public GameState(GameCanvas gameCanvas) {
+	public GameState(GamePanel gameCanvas) {
 		this.parentPanel = gameCanvas;
 	}
 	

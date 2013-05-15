@@ -18,12 +18,13 @@ public class Character {
 		int targetX = x + dx;
 		int targetY = y + dy;
 		
-		if(map[targetX][targetY].blocker == false) {
+		//if(map[targetX][targetY].blocker == false) {
 			x = targetX;
 			y = targetY;
-		} else {
-			System.out.println("You bump into a wall. Idiot.");
-		}
+			
+		//} else {
+			//System.out.println("You bump into a wall. Idiot.");
+		//}
 	}
 	
 	public int getX() { return x; }
