@@ -38,6 +38,6 @@ public class Character {
 	 * @param camY Where the camera is vertically.
 	 */
 	public void draw(Graphics2D g2, int camX, int camY) {
-		g2.drawString("@", ((x-camX)*12+InGameState.INGAME_WINDOW_OFFSET_X), ((y-camY)*12+12+InGameState.INGAME_WINDOW_OFFSET_Y));
+		g2.drawString("@", ((x-camX)*12), ((y-camY)*12+12));
 	}
 }

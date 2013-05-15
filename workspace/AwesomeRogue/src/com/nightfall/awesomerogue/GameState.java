@@ -5,10 +5,10 @@ import java.awt.event.KeyEvent;
 
 public abstract class GameState {
 	@SuppressWarnings("unused")
-	private GamePanel parentPanel;
+	private GameCanvas parentPanel;
 	
-	public GameState(GamePanel parentPanel) {
-		this.parentPanel = parentPanel;
+	public GameState(GameCanvas gameCanvas) {
+		this.parentPanel = gameCanvas;
 	}
 	
 	public abstract void update();

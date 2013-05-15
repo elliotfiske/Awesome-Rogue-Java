@@ -75,7 +75,7 @@ public class GamePanel extends JPanel implements Runnable {
 			// DO WITH ANY OF THESE CLASSES IN ORDER FOR THE BASIC ENGINE TO WORK. ALL OF IT.
 			// *******************************************************************************
 			// *******************************************************************************
-			currentGameState = new InGameState(this);
+			//currentGameState = new InGameState(this);
 		} catch (FontFormatException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

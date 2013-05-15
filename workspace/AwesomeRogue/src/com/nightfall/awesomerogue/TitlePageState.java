@@ -5,7 +5,7 @@ import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 
 public class TitlePageState extends GameState {	
-	public TitlePageState(GamePanel parentPanel) {
+	public TitlePageState(GameCanvas parentPanel) {
 		super(parentPanel);
 	}
 

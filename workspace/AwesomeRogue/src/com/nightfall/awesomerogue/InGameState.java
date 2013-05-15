@@ -41,6 +41,9 @@ public class InGameState extends GameState {
 	private BufferedImage guiBG;
 	
 	private LevelGenerator levelGen;
+	
+	private BufferedImage mapImg;
+	private BufferedImage mapImg_t;
 
 	public static ArrayList<String> waitingOn;
 	boolean suspended = false; //we could just check if waitingOn.size() == 0, but this is faster
@@ -48,8 +51,8 @@ public class InGameState extends GameState {
 
 	public static ArrayList<Enemy> enemies;
 
-	public InGameState(GamePanel parentPanel) throws IOException {
-		super(parentPanel);
+	public InGameState(GameCanvas gameCanvas) throws IOException {
+		super(gameCanvas);
 
 		imgSFX = new ImageSFX();
 
@@ -66,6 +69,9 @@ public class InGameState extends GameState {
 		levelGen = new LevelGenerator();
 		
 		enemies = new ArrayList<Enemy>();
+		
+		mapImg = new BufferedImage(INGAME_WINDOW_WIDTH*12, INGAME_WINDOW_HEIGHT*12, BufferedImage.TYPE_INT_ARGB);
+		mapImg_t = new BufferedImage(INGAME_WINDOW_WIDTH*12, INGAME_WINDOW_HEIGHT*12, BufferedImage.TYPE_INT_ARGB);
 
 		initLevel(1);
 	}
@@ -76,9 +82,16 @@ public class InGameState extends GameState {
 	}
 
 	public void render(Graphics2D g2) {
-		//draw the GUI elements
 		imgSFX.drawResizedImage(g2, guiBG, 0, 0, GamePanel.PWIDTH, GamePanel.PHEIGHT);
+		g2.drawImage(mapImg, INGAME_WINDOW_OFFSET_X, INGAME_WINDOW_OFFSET_Y, null);
+	}
+	
+	public void draw() {
+		Graphics2D g2 = (Graphics2D) mapImg_t.getGraphics();
+		//draw the GUI elements
 
+		g2.setColor(Color.black);
+		g2.clearRect(0,0,GamePanel.PWIDTH, GamePanel.PHEIGHT);
 		g2.setColor(Color.white);
 		
 		// Draw the tiles of the map.
@@ -88,15 +101,15 @@ public class InGameState extends GameState {
 					
 					//Draw the tile image (its type should correspond to the index in tileImages[] that
 					//represents it)
-					g2.drawImage(tileImages[ map[i][j].type ], (i-CAMERA_X)*12+INGAME_WINDOW_OFFSET_X,
-							(j-CAMERA_Y)*12+INGAME_WINDOW_OFFSET_Y, null);
+					g2.drawImage(tileImages[ map[i][j].type ], (i-CAMERA_X)*12,
+							(j-CAMERA_Y)*12, null);
 					
-				} else if(map[i][j].seen) {
+				} else if(map[i][j].seen && false) {
 					//The tile is in our memory.  Draw it, but darkened.
 					
 					//TODO: actually darken the tile.  Dunno how to do it right now.
-					g2.drawImage(tileImages[ map[i][j].type ], (i-CAMERA_X)*12+INGAME_WINDOW_OFFSET_X,
-							(j-CAMERA_Y)*12+INGAME_WINDOW_OFFSET_Y, null);
+					g2.drawImage(tileImages[ map[i][j].type ], (i-CAMERA_X)*12,
+							(j-CAMERA_Y)*12, null);
 				}
 			}
 		}
@@ -108,6 +121,9 @@ public class InGameState extends GameState {
 		for(int i = 0; i < enemies.size(); i++) {
 			enemies.get(i).draw(g2);
 		}
+		
+		Graphics2D g = (Graphics2D) mapImg.getGraphics();
+		g.drawImage(mapImg_t,  0,  0,  null);
 	}
 	
 	/**
@@ -217,7 +233,7 @@ public class InGameState extends GameState {
 
 	private void initLevel(int levelNum) {
 		
-		/*map = new Tile[60][40];
+		map = new Tile[60][40];
 		
 		for(int i = 0; i < map.length; i ++) {
 			for(int j = 0; j < map[0].length; j ++) {
@@ -228,13 +244,13 @@ public class InGameState extends GameState {
 			}
 		}
 
-		map[10][4] = new Tile(Tile.WALL);
-		map[5][4] = new Tile(Tile.WALL);
-		map[15][5] = new Tile(Tile.WALL);*/
+		map[10][4] = new Tile(Tile.FLOOR);
+		map[5][4] = new Tile(Tile.FLOOR);
+		map[15][5] = new Tile(Tile.FLOOR);
 		
 		//Generate a sweet new Caves level.
-		map = new Tile[60][40];
-		levelGen.makeLevel(map, LevelGenerator.CAVE, 60, 40);
+		/* map = new Tile[60][40];
+		levelGen.makeLevel(map, LevelGenerator.CAVE, 60, 40); */
 
 		calculateLighting();
 	}
@@ -299,6 +315,8 @@ public class InGameState extends GameState {
 				}
 			}
 		}
+		
+		draw();
 	}
 
 	/**
