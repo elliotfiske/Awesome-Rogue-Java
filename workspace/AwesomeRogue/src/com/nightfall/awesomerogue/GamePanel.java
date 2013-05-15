@@ -150,12 +150,24 @@ public class GamePanel extends JPanel implements Runnable {
 		// update, render, sleep
 		running = true;
 		while(running) {
-			gameUpdate();
-			gameRender();
-			paintScreen();
 			
+			gameUpdate();
+			
+			beforeTime = System.currentTimeMillis();
+			
+			gameRender();
+
 			afterTime = System.currentTimeMillis();
 			timeDiff = afterTime - beforeTime;
+			System.out.println("Time it took to render = " + timeDiff);
+
+			beforeTime = System.currentTimeMillis();
+			
+			paintScreen();
+
+			afterTime = System.currentTimeMillis();
+			timeDiff = afterTime - beforeTime;
+			System.out.println("Time it took to paint = " + timeDiff);
 			sleepTime = (period - timeDiff) - overSleepTime;
 			
 			if(sleepTime >= 0) {
@@ -212,12 +224,15 @@ public class GamePanel extends JPanel implements Runnable {
 			}
 		}
 
+		
 		dbg.setFont(gameFont);
 		dbg.setColor(Color.black);
 		dbg.fillRect(0, 0, PWIDTH, PHEIGHT);
+
 		
-		if(currentGameState != null)
+		if(currentGameState != null) {
 			currentGameState.render((Graphics2D) dbg);
+		}
 	} // End gameRender()
 	
 	private void paintScreen() {
