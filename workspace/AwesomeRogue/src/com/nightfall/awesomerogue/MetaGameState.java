@@ -12,8 +12,12 @@ import java.util.ArrayList;
 import javax.imageio.ImageIO;
 
 public class MetaGameState extends GameState {
-	public static final int INGAME_WINDOW_OFFSET_X = 180;	// In pixels, not cells
-	public static final int INGAME_WINDOW_OFFSET_Y = 22;	// In pixels, not cells
+	public static final int INGAME_WINDOW_OFFSET_X = 32;	// In pixels, not cells
+	public static final int INGAME_WINDOW_OFFSET_Y = 23;	// In pixels, not cells
+	public static final int LEVEL_ANIM_OFFSET_X = 551;	// In pixels, not cells
+	public static final int LEVEL_ANIM_OFFSET_Y = 23;	// In pixels, not cells
+	public static final int LEVEL_INFO_OFFSET_X = 551;	// In pixels, not cells
+	public static final int LEVEL_INFO_OFFSET_Y = 180;	// In pixels, not cells
 	public static final int CELL_SIZE = 80;
 	public static final int META_MAP_WIDTH = 6;				// In cells, not pixels
 	public static final int META_MAP_HEIGHT = 6;			// In cells, not pixels
@@ -33,7 +37,7 @@ public class MetaGameState extends GameState {
 
 	private ImageSFX imgSFX;
 
-	private BufferedImage guiBG;
+	private BufferedImage[] guiBG;
 
 	private BufferedImage[] tileImages;
 
@@ -48,7 +52,8 @@ public class MetaGameState extends GameState {
 		tileImages[0] = ImageIO.read(new File("img/metagame/CaveMetaTile.png"));
 		tileImages[1] = ImageIO.read(new File("img/metagame/RoomMetaTile.png"));
 
-		guiBG = ImageIO.read(new File("img/metagame/guiBG.png"));
+		guiBG = new BufferedImage[1];
+		guiBG[0] = ImageIO.read(new File("img/metagame/guiBG.png"));
 
 		charX = 0;
 		charY = 0;
@@ -81,7 +86,7 @@ public class MetaGameState extends GameState {
 		//draw the GUI elements
 		g2.setColor(Color.black);
 		
-		g2.drawImage(guiBG, 0, 0, null);
+		g2.drawImage(guiBG[0], 0, 0, null);
 		//imgSFX.drawResizedImage(g2, guiBG, 0, 0, GamePanel.PWIDTH, GamePanel.PHEIGHT);
 
 		// Draw the tiles of the map.
@@ -109,11 +114,6 @@ public class MetaGameState extends GameState {
 		//Draw the user character.
 		g2.drawImage(metaChar,  charX*CELL_SIZE+INGAME_WINDOW_OFFSET_X,  charY*CELL_SIZE+INGAME_WINDOW_OFFSET_Y,  null);
 		g2.drawImage(wizChar,  wizX*CELL_SIZE+INGAME_WINDOW_OFFSET_X,  wizY*CELL_SIZE+INGAME_WINDOW_OFFSET_Y,  null);
-
-		//Draw the enemies.
-		for(int i = 0; i < enemies.size(); i++) {
-			enemies.get(i).draw(g2);
-		}		
 	}
 
 	public void keyPress(KeyEvent e) {

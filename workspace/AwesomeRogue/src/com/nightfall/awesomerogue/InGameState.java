@@ -12,10 +12,10 @@ import java.util.ArrayList;
 import javax.imageio.ImageIO;
 
 public class InGameState extends GameState {
-	public static final int INGAME_WINDOW_OFFSET_X = 66;	// In pixels, not cells
-	public static final int INGAME_WINDOW_OFFSET_Y = 26;	// In pixels, not cells
-	public static final int INGAME_WINDOW_WIDTH = 54;		// In cells, not pixels
-	public static final int INGAME_WINDOW_HEIGHT = 50;		// In cells, not pixels
+	public static final int INGAME_WINDOW_OFFSET_X = 46;	// In pixels, not cells
+	public static final int INGAME_WINDOW_OFFSET_Y = 19;	// In pixels, not cells
+	public static final int INGAME_WINDOW_WIDTH = 38;		// In cells, not pixels
+	public static final int INGAME_WINDOW_HEIGHT = 35;		// In cells, not pixels
 	public static final int INGAME_SCROLL_PADDING = 10;		// Padding to scroll the viewing window
 	public static final int INGAME_SCROLL_MINX = INGAME_SCROLL_PADDING;
 	public static final int INGAME_SCROLL_MAXX = INGAME_WINDOW_WIDTH - INGAME_SCROLL_PADDING;
