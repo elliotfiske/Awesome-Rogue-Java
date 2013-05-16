@@ -157,7 +157,7 @@ public class InGameState extends GameState {
 	}
 
 	public void keyPress(KeyEvent e) {
-
+		
 		//Parse the direction from the given KeyPress
 		Point p = getDirection(e);
 
@@ -247,23 +247,23 @@ public class InGameState extends GameState {
 	}
 
 	private void initLevel(int levelNum) {
-		map = new Tile[60][40];
-		for(int i = 0; i < map.length; i ++) {
-			for(int j = 0; j < map[0].length; j ++) {
-				map[i][j] = new Tile(Tile.FLOOR);
-				if(i == 0 || i == 5 || j == 0 || j == 5 || i == map.length-1 || j == map[0].length-1) {
-					map[i][j] = new Tile(Tile.WALL);
-				}
-			}
-		}
-
-		map[10][4] = new Tile(Tile.FLOOR);
-		map[5][4] = new Tile(Tile.FLOOR);
-		map[15][5] = new Tile(Tile.FLOOR);
+//		map = new Tile[60][40];
+//		for(int i = 0; i < map.length; i ++) {
+//			for(int j = 0; j < map[0].length; j ++) {
+//				map[i][j] = new Tile(Tile.FLOOR);
+//				if(i == 0 || i == 5 || j == 0 || j == 5 || i == map.length-1 || j == map[0].length-1) {
+//					map[i][j] = new Tile(Tile.WALL);
+//				}
+//			}
+//		}
+//
+//		map[10][4] = new Tile(Tile.FLOOR);
+//		map[5][4] = new Tile(Tile.FLOOR);
+//		map[15][5] = new Tile(Tile.FLOOR);
 		
 		//Generate a sweet new Caves level.
-		//map = new Tile[80][70];
-		//levelGen.makeLevel(map, LevelGenerator.CAVE, 80, 70);
+		map = new Tile[80][70];
+		levelGen.makeLevel(map, LevelGenerator.CAVE, 80, 70);
 
 		calculateLighting();
 	}

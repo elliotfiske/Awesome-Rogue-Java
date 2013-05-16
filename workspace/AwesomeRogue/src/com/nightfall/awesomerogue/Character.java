@@ -15,6 +15,7 @@ public class Character {
 	}
 	
 	public void move(int dx, int dy, Tile[][] map) {
+		
 		int targetX = x + dx;
 		int targetY = y + dy;
 		
