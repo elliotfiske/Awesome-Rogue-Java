@@ -22,7 +22,13 @@ public class LevelGenerator {
 	 */
 	private static final int CAVE_ITERATIONS = 8;
 
-
+	/**
+	 * Bitwise values for the walls of the MetaMaze
+	 */
+	private static final int N = 1;
+	private static final int E = 2;
+	private static final int S = 4;
+	private static final int W = 8;
 
 	/**
 	 * Generate a new level with the specified parameters.
@@ -246,5 +252,132 @@ public class LevelGenerator {
 
 	private static void makeCatacombs(Tile[][] map, int width, int height) {
 
+	}
+	
+	public static LevelTile[][] makeMetaGame(int width, int height) {
+		int[][] maze = new int[width][height];
+
+        // set all walls of each cell true in maze by setting NESW bits
+        for (int i = 0; i < width; i++)
+            for (int j = 0; j < height; j++)
+                maze[i][j] = (N + E + S + W);
+
+        // create stack for storing previously visited locations
+        int[][] stack = new int[width*height][2];
+
+        // initialize stack
+        for (int i = 0; i < width*height; i++)
+            for (int j = 0; j < 2; j++)
+            	stack[i][j] = 0;
+        
+        int[] curr = new int[2];
+        Random rand = new Random();
+        
+        // arrays of single step movements between cells
+        //              north    east     south    west    
+        int[][] move = {{ 0,-1 }, { 1, 0 }, { 0, 1 }, {-1, 0 }};
+        int[][] next = {{ 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }};
+
+        // choose a cell at random and make it the current cell
+        int x = rand.nextInt(width);
+        int y = rand.nextInt(height);
+    
+        // current search location
+        curr[0] = x;  
+        curr[1] = y;
+        int visited  = 1;
+        int total = width*height;
+        int topOfStack   = 0;                              // index for top of cell stack
+        
+        while(visited < total) {
+        	int j = 0;
+        	for(int i = 0; i < 4; i ++) { 					// Find all neighbors and see if they've been visited
+                x = curr[0] + move[i][0];
+                y = curr[1] + move[i][1];
+
+                //  check for valid next cell
+                if ((0 <= x) && (x < width) && (0 <= y) && (y < height))
+                {
+                    // check if previously visited
+                    if (((maze[x][y] & N) == N) && ((maze[x][y] & E)==E) && ((maze[x][y] & S)==S) && ((maze[x][y] & W)==W))
+                    {
+                        // not visited, so add to possible next cells
+                        next[j][0] = x;
+                        next[j][1] = y;
+                        j++;
+                    }
+                }
+        	}
+        	
+        	if(j > 0) {				// Move to neighbor
+        		int i = rand.nextInt(j);
+
+                if ((next[i][0] - curr[0]) == 0)    // next on same column
+                {
+                    x = next[i][0];
+                    if (next[i][1] > curr[1])       // move east
+                    {
+                        y = curr[1];
+                        maze[x][y] &= ~S;           // clear E wall
+                        y = next[i][1];
+                        maze[x][y] &= ~N;           // clear W wall
+                    }
+                    else                            // move west
+                    {
+                        y = curr[1];
+                        maze[x][y] &= ~N;           // clear W wall
+                        y = next[i][1];
+                        maze[x][y] &= ~S;           // clear E wall
+                    }
+                }
+                else                                // next on same row
+                {
+                    y = next[i][1];
+                    if (next[i][0] > curr[0])       // move south    
+                    {
+                        x = curr[0];
+                        maze[x][y] &= ~E;           // clear S wall
+                        x = next[i][0];
+                        maze[x][y] &= ~W;           // clear N wall
+                    }
+                    else                            // move north
+                    {
+                        x = curr[0];
+                        maze[x][y] &= ~W;           // clear N wall
+                        x = next[i][0];
+                        maze[x][y] &= ~E;           // clear S wall
+                    }
+                }
+
+                topOfStack++;                              // push current cell location
+                stack[topOfStack][0] = curr[0];
+                stack[topOfStack][1] = curr[1];
+
+                curr[0] = next[i][0];               // make next cell the current cell
+                curr[1] = next[i][1];
+
+                visited++;                          // increment count of visited cells
+        	}
+        	else {					// Dead end, start backtracking
+                // pop the most recent cell from the cell stack            
+                // and make it the current cell
+                curr[0] = stack[topOfStack][0];
+                curr[1] = stack[topOfStack][1];
+                topOfStack--;
+        	}
+        }
+        
+        LevelTile[][] map = new LevelTile[width][height];
+
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+            	int m = maze[i][j];
+            	//System.out.println("At "+i+","+j+" - N:"+((m & N) == N) + ",E:" + ((m & E) == E)+ ",S:" + ((m & S) == S)+ ",W:" +( (m & W) == W));
+            	boolean[] walls = { (m & N) == N, (m & E) == E, (m & S) == S, (m & W) == W };
+            	map[i][j] = new LevelTile(rand.nextInt(2), walls);
+            }
+        }
+        
+        return map;
 	}
 }

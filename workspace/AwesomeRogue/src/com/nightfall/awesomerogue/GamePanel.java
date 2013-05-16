@@ -20,7 +20,7 @@ import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
 public class GamePanel extends JPanel implements Runnable {
-	public static final int PHEIGHT = 1000;
+	public static final int PHEIGHT = 700;
 	public static final int PWIDTH = (int) (PHEIGHT * 1.2); //PWIDTH needs to be 1.2 * PHEIGHT
 	
 	private Thread animator;
@@ -75,7 +75,7 @@ public class GamePanel extends JPanel implements Runnable {
 			// DO WITH ANY OF THESE CLASSES IN ORDER FOR THE BASIC ENGINE TO WORK. ALL OF IT.
 			// *******************************************************************************
 			// *******************************************************************************
-			currentGameState = new InGameState(this);
+			currentGameState = new MetaGameState(this);
 		} catch (FontFormatException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

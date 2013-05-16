@@ -79,6 +79,12 @@ public class InGameState extends GameState {
 		
 		draw();
 	}
+	
+	public InGameState(GamePanel gameCanvas, Character character) throws IOException {
+		this(gameCanvas);
+		
+		mainChar = character;
+	}
 
 	public void update() {
 
@@ -185,7 +191,7 @@ public class InGameState extends GameState {
 	 * @param e - KeyEvent with desired key.
 	 * @return Point where x is the dx component and y is the dy component.
 	 */
-	public Point getDirection(KeyEvent e) {
+	public static Point getDirection(KeyEvent e) {
 		Point result = new Point(0,0);
 
 		switch(e.getKeyCode()) {
