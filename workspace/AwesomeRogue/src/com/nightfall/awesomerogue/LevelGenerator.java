@@ -9,6 +9,11 @@ public class LevelGenerator {
 	public static final int ROOMS = 1;
 	public static final int CATACOMBS = 2;
 
+	/**
+	 * How hard it gonn be like?
+	 */
+	private int difficulty;
+	
 	private static final int SEED = 20;
 
 	//---------------------------CAVE GENERATION CONSTANTS--------------------------------//
@@ -33,19 +38,22 @@ public class LevelGenerator {
 	/**
 	 * Generate a new level with the specified parameters.
 	 * 
+	 * Also populates it with scary spooky monsters.
+	 * 
 	 * NOTE: this method MODIFIES the actual array of Tiles you pass in, since
 	 * Java makes arrays a shallow copy.
 	 * 
 	 * @param map The array you want to have a level in it.
 	 * @param type LevelGenerator.CAVE, LevelGenerator.ROOMS, LevelGenerator.CATACOMBS
-	 * @param width Width of the map
+	 * @param width Width of the map.
 	 * @param height Height of the map.
 	 * @param currState A handle to the InGameState so we can access Tiles :/
+	 * @param difficulty How hard do I want it?
 	 */
-	public void makeLevel(Tile[][] map, int type, int width, int height) {
+	public void makeLevel(Tile[][] map, int type, int width, int height, int difficulty) {
 		switch(type) {
 		case CAVE:
-			makeCaves(map, width, height);
+			makeCaves(map, width, height, difficulty);
 			break;
 		case ROOMS:
 			makeRooms(map, width, height);
@@ -56,7 +64,7 @@ public class LevelGenerator {
 		}
 	}
 
-	private void makeCaves(Tile[][] map, int width, int height) {
+	private void makeCaves(Tile[][] map, int width, int height, int difficulty) {
 		//Make our sweet number generator
 		Random numGen = new Random(SEED);
 
@@ -243,6 +251,47 @@ public class LevelGenerator {
 				}
 			}
 		}
+		
+		//Plop down some enemies based on the difficulty.
+		if(difficulty == 1) {
+			Enemy bob = new Enemy(30, 40, Enemy.RAT);
+			InGameState.enemies.add(bob);
+		}
+		
+		if(difficulty == 2) {
+			//Divide the map into squares of size 10x10 and plop down 3 monsters each.
+			for(int xTen = 0; xTen < width; xTen += 10) {
+				for(int yTen = 0; yTen < height; yTen += 10) {
+					
+					for(int monsterNum = 0; monsterNum < 3; monsterNum++) {
+						int monsterX = numGen.nextInt(10) + xTen;
+						int monsterY = numGen.nextInt(10) + yTen;
+						
+						//Choose a type
+						int type = 0;
+						switch(numGen.nextInt(2)) {
+						case 0:
+							type = Enemy.ANGRY_MUSHROOM;
+							break;
+						case 1:
+							type = Enemy.RAT;
+							break;
+						}
+						
+						//if it's on a wall, it's outta luck.  So sad, try again next time.
+						if(map[monsterX][monsterY].type != Tile.FLOOR) {
+							continue;
+						}
+						
+						Enemy newEnemy = new Enemy(monsterX, monsterY, type);
+						InGameState.enemies.add(newEnemy);
+						
+					}
+				
+				}
+			}
+			
+		}
 
 	}
 
@@ -374,7 +423,7 @@ public class LevelGenerator {
             	int m = maze[i][j];
             	//System.out.println("At "+i+","+j+" - N:"+((m & N) == N) + ",E:" + ((m & E) == E)+ ",S:" + ((m & S) == S)+ ",W:" +( (m & W) == W));
             	boolean[] walls = { (m & N) == N, (m & E) == E, (m & S) == S, (m & W) == W };
-            	map[i][j] = new LevelTile(rand.nextInt(2)+2, walls);
+            	map[i][j] = new LevelTile(rand.nextInt(2), walls);
             }
         }
         

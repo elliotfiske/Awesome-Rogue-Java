@@ -38,7 +38,6 @@ public class MetaGameState extends GameState {
 	private ImageSFX imgSFX;
 
 	private BufferedImage[] guiBG;
-	private LevelAnim[] levelAnim;
 
 	private BufferedImage[] tileImages;
 
@@ -50,19 +49,11 @@ public class MetaGameState extends GameState {
 		imgSFX = new ImageSFX();
 
 		tileImages = new BufferedImage[10];
-		tileImages[0] = ImageIO.read(new File("img/metagame/IntroMetaTile.png"));
-		tileImages[1] = ImageIO.read(new File("img/metagame/WizardMetaTile.png"));
-		tileImages[2] = ImageIO.read(new File("img/metagame/RoomMetaTile.png"));
-		tileImages[3] = ImageIO.read(new File("img/metagame/CaveMetaTile.png"));
+		tileImages[0] = ImageIO.read(new File("img/metagame/CaveMetaTile.png"));
+		tileImages[1] = ImageIO.read(new File("img/metagame/RoomMetaTile.png"));
 
 		guiBG = new BufferedImage[1];
 		guiBG[0] = ImageIO.read(new File("img/metagame/guiBG.png"));
-		
-		levelAnim = new LevelAnim[4];
-		levelAnim[0] = new LevelAnim("Intro", true);
-		levelAnim[1] = new LevelAnim("Wizard", false);
-		levelAnim[2] = new LevelAnim("Room", true);
-		levelAnim[3] = new LevelAnim("Cave", false);
 
 		charX = 0;
 		charY = 0;
@@ -78,10 +69,6 @@ public class MetaGameState extends GameState {
 		
 		map = LevelGenerator.makeMetaGame(META_MAP_WIDTH, META_MAP_HEIGHT);
 		map[0][0].visible = true;
-		map[0][0].type = 0;
-		
-		map[5][5].visible = true;
-		map[5][5].type = 1;
 		if(!map[charX][charY].walls[1]) {
 			map[charX+1][charY].visible = true;
 		}
@@ -100,8 +87,6 @@ public class MetaGameState extends GameState {
 		g2.setColor(Color.black);
 		
 		g2.drawImage(guiBG[0], 0, 0, null);
-		
-		g2.drawImage(levelAnim[ map[charX][charY].type ].next(), LEVEL_ANIM_OFFSET_X, LEVEL_ANIM_OFFSET_Y, null);
 		//imgSFX.drawResizedImage(g2, guiBG, 0, 0, GamePanel.PWIDTH, GamePanel.PHEIGHT);
 
 		// Draw the tiles of the map.

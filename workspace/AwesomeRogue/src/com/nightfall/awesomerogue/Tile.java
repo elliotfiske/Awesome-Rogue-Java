@@ -1,5 +1,7 @@
 package com.nightfall.awesomerogue;
 
+import java.awt.Color;
+
 public class Tile { 	
 	
 	//list of tile types
@@ -10,6 +12,10 @@ public class Tile {
 	public boolean visible = false, seen = false;
 	
 	public int type;
+	
+	public Color color;
+	/** True if this Tile is being color-changed for debugging */
+	public boolean illustrated = false;
 	
 	//ID used for map generation
 	private int id;
@@ -42,5 +48,14 @@ public class Tile {
 	
 	public int getID() {
 		return id;
+	}
+	
+	/**
+	 * Sets the Tile to a color so I can show off sexy pathfinding algorithms and whatnot.
+	 * @param color WHAT COLOR EH
+	 */
+	public void illustrate(Color color) {
+		this.color = color;
+		illustrated = true;
 	}
 }
