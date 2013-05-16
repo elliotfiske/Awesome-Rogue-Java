@@ -147,23 +147,30 @@ public class GamePanel extends JPanel implements Runnable {
 		long excess = 0L;
 		beforeTime = System.currentTimeMillis();
 		
+		int requestFocusCounter = 0;
+		
 		// update, render, sleep
 		running = true;
 		while(running) {
 			
+			//System.out.println("Focus man: " + gameFrame.getFocusOwner());
+			//BREAKS it: com.nightfall.awesomerogue.GameFrame[frame0,0,0,846x733,layout=java.awt.BorderLayout,title=,normal,defaultCloseOperation=EXIT_ON_CLOSE,rootPane=javax.swing.JRootPane[,3,30,840x700,layout=javax.swing.JRootPane$RootLayout,alignmentX=0.0,alignmentY=0.0,border=,flags=16777673,maximumSize=,minimumSize=,preferredSize=],rootPaneCheckingEnabled=true]
 			gameUpdate();
-			
-			beforeTime = System.currentTimeMillis();
-			
 			gameRender();
-
-			afterTime = System.currentTimeMillis();
-			timeDiff = afterTime - beforeTime;
-
-			beforeTime = System.currentTimeMillis();
-			
 			paintScreen();
 
+			//The GamePanel occasionally loses focus for unknown reasons.
+			//Don't ask TOO many times, but do ask politely for the focus back.
+			if(requestFocusCounter == 60) {
+				if(!this.isFocusOwner()) {
+					requestFocus();
+					System.out.println("yanked the focus back from GameFrame");
+				}
+				
+				requestFocusCounter = 0;
+			}
+			requestFocusCounter++;
+			
 			afterTime = System.currentTimeMillis();
 			timeDiff = afterTime - beforeTime;
 			sleepTime = (period - timeDiff) - overSleepTime;
