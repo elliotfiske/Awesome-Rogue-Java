@@ -66,7 +66,7 @@ public class InGameState extends GameState {
 
 		waitingOn = new ArrayList<String>();
 
-		mainChar = new Character(1,1);
+		mainChar = new Character(10,10);
 
 		levelGen = new LevelGenerator();
 
@@ -114,6 +114,11 @@ public class InGameState extends GameState {
 					g2.drawImage(tileImages[ map[i][j].type*2 ], (i-CAMERA_X)*12,
 							(j-CAMERA_Y)*12, null);
 
+					if(map[i][j].illustrated) {
+						g2.setColor(map[i][j].color);
+						g2.fillRect((i-CAMERA_X)*12, (j-CAMERA_Y)*12, 12, 12);
+					}
+					
 					if(map[i][j].getID() != 0) {
 						g2.drawString(Integer.toString(map[i][j].getID() % 10), (i-CAMERA_X)*12,
 								(j-CAMERA_Y)*12 + 12);
@@ -126,6 +131,12 @@ public class InGameState extends GameState {
 					g2.drawImage(tileImages[ map[i][j].type*2+1 ], (i-CAMERA_X)*12,
 							(j-CAMERA_Y)*12, null);
 				}
+				
+				if(map[i][j].illustrated) {
+					g2.setColor(map[i][j].color);
+					g2.fillRect((i-CAMERA_X)*12, (j-CAMERA_Y)*12, 12, 12);
+				}
+				
 			}
 		}
 
@@ -134,7 +145,7 @@ public class InGameState extends GameState {
 
 		//Draw the enemies.
 		for(int i = 0; i < enemies.size(); i++) {
-			enemies.get(i).draw(g2);
+			enemies.get(i).draw(g2, CAMERA_X, CAMERA_Y);
 		}
 		
 		Graphics2D g = (Graphics2D) mapImg.getGraphics();
@@ -182,6 +193,17 @@ public class InGameState extends GameState {
 		//TODO: Weapons and usable stuff goes here.
 
 		//TODO: Have the enemies take a turn here.
+		
+		//Wipe tiles of their illustrations
+		for(int x = 0; x < map.length; x++) {
+			for(int y = 0; y < map[0].length; y++) {
+				map[x][y].illustrated = false;
+			}
+		}
+		
+		for(Enemy enemy : enemies) {
+			enemy.pathToHeroAndMove(mainChar.getX(), mainChar.getY(), map);
+		}
 
 		calculateLighting();
 	}
@@ -263,8 +285,8 @@ public class InGameState extends GameState {
 		
 		//Generate a sweet new Caves level.
 		map = new Tile[80][70];
-		levelGen.makeLevel(map, LevelGenerator.CAVE, 80, 70);
-
+		levelGen.makeLevel(map, LevelGenerator.CAVE, 80, 70, 1);
+		
 		calculateLighting();
 	}
 

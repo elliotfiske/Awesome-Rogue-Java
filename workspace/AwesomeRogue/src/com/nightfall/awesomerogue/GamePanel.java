@@ -75,7 +75,7 @@ public class GamePanel extends JPanel implements Runnable {
 			// DO WITH ANY OF THESE CLASSES IN ORDER FOR THE BASIC ENGINE TO WORK. ALL OF IT.
 			// *******************************************************************************
 			// *******************************************************************************
-			currentGameState = new MetaGameState(this);
+			currentGameState = new InGameState(this);
 		} catch (FontFormatException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -153,8 +153,6 @@ public class GamePanel extends JPanel implements Runnable {
 		running = true;
 		while(running) {
 			
-			//System.out.println("Focus man: " + gameFrame.getFocusOwner());
-			//BREAKS it: com.nightfall.awesomerogue.GameFrame[frame0,0,0,846x733,layout=java.awt.BorderLayout,title=,normal,defaultCloseOperation=EXIT_ON_CLOSE,rootPane=javax.swing.JRootPane[,3,30,840x700,layout=javax.swing.JRootPane$RootLayout,alignmentX=0.0,alignmentY=0.0,border=,flags=16777673,maximumSize=,minimumSize=,preferredSize=],rootPaneCheckingEnabled=true]
 			gameUpdate();
 			gameRender();
 			paintScreen();
