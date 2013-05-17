@@ -1,11 +1,16 @@
 package com.nightfall.awesomerogue;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
 
 public class LevelAnim {
 	public static final int FRAMELEN = 15;
 	
 	private BufferedImage[] imgList;
+	private BufferedImage info;
 	private int index;
 	private boolean willReverse;
 	
@@ -19,6 +24,12 @@ public class LevelAnim {
 		willReverse = reverse;
 		
 		imgList = GameFrame.loadVertAnimation("metagame/"+string+"MetaAnim.png", 120);
+		try {
+			info = ImageIO.read(new File("img/metagame/"+string+"MetaInfo.png"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public BufferedImage next() {
@@ -32,5 +43,9 @@ public class LevelAnim {
 		}
 		
 		return img;
+	}
+	
+	public BufferedImage desc() {
+		return info;
 	}
 }

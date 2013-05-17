@@ -9,6 +9,7 @@ public class LevelTile {
 	public boolean[] walls;
 	
 	public int type;
+	private boolean clear;
 	
 	//ID used for map generation
 	private int id;
@@ -22,4 +23,7 @@ public class LevelTile {
 	public void doAction() {
 
 	}
+	
+	public boolean isClear() { return clear; }
+	public void clear() { clear = true; }
 }
