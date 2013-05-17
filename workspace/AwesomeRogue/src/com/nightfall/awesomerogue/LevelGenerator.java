@@ -423,7 +423,7 @@ public class LevelGenerator {
             	int m = maze[i][j];
             	//System.out.println("At "+i+","+j+" - N:"+((m & N) == N) + ",E:" + ((m & E) == E)+ ",S:" + ((m & S) == S)+ ",W:" +( (m & W) == W));
             	boolean[] walls = { (m & N) == N, (m & E) == E, (m & S) == S, (m & W) == W };
-            	map[i][j] = new LevelTile(rand.nextInt(2), walls);
+            	map[i][j] = new LevelTile(rand.nextInt(2)+2, walls);
             }
         }
         

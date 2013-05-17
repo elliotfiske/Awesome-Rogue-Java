@@ -1,6 +1,12 @@
 package com.nightfall.awesomerogue;
+import java.awt.Graphics2D;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
 
@@ -54,4 +60,62 @@ public class GameFrame extends JFrame implements WindowListener {
 
 	public void windowOpened(WindowEvent e) { }
 	/* End window functions */
+	
+	public static BufferedImage[] loadAnimation(String filename, int imWidth) {
+		BufferedImage stripIm;
+		BufferedImage[] strip;
+
+		try {
+			stripIm = ImageIO.read(new File("img/"+filename));
+			
+			int height = stripIm.getHeight();
+			
+			int number = stripIm.getWidth() / imWidth;
+			
+			strip = new BufferedImage[number];
+			
+			for(int i=0; i < number; i ++) {
+				strip[i] = new BufferedImage(imWidth, height, BufferedImage.TYPE_INT_ARGB);
+				
+				Graphics2D stripGC = strip[i].createGraphics();
+				stripGC.drawImage(stripIm, 0, 0, imWidth, height, i*imWidth, 0, (i*imWidth)+imWidth, height, null);
+			}
+			
+			return strip;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			
+			return null;
+		}
+	}
+	
+	public static BufferedImage[] loadVertAnimation(String filename, int imHeight) {
+		BufferedImage stripIm;
+		BufferedImage[] strip;
+
+		try {
+			stripIm = ImageIO.read(new File("img/"+filename));
+			
+			int width = stripIm.getWidth();
+			
+			int number = stripIm.getHeight() / imHeight;
+			
+			strip = new BufferedImage[number];
+			
+			for(int i=0; i < number; i ++) {
+				strip[i] = new BufferedImage(width, imHeight, BufferedImage.TYPE_INT_ARGB);
+				
+				Graphics2D stripGC = strip[i].createGraphics();
+				stripGC.drawImage(stripIm, 0, 0, width, imHeight, 0, imHeight*i, width, (i*imHeight)+imHeight, null);
+			}
+			
+			return strip;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			
+			return null;
+		}
+	}
 }
