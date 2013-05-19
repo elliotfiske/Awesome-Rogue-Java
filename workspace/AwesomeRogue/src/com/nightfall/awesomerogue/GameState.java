@@ -14,4 +14,5 @@ public abstract class GameState {
 	public abstract void update();
 	public abstract void render(Graphics2D g2);
 	public abstract void keyPress(KeyEvent e);
+	public GamePanel parentPanel() { return parentPanel; }
 }

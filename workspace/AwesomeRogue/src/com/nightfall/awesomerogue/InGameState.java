@@ -50,6 +50,16 @@ public class InGameState extends GameState {
 	private BufferedImage[] tileImages;
 
 	public static ArrayList<Enemy> enemies;
+	
+	private MetaGameState metaGame;
+	
+	public InGameState(GamePanel gameCanvas, int levelType, MetaGameState metaGame) throws IOException {
+		this(gameCanvas);
+		
+		this.metaGame = metaGame;
+		
+		initLevel(levelType);
+	}
 
 	public InGameState(GamePanel gameCanvas) throws IOException {
 		super(gameCanvas);
@@ -84,6 +94,11 @@ public class InGameState extends GameState {
 		this(gameCanvas);
 		
 		mainChar = character;
+	}
+	
+	public void clearLevel() {
+		metaGame.clearCurrentLevel();
+		parentPanel().changeGameState(metaGame);
 	}
 
 	public void update() {
@@ -168,6 +183,9 @@ public class InGameState extends GameState {
 	}
 
 	public void keyPress(KeyEvent e) {
+		if(e.getKeyCode() == KeyEvent.VK_SPACE) {
+			clearLevel();
+		}
 		
 		//Parse the direction from the given KeyPress
 		Point p = getDirection(e);

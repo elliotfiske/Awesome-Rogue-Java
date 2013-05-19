@@ -18,9 +18,9 @@ public class MetaGameState extends GameState {
 	public static final int LEVEL_ANIM_OFFSET_Y = 23;	// In pixels, not cells
 	public static final int LEVEL_INFO_OFFSET_X = 551;	// In pixels, not cells
 	public static final int LEVEL_INFO_OFFSET_Y = 180;	// In pixels, not cells
-	public static final int CELL_SIZE = 80;
-	public static final int META_MAP_WIDTH = 6;				// In cells, not pixels
-	public static final int META_MAP_HEIGHT = 6;			// In cells, not pixels
+	public static final int CELL_SIZE = 120;
+	public static final int META_MAP_WIDTH = 4;				// In cells, not pixels
+	public static final int META_MAP_HEIGHT = 4;			// In cells, not pixels
 
 	/**
 	 * Describes the cell location of the upper lefthand corner of the area
@@ -36,8 +36,10 @@ public class MetaGameState extends GameState {
 	private BufferedImage wizChar;
 
 	private ImageSFX imgSFX;
-
+	
 	private BufferedImage[] guiBG;
+	private BufferedImage clearImg;
+	private LevelAnim[] levelAnim;
 
 	private BufferedImage[] tileImages;
 
@@ -49,11 +51,20 @@ public class MetaGameState extends GameState {
 		imgSFX = new ImageSFX();
 
 		tileImages = new BufferedImage[10];
-		tileImages[0] = ImageIO.read(new File("img/metagame/CaveMetaTile.png"));
-		tileImages[1] = ImageIO.read(new File("img/metagame/RoomMetaTile.png"));
+		tileImages[0] = ImageIO.read(new File("img/metagame/IntroMetaTile.png"));
+		tileImages[1] = ImageIO.read(new File("img/metagame/WizardMetaTile.png"));
+		tileImages[2] = ImageIO.read(new File("img/metagame/RoomMetaTile.png"));
+		tileImages[3] = ImageIO.read(new File("img/metagame/CaveMetaTile.png"));
 
 		guiBG = new BufferedImage[1];
 		guiBG[0] = ImageIO.read(new File("img/metagame/guiBG.png"));
+		clearImg = ImageIO.read(new File("img/metagame/ClearMeta.png"));
+		
+		levelAnim = new LevelAnim[4];
+		levelAnim[0] = new LevelAnim("Intro", true);
+		levelAnim[1] = new LevelAnim("Wizard", false);
+		levelAnim[2] = new LevelAnim("Room", true);
+		levelAnim[3] = new LevelAnim("Cave", false);
 
 		charX = 0;
 		charY = 0;
@@ -69,11 +80,35 @@ public class MetaGameState extends GameState {
 		
 		map = LevelGenerator.makeMetaGame(META_MAP_WIDTH, META_MAP_HEIGHT);
 		map[0][0].visible = true;
-		if(!map[charX][charY].walls[1]) {
+		map[0][0].type = 0;
+		
+		map[META_MAP_WIDTH-1][META_MAP_HEIGHT-1].visible = true;
+		map[META_MAP_WIDTH-1][META_MAP_HEIGHT-1].type = 1;
+		/*if(!map[charX][charY].walls[1]) {
 			map[charX+1][charY].visible = true;
 		}
 		if(!map[charX][charY].walls[2]) {
 			map[charX][charY+1].visible = true;
+		}*/
+	}
+	
+	private void enterLevel(int levelType) throws IOException {
+		parentPanel().changeGameState(new InGameState(parentPanel(), levelType, this));
+	}
+
+	public void clearCurrentLevel() {
+		map[charX][charY].clear();
+		if(!map[charX][charY].walls[0] && charY > 0) {
+			map[charX][charY-1].visible = true;
+		}
+		if(!map[charX][charY].walls[1] && charX < map.length) {
+			map[charX+1][charY].visible = true;
+		}
+		if(!map[charX][charY].walls[2] && charY < map[0].length) {
+			map[charX][charY+1].visible = true;
+		}
+		if(!map[charX][charY].walls[3] && charX > 0) {
+			map[charX-1][charY].visible = true;
 		}
 	}
 
@@ -87,6 +122,14 @@ public class MetaGameState extends GameState {
 		g2.setColor(Color.black);
 		
 		g2.drawImage(guiBG[0], 0, 0, null);
+		
+		g2.drawImage(levelAnim[ map[charX][charY].type ].next(), LEVEL_ANIM_OFFSET_X, LEVEL_ANIM_OFFSET_Y, null);
+		if(map[charX][charY].isClear()) {
+			g2.drawImage(clearImg, LEVEL_INFO_OFFSET_X, LEVEL_INFO_OFFSET_Y, null);
+		}
+		else {
+			g2.drawImage(levelAnim[ map[charX][charY].type ].desc(), LEVEL_INFO_OFFSET_X, LEVEL_INFO_OFFSET_Y, null);
+		}
 		//imgSFX.drawResizedImage(g2, guiBG, 0, 0, GamePanel.PWIDTH, GamePanel.PHEIGHT);
 
 		// Draw the tiles of the map.
@@ -117,44 +160,47 @@ public class MetaGameState extends GameState {
 	}
 
 	public void keyPress(KeyEvent e) {
-		//Parse the direction from the given KeyPress
-		Point p = InGameState.getDirection(e);
-
-		//Move the main character horizontally
-		if(p.x == 1) {
-			if(!map[charX][charY].walls[1]) {
-				charX += p.x;
+		if(e.getKeyCode() == KeyEvent.VK_SPACE) {
+			if(!map[charX][charY].isClear()) {
+				try {
+					enterLevel(map[charX][charY].type);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
 			}
 		}
-		else if(p.x == -1) {
-			if(!map[charX][charY].walls[3]) {
-				charX += p.x;
+		else {
+			//Parse the direction from the given KeyPress
+			Point p = InGameState.getDirection(e);
+	
+			//Move the main character horizontally
+			if(p.x == 1) {
+				if(!map[charX][charY].walls[1]) {
+					if(map[charX][charY].isClear() || map[charX+p.x][charY].isClear())
+						charX += p.x;
+				}
 			}
-		}
-		//Move the main character vertically
-		if(p.y == -1) {
-			if(!map[charX][charY].walls[0]) {
-				charY += p.y;
+			else if(p.x == -1) {
+				if(!map[charX][charY].walls[3]) {
+					if(map[charX][charY].isClear() || map[charX+p.x][charY].isClear())
+						charX += p.x;
+				}
 			}
-		}
-		else if(p.y == 1) {
-			if(!map[charX][charY].walls[2]) {
-				charY += p.y;
+			//Move the main character vertically
+			if(p.y == -1) {
+				if(!map[charX][charY].walls[0]) {
+					if(map[charX][charY].isClear() || map[charX][charY+p.y].isClear())
+						charY += p.y;
+				}
 			}
-		}
-
-		map[charX][charY].visible = true;
-		if(!map[charX][charY].walls[0] && charY > 0) {
-			map[charX][charY-1].visible = true;
-		}
-		if(!map[charX][charY].walls[1] && charX < map.length) {
-			map[charX+1][charY].visible = true;
-		}
-		if(!map[charX][charY].walls[2] && charY < map[0].length) {
-			map[charX][charY+1].visible = true;
-		}
-		if(!map[charX][charY].walls[3] && charX > 0) {
-			map[charX-1][charY].visible = true;
+			else if(p.y == 1) {
+				if(!map[charX][charY].walls[2]) {
+					if(map[charX][charY].isClear() || map[charX][charY+p.y].isClear())
+						charY += p.y;
+				}
+			}
+	
+			map[charX][charY].visible = true;
 		}
 	}
 }
