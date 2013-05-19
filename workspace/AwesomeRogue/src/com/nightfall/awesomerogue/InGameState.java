@@ -34,7 +34,7 @@ public class InGameState extends GameState {
 	int mapWidth = 0;
 	int mapHeight = 0;
 
-	private Character mainChar;
+	private MainCharacter mainChar;
 
 	private ImageSFX imgSFX;
 
@@ -53,11 +53,12 @@ public class InGameState extends GameState {
 	private boolean introLevel;
 
 	public static ArrayList<Enemy> enemyList;
-	public ArrayList<Enemy> enemies;
+	private ArrayList<Enemy> enemies;
+	private Character[][] entities;
 	
 	private MetaGameState metaGame;
 	
-	public InGameState(GamePanel gameCanvas, int levelType, MetaGameState metaGame, Character character) throws IOException {
+	public InGameState(GamePanel gameCanvas, int levelType, MetaGameState metaGame, MainCharacter character) throws IOException {
 		this(gameCanvas, false);
 		
 		this.metaGame = metaGame;
@@ -98,7 +99,7 @@ public class InGameState extends GameState {
 		if(needsInit) {
 			initLevel(3);
 
-			mainChar = new Character(10,10);
+			mainChar = new MainCharacter(10,10);
 		}
 	}
 	
@@ -218,7 +219,7 @@ public class InGameState extends GameState {
 		Point p = getDirection(e);
 
 		//Move the main character
-		mainChar.move(p.x, p.y, map);
+		mainChar.move(p.x, p.y, map, entities);
 
 		//Move the camera appropriately
 		if(mainChar.getX() - CAMERA_X < INGAME_SCROLL_MINX) {
@@ -238,16 +239,23 @@ public class InGameState extends GameState {
 		//TODO: Weapons and usable stuff goes here.
 
 		//TODO: Have the enemies take a turn here.
+		for(int i = 0; i < enemies.size(); i ++) {
+			Enemy enemy = enemies.get(i);
+			if(enemy.dead()) {
+				enemies.remove(enemy);
+				entities[enemy.getX()][enemy.getY()] = null;
+				i -- ;
+			}
+			else {
+				enemy.pathToHeroAndMove(mainChar.getX(), mainChar.getY(), map);
+			}
+		}
 		
 		//Wipe tiles of their illustrations
 		for(int x = 0; x < map.length; x++) {
 			for(int y = 0; y < map[0].length; y++) {
 				map[x][y].illustrated = false;
 			}
-		}
-		
-		for(Enemy enemy : enemyList) {
-			enemy.pathToHeroAndMove(mainChar.getX(), mainChar.getY(), map);
 		}
 
 		calculateLighting();
@@ -342,6 +350,14 @@ public class InGameState extends GameState {
 		}
 		
 		calculateLighting();
+		
+		// Fill entity array!
+		entities = new Character[map.length][map[0].length];
+		for(int i = 0; i < enemies.size(); i++) {
+			Enemy e = enemies.get(i);
+			entities[e.getX()][e.getY()] = e;
+		}
+		entities[mainChar.getX()][mainChar.getY()] = mainChar;
 	}
 
 	private void calculateLighting() {

@@ -30,7 +30,7 @@ public class MetaGameState extends GameState {
 
 	private int charX, charY;
 	private BufferedImage metaChar;
-	private Character mainChar;
+	private MainCharacter mainChar;
 	
 	private int wizX, wizY;
 	private BufferedImage wizChar;
@@ -71,7 +71,7 @@ public class MetaGameState extends GameState {
 		charX = 0;
 		charY = 0;
 		metaChar = ImageIO.read(new File("img/metagame/MetaChar.png"));
-		mainChar = new Character(1,1);
+		mainChar = new MainCharacter(1,1);
 		
 		wizX = META_MAP_WIDTH-1;
 		wizY = META_MAP_HEIGHT-1;

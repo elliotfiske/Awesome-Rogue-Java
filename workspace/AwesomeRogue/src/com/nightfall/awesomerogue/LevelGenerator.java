@@ -278,11 +278,11 @@ public class LevelGenerator {
 				if(numMap[x][y] == 0) {
 					//tempMap still has the ID's in it.
 					//For debugging I want to print out the tile #'s.
-					map[x][y] = new Tile(Tile.FLOOR, (tempMap[x][y]));
+					map[x][y] = new Tile(Tile.FLOOR, (tempMap[x][y]), x, y);
 				}
 
 				if(numMap[x][y] == 1) {
-					map[x][y] = new Tile(Tile.WALL);
+					map[x][y] = new Tile(Tile.WALL, 0, x, y);
 				}
 			}
 		}

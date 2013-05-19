@@ -23,6 +23,10 @@ public class Tile {
 	//ID used for map generation
 	private int id;
 	
+	//where u at
+	public int x;
+	public int y;
+	
 	public Tile(int type) {
 		switch(type) {
 		case WALL:
@@ -37,6 +41,12 @@ public class Tile {
 	public Tile(int type, int id) {
 		this(type);
 		this.id = id;
+	}
+	
+	public Tile(int type, int id, int x, int y) {
+		this(type, id);
+		this.x = x;
+		this.y = y;
 	}
 
 	public void doAction() {

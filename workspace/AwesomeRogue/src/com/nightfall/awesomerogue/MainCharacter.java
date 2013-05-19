@@ -9,6 +9,7 @@ public class MainCharacter extends Character {
 	public MainCharacter(int x, int y) {
 		super(x, y, "@");
 		awesome = 100;
+		setCurrentWeapon(new Fists());
 	}
 	public int getAwesome() { return awesome; }
 }

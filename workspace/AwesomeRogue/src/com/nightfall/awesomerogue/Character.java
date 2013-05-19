@@ -9,6 +9,8 @@ public class Character {
 	private int room;
 	String character;
 	
+	private Weapon currentWeapon;
+	
 	public Character(int x, int y, String character) {
 		initPos(x, y);
 		this.character = character;
@@ -19,21 +21,28 @@ public class Character {
 		this.y = y;
 	}
 	
-	public void move(int dx, int dy, Tile[][] map) {
+	public void move(int dx, int dy, Tile[][] map, Character[][] entities) {
 		
 		int targetX = x + dx;
 		int targetY = y + dy;
 		
-		if(!map[targetX][targetY].blocker) {
+		if(!map[targetX][targetY].blocker && entities[targetX][targetY] == null) {
+			entities[x][y] = null;
 			x = targetX;
 			y = targetY;
 			room = map[x][y].room;
+			entities[targetX][targetY] = this;
 		}
-		
-		// Do action for the tile you tried to walk to.
-		// That way we can have impassible tiles that
-		// Can be interacted with.
-		map[targetX][targetY].doAction();
+		else if(entities[targetX][targetY] == null) {
+			// Do action for the tile you tried to walk to.
+			// That way we can have impassible tiles that
+			// Can be interacted with.
+			// Only do action if there's no enemy there though.
+			map[targetX][targetY].doAction();
+		}
+		else {
+			attack(entities[targetX][targetY]);
+		}
 	}
 	
 	public int getRoom() { return room; }
@@ -41,6 +50,14 @@ public class Character {
 	
 	public int getX() { return x; }
 	public int getY() { return y; }
+	
+	public void setCurrentWeapon(Weapon weapon) { currentWeapon = weapon; }
+	public Weapon getCurrentWeapon() { return currentWeapon; }
+	
+	private void attack(Character enemy) {
+		if(enemy.getClass() == this.getClass()) return; // Friendly fire!
+		currentWeapon.attack(enemy);
+	}
 	
 	/**
 	 * Draw the Character to the screen.
@@ -50,6 +67,14 @@ public class Character {
 	 * @param camY Where the camera is vertically.
 	 */
 	public void draw(Graphics2D g2, int camX, int camY) {
-		g2.drawString("@", ((x-camX)*12), ((y-camY)*12+12));
+		g2.drawString(character, ((x-camX)*12), ((y-camY)*12+12));
+	}
+
+	public String getName() {
+		return character;
+	}
+
+	public void getHit(int damage) {
+		System.out.println("I took "+damage+" damage but I don't know how to handle it");
 	}
 }
