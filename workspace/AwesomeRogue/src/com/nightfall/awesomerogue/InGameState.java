@@ -66,7 +66,7 @@ public class InGameState extends GameState {
 
 		waitingOn = new ArrayList<String>();
 
-		mainChar = new Character(10,10);
+		mainChar = new Character(1,1);
 
 		levelGen = new LevelGenerator();
 

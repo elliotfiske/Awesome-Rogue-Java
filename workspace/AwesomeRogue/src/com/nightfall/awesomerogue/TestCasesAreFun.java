@@ -4,27 +4,141 @@
 
 package com.nightfall.awesomerogue;
 
+import java.awt.Point;
+
 public class TestCasesAreFun {
 
+	//Handy dandy map-man
+	static Tile f = new Tile(Tile.FLOOR);
+	static Tile w = new Tile(Tile.WALL);
+	static Tile[][] map = 
+		{{w,w,w,w,w,w},
+		 {w,f,f,f,f,w},
+		 {w,f,w,f,f,w},
+		 {w,f,w,f,w,w},
+		 {w,f,w,f,f,w},
+		 {w,w,w,w,w,w}};
+
+	/*
+	 * 
+ 	      W      W      W      W      W      W     
+ 	      W      F      F      F      F      W     
+ 	      W      F      W      W      W      W     
+	      W      F      F      F      F      W     
+	      W      F      F      W      F      W     
+	      W      W      W      W      W      W  
+
+		(0,0)  (1,0)  (2,0)  (3,0)  (4,0)  (5,0)  
+		(0,1)  (1,1)  (2,1)  (3,1)  (4,1)  (5,1)  
+		(0,2)  (1,2)  (2,2)  (3,2)  (4,2)  (5,2)  
+		(0,3)  (1,3)  (2,3)  (3,3)  (4,3)  (5,3)  
+		(0,4)  (1,4)  (2,4)  (3,4)  (4,4)  (5,4)  
+		(0,5)  (1,5)  (2,5)  (3,5)  (4,5)  (5,5)  
+
+
+	 */
+
 	public static void main(String[] args) {
-		testEnemyStraightLine();
+		//testEnemyStraightLine();
+		testEnemyWallFollow();
+//		generateGrids();
 	}
-	
+
+	//TEST IF THE ENEMIES CAN WALK IN A STRAIGHT LINE K
 	public static void testEnemyStraightLine() {
 		Enemy e = new Enemy(0, 0, 0);
+
+		assertEquals(new Point(-1, -1), e.walkStraight(25, 25, 20, 20));
+
+		assertEquals(new Point(-1, 1), e.walkStraight(25, 15, 20, 20));
+	}
+
+	//TEST IF ENEMIES CAN FOLLOW A WALL LIKE A CLEVER LITTLE ENEMY
+	private static void testEnemyWallFollow() { 
+		//7 0 1
+		//6   2
+		//5 4 3
+		Enemy e = new Enemy(0, 0, 0);
 		
-		System.out.println("(-1, -1): " + e.walkStraight(5, 5, 0, 0));
+		assertEquals(7, e.getIntialDirection(new Point(4, 4), new Point(3, 4), true, map));
+
+		assertEquals(0, e.getIntialDirection(new Point(4, 4), new Point(3, 4), false, map));
 		
-		System.out.println("(-1, 0): " + e.walkStraight(2, 1, 0, 0));
-		System.out.println("(-1, 0): " + e.walkStraight(5, 2, 0, 0));
+		assertEquals(0, e.followTheWall(feelerX, feelerY, goingRight, leftFeelerDirection, map))
+	}
+
+
+	//assertions of equality
+
+	public static boolean assertEquals(Point expected, Point actual) {
+		if(expected.x == actual.x && expected.y == actual.y) {
+			return true;
+		}
+
+		System.out.println("Expected: (" + expected.x + ", " + expected.y + ")  Got: (" + actual.x +", " + actual.y + ")");
+		return false;
+	}
+
+	public static boolean assertEquals(int expected, int actual) {
+		if(expected == actual) {
+			return true;
+		}
+
+		System.out.println("Expected: " + expected + ",  Got: " + actual);
+		return false;
+	}
+
+
+	public static void generateGrids() {
+		//lol
+//		for(int x = 0; x < 6; x++) {
+//			for(int y = 0; y < 6; y++) {
+//				System.out.print("("+y+","+x+")  ");
+//			}
+//			System.out.println();
+//		}
 		
-		System.out.println("(1,1): " + e.walkStraight(-1, -1, 0, 0));
-		System.out.println("(1,1): " + e.walkStraight(-5, -4, 0, 0));
-		
-		System.out.println("(0,1): " + e.walkStraight(-1, 5, 0, 0));
-		
-		System.out.println("(1,1): " + e.walkStraight(-6, 4, 0, 0));
+		printMap(0,0);
+		printMap(1,0);
+		printMap(2,0);
+		printMap(3,0);
+		printMap(4,0);
+		printMap(5,0);
+		System.out.println();
+		printMap(0,1);
+		printMap(1,1);
+		printMap(2,1);
+		printMap(3,1);
+		printMap(4,1);
+		printMap(5,1);
+		System.out.println();
+		printMap(0,2);
+		printMap(1,2);
+		printMap(2,2);
+		printMap(3,2);
+		printMap(4,2);
+		printMap(5,2);
+		System.out.println();
+		printMap(0,3);
+		printMap(1,3);
+		printMap(2,3);
+		printMap(3,3);
+		printMap(4,3);
+		printMap(5,3);
+		System.out.println();
+		printMap(0,4);
+		printMap(1,4);
+		printMap(2,4);
+		printMap(3,4);
+		printMap(4,4);
+		printMap(5,4);
 	}
 	
-
+	public static void printMap(int x, int y) {
+		if(map[x][y].type == Tile.FLOOR) {
+			System.out.print("F ");
+		} else {
+			System.out.print("W ");
+		}
+	}
 }
