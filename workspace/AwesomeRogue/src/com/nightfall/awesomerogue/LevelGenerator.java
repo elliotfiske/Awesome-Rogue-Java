@@ -393,6 +393,7 @@ public class LevelGenerator {
 		map[ROOM_MIN-5][ROOM_MAX] = new Tile(Tile.DOOR);
 		map[ROOM_MIN][CENTER] = new Tile(Tile.DOOR);
 		map[CENTER][ROOM_MIN] = new Tile(Tile.DOOR);
+		map[(int)Math.floor(ROOM_MIN/2)][5] = new Tile(Tile.CHEST);
 		
 		enemies.add(new Enemy((int) (Math.random()*(ROOM_MIN-2)+1),(int) (Math.random()*(ROOM_MIN-2)+1), Enemy.ANGRY_MUSHROOM));
 		

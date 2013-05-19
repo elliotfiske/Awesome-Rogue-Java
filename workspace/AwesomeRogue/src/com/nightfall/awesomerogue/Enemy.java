@@ -72,11 +72,6 @@ public class Enemy extends Character {
 	public int getX() { return x; }
 	public int getY() { return y; }
 
-	public void forceMarch(int dx, int dy) {
-
-
-	}
-
 	//Fuzzy pathfinding = fun times for all!
 	public void pathToHeroAndMove(int targetX, int targetY, Tile[][] map) {
 		return;

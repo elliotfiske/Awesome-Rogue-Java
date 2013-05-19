@@ -9,6 +9,7 @@ public class Tile {
 	public static final int WALL = 1;
 	public static final int DOOR = 2;
 	public static final int OPEN_DOOR = 3;
+	public static final int CHEST = 4;
 
 	public boolean blocker = false;
 	public boolean visible = false, seen = false;
@@ -31,6 +32,7 @@ public class Tile {
 		switch(type) {
 		case WALL:
 		case DOOR:
+		case CHEST:
 			blocker = true;
 			break;
 		}
@@ -49,11 +51,18 @@ public class Tile {
 		this.y = y;
 	}
 
-	public void doAction() {
+	public void doAction(Character character) {
 		switch(type) {		// Screw subclasses just for the doAction...
 		case DOOR:
 			type = OPEN_DOOR;
 			blocker = false;
+			break;
+		case CHEST:
+			if(character instanceof MainCharacter) { 
+				type = FLOOR;
+				blocker = false;
+				((MainCharacter) character).findArtifact();
+			}
 			break;
 		}
 	}

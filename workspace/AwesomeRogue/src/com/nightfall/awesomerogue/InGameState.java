@@ -46,7 +46,7 @@ public class InGameState extends GameState {
 	private BufferedImage mapImg_t;
 
 	public static ArrayList<String> waitingOn;
-	boolean suspended = false; //we could just check if waitingOn.size() == 0, but this is faster
+	public static boolean suspended = false; //we could just check if waitingOn.size() == 0, but this is faster
 	private BufferedImage[] tileImages;
 	private BufferedImage[] layovers;
 	
@@ -218,107 +218,74 @@ public class InGameState extends GameState {
 		//Parse the direction from the given KeyPress
 		Point p = getDirection(e);
 
-		//Move the main character
-		mainChar.move(p.x, p.y, map, entities);
-
-		//Move the camera appropriately
-		if(mainChar.getX() - CAMERA_X < INGAME_SCROLL_MINX) {
-			moveCamera(-1, 0);
-		}
-		else if(mainChar.getX() - CAMERA_X > INGAME_SCROLL_MAXX) {
-			moveCamera(1, 0);
-		}
-
-		if(mainChar.getY() - CAMERA_Y < INGAME_SCROLL_MINY) {
-			moveCamera(0, -1);
-		}
-		else if(mainChar.getY() - CAMERA_Y > INGAME_SCROLL_MAXY) {
-			moveCamera(0, 1);
-		}
-
-		//TODO: Weapons and usable stuff goes here.
-
-		//TODO: Have the enemies take a turn here.
-		for(int i = 0; i < enemies.size(); i ++) {
-			Enemy enemy = enemies.get(i);
-			if(enemy.dead()) {
-				enemies.remove(enemy);
-				entities[enemy.getX()][enemy.getY()] = null;
-				i -- ;
+		if(!suspended) {
+			if(p.x == 0 && p.y == 0) {
+				if(e.getKeyCode() == KeyEvent.VK_Z) {
+					mainChar.prepareSkill(0);
+				}
+				else if(e.getKeyCode() == KeyEvent.VK_X) {
+					mainChar.prepareSkill(1);
+				}
+				else if(e.getKeyCode() == KeyEvent.VK_C) {
+					mainChar.prepareSkill(2);
+				}
 			}
 			else {
-				enemy.pathToHeroAndMove(mainChar.getX(), mainChar.getY(), map);
-			}
-		}
+				//Move the main character
+				mainChar.move(p.x, p.y, map, entities);
 		
-		//Wipe tiles of their illustrations
-		for(int x = 0; x < map.length; x++) {
-			for(int y = 0; y < map[0].length; y++) {
-				map[x][y].illustrated = false;
+				//Move the camera appropriately
+				if(mainChar.getX() - CAMERA_X < INGAME_SCROLL_MINX) {
+					moveCamera(-1, 0);
+				}
+				else if(mainChar.getX() - CAMERA_X > INGAME_SCROLL_MAXX) {
+					moveCamera(1, 0);
+				}
+		
+				if(mainChar.getY() - CAMERA_Y < INGAME_SCROLL_MINY) {
+					moveCamera(0, -1);
+				}
+				else if(mainChar.getY() - CAMERA_Y > INGAME_SCROLL_MAXY) {
+					moveCamera(0, 1);
+				}
+		
+				//TODO: Weapons and usable stuff goes here.
+		
+				//TODO: Have the enemies take a turn here.
+				for(int i = 0; i < enemies.size(); i ++) {
+					Enemy enemy = enemies.get(i);
+					if(enemy.dead()) {
+						enemies.remove(enemy);
+						entities[enemy.getX()][enemy.getY()] = null;
+						i -- ;
+					}
+					else {
+						enemy.pathToHeroAndMove(mainChar.getX(), mainChar.getY(), map);
+					}
+				}
+				
+				//Wipe tiles of their illustrations
+				for(int x = 0; x < map.length; x++) {
+					for(int y = 0; y < map[0].length; y++) {
+						map[x][y].illustrated = false;
+					}
+				}
+	
+				calculateLighting();
 			}
 		}
-
-		calculateLighting();
-	}
-
-	/**
-	 * Tells you which direction you should go based on a specified key. 
-	 * @param e - KeyEvent with desired key.
-	 * @return Point where x is the dx component and y is the dy component.
-	 */
-	public static Point getDirection(KeyEvent e) {
-		Point result = new Point(0,0);
-
-		switch(e.getKeyCode()) {
-		case KeyEvent.VK_Y:
-		case KeyEvent.VK_NUMPAD7:
-			result = new Point(-1, -1);
-			break;
-		case KeyEvent.VK_U:
-		case KeyEvent.VK_NUMPAD8:
-			result = new Point(0, -1);
-			break;
-		case KeyEvent.VK_I:
-		case KeyEvent.VK_NUMPAD9:
-			result = new Point(1, -1);
-			break;
-		case KeyEvent.VK_H:
-		case KeyEvent.VK_NUMPAD4:
-			result = new Point(-1, 0);
-			break;
-		case KeyEvent.VK_K:
-		case KeyEvent.VK_NUMPAD6:
-			result = new Point(1, 0);
-			break;
-		case KeyEvent.VK_N:
-		case KeyEvent.VK_NUMPAD1:
-			result = new Point(-1, 1);
-			break;
-		case KeyEvent.VK_M:
-		case KeyEvent.VK_NUMPAD2:
-			result = new Point(0, 1);
-			break;
-		case KeyEvent.VK_COMMA:
-		case KeyEvent.VK_NUMPAD3:
-			result = new Point(1, 1);
-			break;
-
-		case KeyEvent.VK_UP:
-			result = new Point(0, -1);
-			break;
-		case KeyEvent.VK_LEFT:
-			result = new Point(-1, 0);
-			break;
-		case KeyEvent.VK_DOWN:
-			result = new Point(0, 1);
-			break;
-		case KeyEvent.VK_RIGHT:
-			result = new Point(1, 0);
-			break;
-		case KeyEvent.VK_SPACE:
+		else {
+			String waiting = waitingOn.get(waitingOn.size()-1);
+			if(waiting.equals("Z")) {
+				mainChar.activateSkill(0, p);
+			}
+			else if(waiting.equals("X")) {
+				mainChar.activateSkill(1, p);
+			}
+			else if(waiting.equals("C")) {
+				mainChar.activateSkill(2, p);
+			}
 		}
-
-		return result;
 	}
 
 	private void initLevel(int levelNum) {
@@ -432,5 +399,65 @@ public class InGameState extends GameState {
 	 */
 	private boolean checkCoords(int x, int y) {
 		return x >= 0 && x < map.length && y >= 0 && y < map[0].length;
+	}
+
+	/**
+	 * Tells you which direction you should go based on a specified key. 
+	 * @param e - KeyEvent with desired key.
+	 * @return Point where x is the dx component and y is the dy component.
+	 */
+	public static Point getDirection(KeyEvent e) {
+		Point result = new Point(0,0);
+
+		switch(e.getKeyCode()) {
+		case KeyEvent.VK_Y:
+		case KeyEvent.VK_NUMPAD7:
+			result = new Point(-1, -1);
+			break;
+		case KeyEvent.VK_U:
+		case KeyEvent.VK_NUMPAD8:
+			result = new Point(0, -1);
+			break;
+		case KeyEvent.VK_I:
+		case KeyEvent.VK_NUMPAD9:
+			result = new Point(1, -1);
+			break;
+		case KeyEvent.VK_H:
+		case KeyEvent.VK_NUMPAD4:
+			result = new Point(-1, 0);
+			break;
+		case KeyEvent.VK_K:
+		case KeyEvent.VK_NUMPAD6:
+			result = new Point(1, 0);
+			break;
+		case KeyEvent.VK_N:
+		case KeyEvent.VK_NUMPAD1:
+			result = new Point(-1, 1);
+			break;
+		case KeyEvent.VK_M:
+		case KeyEvent.VK_NUMPAD2:
+			result = new Point(0, 1);
+			break;
+		case KeyEvent.VK_COMMA:
+		case KeyEvent.VK_NUMPAD3:
+			result = new Point(1, 1);
+			break;
+
+		case KeyEvent.VK_UP:
+			result = new Point(0, -1);
+			break;
+		case KeyEvent.VK_LEFT:
+			result = new Point(-1, 0);
+			break;
+		case KeyEvent.VK_DOWN:
+			result = new Point(0, 1);
+			break;
+		case KeyEvent.VK_RIGHT:
+			result = new Point(1, 0);
+			break;
+		case KeyEvent.VK_SPACE:
+		}
+
+		return result;
 	}
 }

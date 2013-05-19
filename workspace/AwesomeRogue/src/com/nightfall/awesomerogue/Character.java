@@ -38,7 +38,7 @@ public class Character {
 			// That way we can have impassible tiles that
 			// Can be interacted with.
 			// Only do action if there's no enemy there though.
-			map[targetX][targetY].doAction();
+			map[targetX][targetY].doAction(this);
 		}
 		else {
 			attack(entities[targetX][targetY]);
@@ -57,6 +57,10 @@ public class Character {
 	private void attack(Character enemy) {
 		if(enemy.getClass() == this.getClass()) return; // Friendly fire!
 		currentWeapon.attack(enemy);
+	}
+
+	public void forceMarch(int dx, int dy) {
+
 	}
 	
 	/**
