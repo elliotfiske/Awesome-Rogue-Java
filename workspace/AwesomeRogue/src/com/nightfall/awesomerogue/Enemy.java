@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 
-public class Enemy {
+public class Enemy extends Character {
 
 	public static final int ANGRY_MUSHROOM = 0;
 	public static final int RAT = 1;
@@ -12,14 +12,16 @@ public class Enemy {
 	public static final int ZOMBIE = 3;
 	public static final int SKELETON = 4;
 	public static final int WIZARD = 5;
+	public static final int MUSHROOM = 6;
 
-	public static final String[] enemyIcons = {"M", "r", "R", "Z", "S", "W"};
+	public static final String[] enemyIcons = {"M", "r", "R", "Z", "S", "W", "m"};
 
 	private int x, y, whichEnemy, health = 0;
 	String name;
 	String icon;
 
 	public Enemy /* number one */ (int x, int y, int whichEnemy) {
+		super(x, y, enemyIcons[whichEnemy]);
 		this.x = x;
 		this.y = y;
 
@@ -27,8 +29,12 @@ public class Enemy {
 
 		switch(whichEnemy) {
 		case ANGRY_MUSHROOM:
-			health = 5;
+			health = 15;
 			name = "angry mushroom";
+			break;
+		case MUSHROOM:
+			health = 1;
+			name = "mushroom";
 			break;
 		case RAT:
 			health = 10;
@@ -58,6 +64,9 @@ public class Enemy {
 
 		//sanity check here.
 	}
+	
+	public int getX() { return x; }
+	public int getY() { return y; }
 
 	public void forceMarch(int dx, int dy) {
 

@@ -41,7 +41,7 @@ public class MetaGameState extends GameState {
 	private BufferedImage clearImg;
 	private LevelAnim[] levelAnim;
 
-	private BufferedImage[] tileImages;
+	private BufferedImage[] tileImages, inGameTiles;
 
 	public static ArrayList<Enemy> enemies;
 
@@ -49,6 +49,8 @@ public class MetaGameState extends GameState {
 		super(gameCanvas);
 
 		imgSFX = new ImageSFX();
+
+		inGameTiles = GameFrame.loadAnimation("tileImages.png", 12);
 
 		tileImages = new BufferedImage[10];
 		tileImages[0] = ImageIO.read(new File("img/metagame/IntroMetaTile.png"));
@@ -93,7 +95,7 @@ public class MetaGameState extends GameState {
 	}
 	
 	private void enterLevel(int levelType) throws IOException {
-		parentPanel().changeGameState(new InGameState(parentPanel(), levelType, this));
+		parentPanel().changeGameState(new InGameState(parentPanel(), levelType, this, mainChar));
 	}
 
 	public void clearCurrentLevel() {
@@ -202,5 +204,9 @@ public class MetaGameState extends GameState {
 	
 			map[charX][charY].visible = true;
 		}
+	}
+
+	public BufferedImage[] getTileImages() {
+		return inGameTiles;
 	}
 }

@@ -6,10 +6,15 @@ public class Character {
 	public static final int VISIONRANGE = 35;
 	
 	private int x, y;
-	private int awesome;
+	private int room;
+	String character;
 	
-	public Character(int x, int y) {
-		awesome = 100;
+	public Character(int x, int y, String character) {
+		initPos(x, y);
+		this.character = character;
+	}
+	
+	public void initPos(int x, int y) {
 		this.x = x;
 		this.y = y;
 	}
@@ -19,18 +24,23 @@ public class Character {
 		int targetX = x + dx;
 		int targetY = y + dy;
 		
-		//if(map[targetX][targetY].blocker == false) {
+		if(!map[targetX][targetY].blocker) {
 			x = targetX;
 			y = targetY;
-			
-		//} else {
-			//System.out.println("You bump into a wall. Idiot.");
-		//}
+			room = map[x][y].room;
+		}
+		
+		// Do action for the tile you tried to walk to.
+		// That way we can have impassible tiles that
+		// Can be interacted with.
+		map[targetX][targetY].doAction();
 	}
+	
+	public int getRoom() { return room; }
+	public void setRoom(int room) { this.room = room; }
 	
 	public int getX() { return x; }
 	public int getY() { return y; }
-	public int getAwesome() { return awesome; }
 	
 	/**
 	 * Draw the Character to the screen.

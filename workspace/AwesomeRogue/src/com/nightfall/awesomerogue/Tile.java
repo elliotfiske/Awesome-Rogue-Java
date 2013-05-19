@@ -7,11 +7,14 @@ public class Tile {
 	//list of tile types
 	public static final int FLOOR = 0;
 	public static final int WALL = 1;
+	public static final int DOOR = 2;
+	public static final int OPEN_DOOR = 3;
 
 	public boolean blocker = false;
 	public boolean visible = false, seen = false;
 	
 	public int type;
+	public int room;
 	
 	public Color color;
 	/** True if this Tile is being color-changed for debugging */
@@ -22,10 +25,8 @@ public class Tile {
 	
 	public Tile(int type) {
 		switch(type) {
-		case FLOOR:
-			blocker = false;
-			break;
 		case WALL:
+		case DOOR:
 			blocker = true;
 			break;
 		}
@@ -39,7 +40,12 @@ public class Tile {
 	}
 
 	public void doAction() {
-
+		switch(type) {		// Screw subclasses just for the doAction...
+		case DOOR:
+			type = OPEN_DOOR;
+			blocker = false;
+			break;
+		}
 	}
 	
 	public void setID(int id) {

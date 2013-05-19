@@ -5,7 +5,8 @@ import java.util.Random;
 
 public class LevelGenerator {
 
-	public static final int CAVE = 0;
+	public static final int CAVE = 3;
+	public static final int INTRO = 0;
 	public static final int ROOMS = 1;
 	public static final int CATACOMBS = 2;
 
@@ -58,10 +59,44 @@ public class LevelGenerator {
 		case ROOMS:
 			makeRooms(map, width, height);
 			break;
+		case INTRO:
+			//makeIntro(map, width, height);
+			break;
 		case CATACOMBS:
 			makeCatacombs(map, width, height);
 			break;
 		}
+	}
+	
+	/**
+	 * Generate a new level with the specified parameters - Thomas' Way
+	 * 
+	 * Also populates it with scary spooky monsters.
+	 * 
+	 * NOTE: this method CREATES the map once and passes it. Sure it's shallow but it
+	 * doesn't matter because this method sure won't be doing anything with it later.
+	 * 
+	 * @param type LevelGenerator.CAVE, LevelGenerator.ROOMS, LevelGenerator.CATACOMBS
+	 * @param width Width of the map.
+	 * @param height Height of the map.
+	 * @param currState A handle to the InGameState so we can access Tiles :/
+	 * @param difficulty How hard do I want it?
+	 */
+	public static Tile[][] makeLevel(int type, int width, int height, int difficulty, ArrayList<Enemy> enemies) {
+		switch(type) {
+		case CAVE:
+			//return makeCaves(width, height, difficulty);
+			break;
+		case ROOMS:
+			//return makeRooms(width, height);
+			break;
+		case INTRO:
+			return makeIntro(width, height, enemies);
+		case CATACOMBS:
+			//return makeCatacombs(width, height);
+			break;
+		}
+		return null;
 	}
 
 	private void makeCaves(Tile[][] map, int width, int height, int difficulty) {
@@ -255,7 +290,7 @@ public class LevelGenerator {
 		//Plop down some enemies based on the difficulty.
 		if(difficulty == 1) {
 			Enemy bob = new Enemy(30, 40, Enemy.RAT);
-			InGameState.enemies.add(bob);
+			InGameState.enemyList.add(bob);
 		}
 		
 		if(difficulty == 2) {
@@ -284,19 +319,84 @@ public class LevelGenerator {
 						}
 						
 						Enemy newEnemy = new Enemy(monsterX, monsterY, type);
-						InGameState.enemies.add(newEnemy);
+						InGameState.enemyList.add(newEnemy);
 						
 					}
 				
 				}
 			}
-			
 		}
 
 	}
 
 	private static void makeRooms(Tile[][] map, int width, int height) {
 
+	}
+
+	public static Tile[][] makeIntro(int width, int height, ArrayList<Enemy> enemies) {
+		int CENTER = 17;
+		int ROOM_MIN = CENTER-5;
+		int ROOM_MAX = CENTER+5;
+		Tile[][] map = new Tile[38][35];
+		for(int i = 0; i < map.length; i ++) {
+			for(int j = 0; j < map[0].length; j ++) {
+				map[i][j] = new Tile(Tile.FLOOR);
+				if(i == 0 || j == 0 || i == map.length-1 || j == map[0].length-1) {
+					map[i][j] = new Tile(Tile.WALL);
+				}
+			}
+		}
+		
+		for(int i = ROOM_MIN; i <= ROOM_MAX; i++) {
+			if(i == CENTER) {
+				for(int j = CENTER+1; j < ROOM_MAX; j ++) {
+					map[i][j] = new Tile(Tile.WALL);
+				}
+			}
+			else {
+				for(int j = ROOM_MIN+1; j < ROOM_MAX; j ++) {
+					if(j != CENTER || i > CENTER) {
+						map[i][j] = new Tile(Tile.WALL);
+					}
+				}
+			}
+		}
+		
+		for(int i = ROOM_MIN; i < map.length; i++) {
+			for(int j = 0; j <= ROOM_MIN; j ++) {
+				if(j == ROOM_MIN || i == ROOM_MIN) {
+					map[i][j] = new Tile(Tile.WALL);
+				}
+				map[i][j].room = 0;
+			}
+		}
+		
+		for(int i = ROOM_MAX; i < map.length; i++) {
+			for(int j = ROOM_MIN; j < map[0].length; j ++) {
+				if(i == ROOM_MAX) {
+					map[i][j] = new Tile(Tile.WALL);
+				}
+				map[i][j].room = 1;
+			}
+		}
+		
+		for(int i = 0; i < ROOM_MAX; i++) {
+			for(int j = ROOM_MAX; j < map[0].length; j ++) {
+				if(j == ROOM_MAX) {
+					map[i][j] = new Tile(Tile.WALL);
+				}
+				map[i][j].room = 2;
+			}
+		}
+		map[ROOM_MAX+5][ROOM_MIN] = new Tile(Tile.DOOR);
+		map[ROOM_MAX][ROOM_MAX+5] = new Tile(Tile.DOOR);
+		map[ROOM_MIN-5][ROOM_MAX] = new Tile(Tile.DOOR);
+		map[ROOM_MIN][CENTER] = new Tile(Tile.DOOR);
+		map[CENTER][ROOM_MIN] = new Tile(Tile.DOOR);
+		
+		enemies.add(new Enemy((int) (Math.random()*(ROOM_MIN-2)+1),(int) (Math.random()*(ROOM_MIN-2)+1), Enemy.ANGRY_MUSHROOM));
+		
+		return map;
 	}
 
 	private static void makeCatacombs(Tile[][] map, int width, int height) {
@@ -426,7 +526,7 @@ public class LevelGenerator {
             	map[i][j] = new LevelTile(rand.nextInt(2)+2, walls);
             }
         }
-        
         return map;
 	}
+    
 }

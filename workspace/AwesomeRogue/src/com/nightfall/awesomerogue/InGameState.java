@@ -13,7 +13,7 @@ import javax.imageio.ImageIO;
 
 public class InGameState extends GameState {
 	public static final int INGAME_WINDOW_OFFSET_X = 46;	// In pixels, not cells
-	public static final int INGAME_WINDOW_OFFSET_Y = 19;	// In pixels, not cells
+	public static final int INGAME_WINDOW_OFFSET_Y = 18;	// In pixels, not cells
 	public static final int INGAME_WINDOW_WIDTH = 38;		// In cells, not pixels
 	public static final int INGAME_WINDOW_HEIGHT = 35;		// In cells, not pixels
 	public static final int INGAME_SCROLL_PADDING = 10;		// Padding to scroll the viewing window
@@ -42,58 +42,64 @@ public class InGameState extends GameState {
 
 	private LevelGenerator levelGen;
 	
-	private BufferedImage mapImg;
+	protected BufferedImage mapImg;
 	private BufferedImage mapImg_t;
 
 	public static ArrayList<String> waitingOn;
 	boolean suspended = false; //we could just check if waitingOn.size() == 0, but this is faster
 	private BufferedImage[] tileImages;
+	private BufferedImage[] layovers;
+	
+	private boolean introLevel;
 
-	public static ArrayList<Enemy> enemies;
+	public static ArrayList<Enemy> enemyList;
+	public ArrayList<Enemy> enemies;
 	
 	private MetaGameState metaGame;
 	
-	public InGameState(GamePanel gameCanvas, int levelType, MetaGameState metaGame) throws IOException {
-		this(gameCanvas);
+	public InGameState(GamePanel gameCanvas, int levelType, MetaGameState metaGame, Character character) throws IOException {
+		this(gameCanvas, false);
 		
 		this.metaGame = metaGame;
-		
+		mainChar = character;
+
+		tileImages = metaGame.getTileImages();
+
+		if(levelType == 0) introLevel = true;
 		initLevel(levelType);
 	}
 
 	public InGameState(GamePanel gameCanvas) throws IOException {
+		this(gameCanvas, true);
+	}
+	
+	public InGameState(GamePanel gameCanvas, boolean needsInit) throws IOException {
 		super(gameCanvas);
 
-		imgSFX = new ImageSFX();
+		layovers = new BufferedImage[3];
+		layovers[0] = ImageIO.read(new File("img/Controls_Move.png"));
+		layovers[1] = ImageIO.read(new File("img/Controls_Attack.png"));
+		layovers[2] = ImageIO.read(new File("img/Controls_Skills.png"));
 
-		tileImages = new BufferedImage[10];
-		tileImages[0] = ImageIO.read(new File("img/blankTile.png"));
-		tileImages[1] = ImageIO.read(new File("img/blankTile_dark.png"));
-		tileImages[2] = ImageIO.read(new File("img/blankTile2.png"));
-		tileImages[3] = ImageIO.read(new File("img/blankTile2_dark.png"));
+		imgSFX = new ImageSFX();
 
 		guiBG = ImageIO.read(new File("img/guiBG.png"));
 
 		waitingOn = new ArrayList<String>();
 
-		mainChar = new Character(10,10);
-
 		levelGen = new LevelGenerator();
 
 		enemies = new ArrayList<Enemy>();
+		enemyList = new ArrayList<Enemy>();
 		
 		mapImg = new BufferedImage(INGAME_WINDOW_WIDTH*12, INGAME_WINDOW_HEIGHT*12, BufferedImage.TYPE_INT_ARGB);
 		mapImg_t = new BufferedImage(INGAME_WINDOW_WIDTH*12, INGAME_WINDOW_HEIGHT*12, BufferedImage.TYPE_INT_ARGB);
 
-		initLevel(1);
-		
-		draw();
-	}
-	
-	public InGameState(GamePanel gameCanvas, Character character) throws IOException {
-		this(gameCanvas);
-		
-		mainChar = character;
+		if(needsInit) {
+			initLevel(3);
+
+			mainChar = new Character(10,10);
+		}
 	}
 	
 	public void clearLevel() {
@@ -104,6 +110,10 @@ public class InGameState extends GameState {
 	public void update() {
 
 
+	}
+	
+	public Character getMainChar() {
+		return mainChar;
 	}
 
 	public void render(Graphics2D g2) {
@@ -154,13 +164,30 @@ public class InGameState extends GameState {
 				
 			}
 		}
+		
+		if(introLevel) {
+			switch(getMainChar().getRoom()) {
+			case 0:
+				g2.drawImage(layovers[0], 200, 30, null);
+				break;
+			case 1:
+				g2.drawImage(layovers[1], 300, 200, null);
+				break;
+			case 2:
+				g2.drawImage(layovers[2], 100, 300, null);
+				break;
+			}
+		}
 
 		//Draw the user character.
 		mainChar.draw(g2, CAMERA_X, CAMERA_Y);
 
 		//Draw the enemies.
 		for(int i = 0; i < enemies.size(); i++) {
-			enemies.get(i).draw(g2, CAMERA_X, CAMERA_Y);
+			Enemy e = enemies.get(i);
+			if(map[e.getX()][e.getY()].visible){ 
+				enemies.get(i).draw(g2, CAMERA_X, CAMERA_Y);
+			}
 		}
 		
 		Graphics2D g = (Graphics2D) mapImg.getGraphics();
@@ -219,7 +246,7 @@ public class InGameState extends GameState {
 			}
 		}
 		
-		for(Enemy enemy : enemies) {
+		for(Enemy enemy : enemyList) {
 			enemy.pathToHeroAndMove(mainChar.getX(), mainChar.getY(), map);
 		}
 
@@ -287,35 +314,44 @@ public class InGameState extends GameState {
 	}
 
 	private void initLevel(int levelNum) {
-//		map = new Tile[60][40];
-//		for(int i = 0; i < map.length; i ++) {
-//			for(int j = 0; j < map[0].length; j ++) {
-//				map[i][j] = new Tile(Tile.FLOOR);
-//				if(i == 0 || i == 5 || j == 0 || j == 5 || i == map.length-1 || j == map[0].length-1) {
-//					map[i][j] = new Tile(Tile.WALL);
-//				}
-//			}
-//		}
-//
-//		map[10][4] = new Tile(Tile.FLOOR);
-//		map[5][4] = new Tile(Tile.FLOOR);
-//		map[15][5] = new Tile(Tile.FLOOR);
-		
-		//Generate a sweet new Caves level.
-		map = new Tile[80][70];
-		levelGen.makeLevel(map, LevelGenerator.CAVE, 80, 70, 1);
+		if(levelNum == 0) {
+			map = LevelGenerator.makeLevel(LevelGenerator.INTRO, 38, 35, 1, enemies);
+
+			mainChar.initPos(17, 5);
+		}
+		else if(levelNum == 2) {
+			map = new Tile[60][40];
+			for(int i = 0; i < map.length; i ++) {
+				for(int j = 0; j < map[0].length; j ++) {
+					map[i][j] = new Tile(Tile.FLOOR);
+					if(i == 0 || i == 5 || j == 0 || j == 5 || i == map.length-1 || j == map[0].length-1) {
+						map[i][j] = new Tile(Tile.WALL);
+					}
+				}
+			}
+	
+			map[10][4] = new Tile(Tile.FLOOR);
+			map[5][4] = new Tile(Tile.FLOOR);
+			map[15][5] = new Tile(Tile.FLOOR);
+		}
+		else if(levelNum == 3) {
+			//Generate a sweet new Caves level.
+			map = new Tile[80][70];
+			levelGen.makeLevel(map, LevelGenerator.CAVE, 80, 70, 1);
+			enemies = enemyList;
+		}
 		
 		calculateLighting();
 	}
 
 	private void calculateLighting() {
 		int x = mainChar.getX(), y = mainChar.getY();
-		map[x][y].visible = true;
 		for(int tx=0;tx<map.length;tx++) {
 			for(int ty=0;ty<map[0].length;ty++) {
 				map[tx][ty].visible = false;
 			}
 		}
+		map[x][y].visible = true;
 
 		// Gotta do 4 directions
 		for(int ix = 1; ix >= -1; ix -= 2) {
