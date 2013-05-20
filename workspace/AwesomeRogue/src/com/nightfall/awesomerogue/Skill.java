@@ -22,7 +22,7 @@ public abstract class Skill {
 	// Returns false if it prepares and activates in the same function
 	// So we don't wait on it
 	public abstract boolean prepare();
-	public abstract void activate(Point direction);
+	public abstract void activate(Point direction, MainCharacter mainChar);
 	public abstract void update();
 	public abstract void draw(Graphics2D g2);
 

@@ -33,16 +33,15 @@ public class MainCharacter extends Character {
 			// Prepare the skill. If it fires as well, it will return false
 			// So we don't want to say to wait on it
 			if(skills[skill].prepare()) {
-				InGameState.suspended = true;
 				switch(skill) {
 				case 0:
-					InGameState.waitingOn.add("Z");
+					InGameState.waitOn("Z");
 					break;
 				case 1:
-					InGameState.waitingOn.add("X");
+					InGameState.waitOn("X");
 					break;
 				case 2:
-					InGameState.waitingOn.add("C");
+					InGameState.waitOn("C");
 					break;
 				}
 			}
@@ -51,20 +50,18 @@ public class MainCharacter extends Character {
 	
 	public void activateSkill(int skill, Point p) {
 		if(skills[skill] != null) {
-			skills[skill].activate(p);
+			skills[skill].activate(p, this);
 			switch(skill) {
 			case 0:
-				InGameState.waitingOn.remove("Z");
+				InGameState.endWait("Z");
 				break;
 			case 1:
-				InGameState.waitingOn.remove("X");
+				InGameState.endWait("X");
 				break;
 			case 2:
-				InGameState.waitingOn.remove("C");
+				InGameState.endWait("C");
 				break;
 			}
-			if(InGameState.waitingOn.size() == 0)
-				InGameState.suspended = false;	// Gotta unpause!
 		}
 	}
 }

@@ -14,8 +14,10 @@ public class FalconPunch extends Skill {
 		return true;
 	}
 
-	public void activate(Point direction) {
+	public void activate(Point direction, MainCharacter mainChar) {
 		System.out.println("PAWNCHHHHH in the direction of dx="+direction.x+", dy="+direction.y);
+		InGameState.waitOn("animation");
+		mainChar.forceMarch(direction.x*4, direction.y*4);
 	}
 
 	public void update() {

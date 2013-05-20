@@ -109,8 +109,25 @@ public class InGameState extends GameState {
 	}
 
 	public void update() {
-
-
+		if(suspended && waitingOn.get(waitingOn.size()-1).equals("animation")) {
+			mainChar.update(map, entities);
+			for(int i = 0; i < enemies.size(); i++) {
+				Enemy e = enemies.get(i);
+				e.update(map, entities);
+			}
+			calculateLighting();
+		}
+	}
+	
+	public static void waitOn(String event) {
+		waitingOn.add(event);
+		suspended = true;
+	}
+	
+	public static void endWait(String event) {
+		waitingOn.remove(event);
+		if(InGameState.waitingOn.size() == 0)
+			InGameState.suspended = false;	// Gotta unpause!
 	}
 	
 	public Character getMainChar() {
@@ -187,7 +204,7 @@ public class InGameState extends GameState {
 		for(int i = 0; i < enemies.size(); i++) {
 			Enemy e = enemies.get(i);
 			if(map[e.getX()][e.getY()].visible){ 
-				enemies.get(i).draw(g2, CAMERA_X, CAMERA_Y);
+				e.draw(g2, CAMERA_X, CAMERA_Y);
 			}
 		}
 		

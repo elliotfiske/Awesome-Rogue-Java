@@ -1,6 +1,8 @@
 package com.nightfall.awesomerogue;
 
+import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.Point;
 
 public class Character {
 	public static final int VISIONRANGE = 35;
@@ -8,6 +10,9 @@ public class Character {
 	private int x, y;
 	private int room;
 	String character;
+	
+	private boolean forceMarch;
+	private Point forceMarchTo;
 	
 	private Weapon currentWeapon;
 	
@@ -22,7 +27,6 @@ public class Character {
 	}
 	
 	public void move(int dx, int dy, Tile[][] map, Character[][] entities) {
-		
 		int targetX = x + dx;
 		int targetY = y + dy;
 		
@@ -60,7 +64,58 @@ public class Character {
 	}
 
 	public void forceMarch(int dx, int dy) {
-
+		forceMarch = true;
+		forceMarchTo = new Point(x + dx, y + dy);
+	}
+	
+	public void update(Tile[][] map, Character[][] entities) {
+		if(forceMarch) {
+			int targetX = x;
+			int targetY = y;
+			// Calculate how far we want to move!
+			if(forceMarchTo.x < x) {
+				targetX --;
+			}
+			else if(forceMarchTo.x > x) {
+				targetX ++;
+			}
+			
+			if(forceMarchTo.y < y) {
+				targetY --;
+			}
+			else if(forceMarchTo.y > y) {
+				targetY ++;
+			}
+			
+			if(!map[targetX][targetY].blocker && entities[targetX][targetY] == null) {
+				entities[x][y] = null;
+				x = targetX;
+				y = targetY;
+				room = map[x][y].room;
+				entities[targetX][targetY] = this;
+			}
+			else {
+				if(map[x][targetY].blocker || entities[x][targetY] != null) {
+					targetY = y;
+					forceMarchTo.y = y;
+				}
+				if(map[targetX][y].blocker || entities[targetX][y] != null) {
+					targetX = x;
+					forceMarchTo.x = x;
+				}
+				// Try to move again
+				if(!map[targetX][targetY].blocker && entities[targetX][targetY] == null) {
+					entities[x][y] = null;
+					x = targetX;
+					y = targetY;
+					room = map[x][y].room;
+					entities[targetX][targetY] = this;
+				}
+			}
+			
+			if(x == forceMarchTo.x && y == forceMarchTo.y)
+				InGameState.endWait("animation");
+		}
 	}
 	
 	/**
