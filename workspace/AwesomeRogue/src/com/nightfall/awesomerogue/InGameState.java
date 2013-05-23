@@ -21,6 +21,8 @@ public class InGameState extends GameState {
 	public static final int INGAME_SCROLL_MAXX = INGAME_WINDOW_WIDTH - INGAME_SCROLL_PADDING;
 	public static final int INGAME_SCROLL_MINY = INGAME_SCROLL_PADDING;
 	public static final int INGAME_SCROLL_MAXY = INGAME_WINDOW_HEIGHT - INGAME_SCROLL_PADDING;
+	
+	public static final int TILE_SIZE = 12;
 
 	/**
 	 * Describes the cell location of the upper lefthand corner of the area
@@ -46,14 +48,16 @@ public class InGameState extends GameState {
 	private BufferedImage mapImg_t;
 
 	public static ArrayList<String> waitingOn;
+	private static ArrayList<Effect> effects;
 	public static boolean suspended = false; //we could just check if waitingOn.size() == 0, but this is faster
+	
 	private BufferedImage[] tileImages;
 	private BufferedImage[] layovers;
 	
 	private boolean introLevel;
 
-	public static ArrayList<Enemy> enemyList;
-	private ArrayList<Enemy> enemies;
+	public static ArrayList<Character> enemyList;
+	private ArrayList<Character> enemies;
 	private Character[][] entities;
 	
 	private MetaGameState metaGame;
@@ -63,6 +67,7 @@ public class InGameState extends GameState {
 		
 		this.metaGame = metaGame;
 		mainChar = character;
+		mainChar.setLevel(this);
 
 		tileImages = metaGame.getTileImages();
 
@@ -83,23 +88,27 @@ public class InGameState extends GameState {
 		layovers[2] = ImageIO.read(new File("img/Controls_Skills.png"));
 
 		imgSFX = new ImageSFX();
+		
+		effects = new ArrayList<Effect>();
 
 		guiBG = ImageIO.read(new File("img/guiBG.png"));
 
 		waitingOn = new ArrayList<String>();
+		suspended = false;
 
 		levelGen = new LevelGenerator();
 
-		enemies = new ArrayList<Enemy>();
-		enemyList = new ArrayList<Enemy>();
+		enemies = new ArrayList<Character>();
+		enemyList = new ArrayList<Character>();
 		
-		mapImg = new BufferedImage(INGAME_WINDOW_WIDTH*12, INGAME_WINDOW_HEIGHT*12, BufferedImage.TYPE_INT_ARGB);
-		mapImg_t = new BufferedImage(INGAME_WINDOW_WIDTH*12, INGAME_WINDOW_HEIGHT*12, BufferedImage.TYPE_INT_ARGB);
+		mapImg = new BufferedImage(INGAME_WINDOW_WIDTH*TILE_SIZE, INGAME_WINDOW_HEIGHT*TILE_SIZE, BufferedImage.TYPE_INT_ARGB);
+		mapImg_t = new BufferedImage(INGAME_WINDOW_WIDTH*TILE_SIZE, INGAME_WINDOW_HEIGHT*TILE_SIZE, BufferedImage.TYPE_INT_ARGB);
 
 		if(needsInit) {
 			initLevel(3);
 
 			mainChar = new MainCharacter(10,10);
+			mainChar.setLevel(this);
 		}
 	}
 	
@@ -109,19 +118,33 @@ public class InGameState extends GameState {
 	}
 
 	public void update() {
-		if(suspended && waitingOn.get(waitingOn.size()-1).equals("animation")) {
-			mainChar.update(map, entities);
-			for(int i = 0; i < enemies.size(); i++) {
-				Enemy e = enemies.get(i);
-				e.update(map, entities);
+		if(suspended) {
+			String waiting = waitingOn.get(waitingOn.size()-1);
+			if(waiting.equals("animation")) {
+				mainChar.update(map, entities);
+				for(int i = 0; i < enemies.size(); i++) {
+					Character e = enemies.get(i);
+					e.update(map, entities);
+				}
+				calculateLighting();
 			}
-			calculateLighting();
 		}
+	}
+	
+	public static void waitOn(Effect effect) {
+		waitOn("animation");
+		effects.add(effect);
 	}
 	
 	public static void waitOn(String event) {
 		waitingOn.add(event);
 		suspended = true;
+	}
+	
+	public static void endAllWaits(String event) {	// Same as endWait but removes all instances of the wait
+		while(waitingOn.remove(event));
+		if(InGameState.waitingOn.size() == 0)
+			InGameState.suspended = false;	// Gotta unpause!
 	}
 	
 	public static void endWait(String event) {
@@ -137,6 +160,17 @@ public class InGameState extends GameState {
 	public void render(Graphics2D g2) {
 		imgSFX.drawResizedImage(g2, guiBG, 0, 0, GamePanel.PWIDTH, GamePanel.PHEIGHT);
 		g2.drawImage(mapImg, INGAME_WINDOW_OFFSET_X, INGAME_WINDOW_OFFSET_Y, null);
+		
+		if(waitingOn.contains("animation")) {
+			for(int i = 0; i < effects.size(); i++) {
+				Effect e = effects.get(i);
+				e.renderAndIterate(g2, map, entities);
+				if(!e.running()) {
+					endWait("animation");
+					effects.remove(i--); // and decrement i so we don't skip an effect
+				}
+			}
+		}
 	}
 	
 	public void draw() {
@@ -154,30 +188,30 @@ public class InGameState extends GameState {
 
 					//Draw the tile image (its type should correspond to the index in tileImages[] that
 					//represents it)
-					g2.drawImage(tileImages[ map[i][j].type*2 ], (i-CAMERA_X)*12,
-							(j-CAMERA_Y)*12, null);
+					g2.drawImage(tileImages[ map[i][j].type*2 ], (i-CAMERA_X)*TILE_SIZE,
+							(j-CAMERA_Y)*TILE_SIZE, null);
 
 					if(map[i][j].illustrated) {
 						g2.setColor(map[i][j].color);
-						g2.fillRect((i-CAMERA_X)*12, (j-CAMERA_Y)*12, 12, 12);
+						g2.fillRect((i-CAMERA_X)*TILE_SIZE, (j-CAMERA_Y)*TILE_SIZE, TILE_SIZE, TILE_SIZE);
 					}
 					
 					if(map[i][j].getID() != 0) {
-						g2.drawString(Integer.toString(map[i][j].getID() % 10), (i-CAMERA_X)*12,
-								(j-CAMERA_Y)*12 + 12);
+						g2.drawString(Integer.toString(map[i][j].getID() % 10), (i-CAMERA_X)*TILE_SIZE,
+								(j-CAMERA_Y)*TILE_SIZE + TILE_SIZE);
 					}
 
 				} else if(map[i][j].seen) {
 					//The tile is in our memory.  Draw it, but darkened.
 
 					//TODO: actually darken the tile.  Dunno how to do it right now.
-					g2.drawImage(tileImages[ map[i][j].type*2+1 ], (i-CAMERA_X)*12,
-							(j-CAMERA_Y)*12, null);
+					g2.drawImage(tileImages[ map[i][j].type*2+1 ], (i-CAMERA_X)*TILE_SIZE,
+							(j-CAMERA_Y)*TILE_SIZE, null);
 				}
 				
 				if(map[i][j].illustrated) {
 					g2.setColor(map[i][j].color);
-					g2.fillRect((i-CAMERA_X)*12, (j-CAMERA_Y)*12, 12, 12);
+					g2.fillRect((i-CAMERA_X)*TILE_SIZE, (j-CAMERA_Y)*TILE_SIZE, TILE_SIZE, TILE_SIZE);
 				}
 				
 			}
@@ -202,7 +236,11 @@ public class InGameState extends GameState {
 
 		//Draw the enemies.
 		for(int i = 0; i < enemies.size(); i++) {
-			Enemy e = enemies.get(i);
+			Character e = enemies.get(i);
+			if(e.dead()) {
+				enemies.remove(i--);
+				continue;
+			}
 			if(map[e.getX()][e.getY()].visible){ 
 				e.draw(g2, CAMERA_X, CAMERA_Y);
 			}
@@ -270,14 +308,14 @@ public class InGameState extends GameState {
 		
 				//TODO: Have the enemies take a turn here.
 				for(int i = 0; i < enemies.size(); i ++) {
-					Enemy enemy = enemies.get(i);
+					Character enemy = enemies.get(i);
 					if(enemy.dead()) {
 						enemies.remove(enemy);
 						entities[enemy.getX()][enemy.getY()] = null;
 						i -- ;
 					}
 					else {
-						enemy.pathToHeroAndMove(mainChar.getX(), mainChar.getY(), map);
+						enemy.takeTurn(mainChar, map);
 					}
 				}
 				
@@ -338,7 +376,7 @@ public class InGameState extends GameState {
 		// Fill entity array!
 		entities = new Character[map.length][map[0].length];
 		for(int i = 0; i < enemies.size(); i++) {
-			Enemy e = enemies.get(i);
+			Character e = enemies.get(i);
 			entities[e.getX()][e.getY()] = e;
 		}
 		entities[mainChar.getX()][mainChar.getY()] = mainChar;
@@ -476,5 +514,9 @@ public class InGameState extends GameState {
 		}
 
 		return result;
+	}
+
+	public void addCharacter(Character character) {
+		enemies.add(character);
 	}
 }

@@ -16,7 +16,7 @@ public abstract class Skill {
 	
 	public static void refreshSkills() {
 		allSkills = new ArrayList<Skill>();
-		allSkills.add(new FalconPunch());
+		allSkills.add(new GrenadeLauncher());
 	}
 	
 	// Returns false if it prepares and activates in the same function

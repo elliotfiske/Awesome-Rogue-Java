@@ -18,7 +18,6 @@ public class Enemy extends Character {
 	public static final String[] enemyIcons = {"M", "r", "R", "Z", "S", "W", "m"};
 
 	private int x, y, whichEnemy, health = 0;
-	private boolean dead;
 	String name;
 	String icon;
 
@@ -71,6 +70,10 @@ public class Enemy extends Character {
 	
 	public int getX() { return x; }
 	public int getY() { return y; }
+
+	public void takeTurn(MainCharacter mainChar, Tile[][] map) {
+		pathToHeroAndMove(mainChar.getX(), mainChar.getY(), map);
+	}
 
 	//Fuzzy pathfinding = fun times for all!
 	public void pathToHeroAndMove(int targetX, int targetY, Tile[][] map) {
@@ -390,8 +393,6 @@ public class Enemy extends Character {
 				((y - camY)*12 + 10));	
 	}
 	
-	public boolean dead() { return dead; }
-
 	/**
 	 * Enemies have hit points (unlike the player's "Awesome level.")
 	 * 
@@ -402,7 +403,7 @@ public class Enemy extends Character {
 	public void getHit(int damage) {
 		health -= damage;
 		if(health <= 0) {
-			dead = true;
+			die();
 
 			if(whichEnemy == WIZARD) {
 				//win

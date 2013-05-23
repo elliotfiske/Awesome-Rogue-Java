@@ -16,9 +16,13 @@ public class Character {
 	
 	private Weapon currentWeapon;
 	
+	private boolean dead;
+	
 	public Character(int x, int y, String character) {
 		initPos(x, y);
 		this.character = character;
+		
+		dead = false;
 	}
 	
 	public void initPos(int x, int y) {
@@ -66,6 +70,7 @@ public class Character {
 	public void forceMarch(int dx, int dy) {
 		forceMarch = true;
 		forceMarchTo = new Point(x + dx, y + dy);
+		InGameState.waitOn("animation");
 	}
 	
 	public void update(Tile[][] map, Character[][] entities) {
@@ -113,8 +118,10 @@ public class Character {
 				}
 			}
 			
-			if(x == forceMarchTo.x && y == forceMarchTo.y)
+			if(x == forceMarchTo.x && y == forceMarchTo.y) {
 				InGameState.endWait("animation");
+				forceMarch = false;
+			}
 		}
 	}
 	
@@ -135,5 +142,16 @@ public class Character {
 
 	public void getHit(int damage) {
 		System.out.println("I took "+damage+" damage but I don't know how to handle it");
+	}
+	
+	public void die() { dead = true; }
+
+	public boolean dead() {
+		return dead;
+	}
+
+	public void takeTurn(MainCharacter mainChar, Tile[][] map) {
+		// TODO Auto-generated method stub
+		
 	}
 }

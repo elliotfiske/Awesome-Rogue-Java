@@ -9,13 +9,17 @@ public class MainCharacter extends Character {
 	private int awesome;
 	private Skill[] skills;
 	
+	private InGameState currentGameState;
+	
 	public MainCharacter(int x, int y) {
 		super(x, y, "@");
 		awesome = 100;
 		setCurrentWeapon(new Fists());
 		skills = new Skill[3];
 	}
+	
 	public int getAwesome() { return awesome; }
+	
 	public void findArtifact() {
 		int randomArtifact = (int)Math.floor(Math.random()*Skill.allSkills.size());
 		for(int i = 0; i < 3; i ++) {
@@ -27,6 +31,12 @@ public class MainCharacter extends Character {
 		// We already have 3 skills! Need to replace and old one
 		// TODO once we actually have 3 skills/levels
 	}
+	
+	public void setLevel(InGameState level) {
+		currentGameState = level;
+	}
+	
+	public InGameState getLevel() { return currentGameState; }
 	
 	public void prepareSkill(int skill) {
 		if(skills[skill] != null) {
