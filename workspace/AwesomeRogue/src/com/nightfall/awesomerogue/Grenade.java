@@ -12,6 +12,8 @@ public class Grenade extends Character {
 		this.direction = direction;
 		forceMarch(direction.x*4, direction.y*4);
 		timer = 3;
+		
+		setAltitude(1);
 	}
 
 	public void takeTurn(MainCharacter mainChar, Tile[][] map) {

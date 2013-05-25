@@ -11,6 +11,8 @@ public class Character {
 	private int room;
 	String character;
 	
+	private int altitude;	// 0 is default, meaning it's on the ground
+	
 	private boolean forceMarch;
 	private Point forceMarchTo;
 	
@@ -55,6 +57,9 @@ public class Character {
 	
 	public int getRoom() { return room; }
 	public void setRoom(int room) { this.room = room; }
+
+	public int getAltitude() { return altitude; }
+	public void setAltitude(int altitude) { this.altitude = altitude; }
 	
 	public int getX() { return x; }
 	public int getY() { return y; }
@@ -68,9 +73,15 @@ public class Character {
 	}
 
 	public void forceMarch(int dx, int dy) {
+		forceMarch(dx, dy, false);
+	}
+	
+	public void forceMarch(int dx, int dy, boolean inAir) {
 		forceMarch = true;
 		forceMarchTo = new Point(x + dx, y + dy);
 		InGameState.waitOn("animation");
+		
+		if(inAir) altitude ++;
 	}
 	
 	public void update(Tile[][] map, Character[][] entities) {
@@ -92,7 +103,8 @@ public class Character {
 				targetY ++;
 			}
 			
-			if(!map[targetX][targetY].blocker && entities[targetX][targetY] == null) {
+			if(!map[targetX][targetY].blocker && entities[targetX][targetY] == null ||
+					entities[targetX][targetY].getAltitude() != altitude) {
 				entities[x][y] = null;
 				x = targetX;
 				y = targetY;
@@ -100,16 +112,19 @@ public class Character {
 				entities[targetX][targetY] = this;
 			}
 			else {
-				if(map[x][targetY].blocker || entities[x][targetY] != null) {
+				if(map[x][targetY].blocker || entities[x][targetY] != null ||
+						entities[x][targetY].getAltitude() != altitude) {
 					targetY = y;
 					forceMarchTo.y = y;
 				}
-				if(map[targetX][y].blocker || entities[targetX][y] != null) {
+				if(map[targetX][y].blocker || entities[targetX][y] != null ||
+						entities[targetX][y].getAltitude() != altitude) {
 					targetX = x;
 					forceMarchTo.x = x;
 				}
 				// Try to move again
-				if(!map[targetX][targetY].blocker && entities[targetX][targetY] == null) {
+				if(!map[targetX][targetY].blocker && entities[targetX][targetY] == null ||
+						entities[targetX][targetY].getAltitude() != altitude) {
 					entities[x][y] = null;
 					x = targetX;
 					y = targetY;
@@ -121,6 +136,7 @@ public class Character {
 			if(x == forceMarchTo.x && y == forceMarchTo.y) {
 				InGameState.endWait("animation");
 				forceMarch = false;
+				if(altitude > 0) altitude --;
 			}
 		}
 	}
