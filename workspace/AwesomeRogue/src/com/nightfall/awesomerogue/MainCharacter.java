@@ -14,7 +14,7 @@ public class MainCharacter extends Character {
 	public MainCharacter(int x, int y) {
 		super(x, y, "@");
 		awesome = 100;
-		setCurrentWeapon(new Fists());
+		setCurrentWeapon(new Pistol());
 		skills = new Skill[3];
 	}
 	

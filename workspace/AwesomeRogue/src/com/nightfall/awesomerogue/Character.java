@@ -17,6 +17,7 @@ public class Character {
 	private Point forceMarchTo;
 	
 	private Weapon currentWeapon;
+	private boolean drawingAttack;
 	
 	private boolean dead;
 	
@@ -51,7 +52,7 @@ public class Character {
 			map[targetX][targetY].doAction(this);
 		}
 		else {
-			attack(entities[targetX][targetY]);
+			attack(new Point(dx, dy));
 		}
 	}
 	
@@ -67,9 +68,17 @@ public class Character {
 	public void setCurrentWeapon(Weapon weapon) { currentWeapon = weapon; }
 	public Weapon getCurrentWeapon() { return currentWeapon; }
 	
-	private void attack(Character enemy) {
-		if(enemy.getClass() == this.getClass()) return; // Friendly fire!
-		currentWeapon.attack(enemy);
+	// Set the weapon to attack in a certain direction.
+	// This does not do any damage inherently, in case
+	// You punch the air or something. The weapon handles that.
+	public void attack(Point direction) {
+		//if(enemy.getClass() == this.getClass()) return; // Friendly fire!
+		drawingAttack = true;
+		InGameState.waitOn("animation");
+		
+		// Tell the weapon both where you are attacking from and what
+		// DIrection to attack in
+		currentWeapon.attack(new Point(x, y), direction);
 	}
 
 	public void forceMarch(int dx, int dy) {
@@ -85,6 +94,10 @@ public class Character {
 	}
 	
 	public void update(Tile[][] map, Character[][] entities) {
+		if(drawingAttack) {
+			currentWeapon.update(map, entities);
+		}
+		
 		if(forceMarch) {
 			int targetX = x;
 			int targetY = y;
@@ -150,6 +163,12 @@ public class Character {
 	 */
 	public void draw(Graphics2D g2, int camX, int camY) {
 		g2.drawString(character, ((x-camX)*12), ((y-camY)*12+12));
+		if(drawingAttack) {
+			if(!currentWeapon.draw(g2, camX, camY)) {
+				drawingAttack = false;
+				InGameState.endWait("animation");
+			}
+		}
 	}
 
 	public String getName() {

@@ -1,9 +1,7 @@
 package com.nightfall.awesomerogue;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.util.ArrayList;
 
 public class Enemy extends Character {
 

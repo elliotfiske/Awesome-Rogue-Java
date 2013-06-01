@@ -266,15 +266,18 @@ public class InGameState extends GameState {
 	}
 
 	public void keyPress(KeyEvent e) {
-		if(e.getKeyCode() == KeyEvent.VK_SPACE) {
-			clearLevel();
-		}
+		//if(e.getKeyCode() == KeyEvent.VK_SPACE) {
+		//	clearLevel();
+		//}
 		
 		//Parse the direction from the given KeyPress
 		Point p = getDirection(e);
 
 		if(!suspended) {
 			if(p.x == 0 && p.y == 0) {
+				if(e.getKeyCode() == KeyEvent.VK_SPACE) {
+					InGameState.waitOn("attack");
+				}
 				if(e.getKeyCode() == KeyEvent.VK_Z) {
 					mainChar.prepareSkill(0);
 				}
@@ -331,6 +334,10 @@ public class InGameState extends GameState {
 		}
 		else {
 			String waiting = waitingOn.get(waitingOn.size()-1);
+			if(waiting.equals("attack")) {
+				mainChar.attack(p);
+				endWait("attack");
+			}
 			if(waiting.equals("Z")) {
 				mainChar.activateSkill(0, p);
 			}
