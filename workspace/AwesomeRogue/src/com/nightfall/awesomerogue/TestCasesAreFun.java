@@ -60,9 +60,9 @@ public class TestCasesAreFun {
 		//5 4 3
 		Enemy e = new Enemy(0, 0, 0);
 		
-		assertEquals(7, e.getIntialDirection(new Point(4, 4), new Point(3, 4), true, map));
+		//assertEquals(7, e.getIntialDirection(new Point(4, 4), new Point(3, 4), true, map));
 
-		assertEquals(0, e.getIntialDirection(new Point(4, 4), new Point(3, 4), false, map));
+		//assertEquals(0, e.getIntialDirection(new Point(4, 4), new Point(3, 4), false, map));
 		
 		//assertEquals(0, e.followTheWall(feelerX, feelerY, goingRight, leftFeelerDirection, map));
 	}

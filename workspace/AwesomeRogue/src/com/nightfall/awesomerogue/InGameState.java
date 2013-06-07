@@ -192,6 +192,7 @@ public class InGameState extends GameState {
 							(j-CAMERA_Y)*TILE_SIZE, null);
 
 					if(map[i][j].illustrated) {
+						System.out.println("WE cool down here. How bout you?");
 						g2.setColor(map[i][j].color);
 						g2.fillRect((i-CAMERA_X)*TILE_SIZE, (j-CAMERA_Y)*TILE_SIZE, TILE_SIZE, TILE_SIZE);
 					}
@@ -273,6 +274,13 @@ public class InGameState extends GameState {
 		//Parse the direction from the given KeyPress
 		Point p = getDirection(e);
 
+		//Wipe tiles of their illustrations
+		for(int x = 0; x < map.length; x++) {
+			for(int y = 0; y < map[0].length; y++) {
+				map[x][y].illustrated = false;
+			}
+		}
+		
 		if(!suspended) {
 			if(p.x == 0 && p.y == 0) {
 				if(e.getKeyCode() == KeyEvent.VK_SPACE) {
@@ -319,13 +327,6 @@ public class InGameState extends GameState {
 					}
 					else {
 						enemy.takeTurn(mainChar, map);
-					}
-				}
-				
-				//Wipe tiles of their illustrations
-				for(int x = 0; x < map.length; x++) {
-					for(int y = 0; y < map[0].length; y++) {
-						map[x][y].illustrated = false;
 					}
 				}
 	

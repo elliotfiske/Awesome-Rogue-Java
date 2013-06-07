@@ -1,7 +1,9 @@
 package com.nightfall.awesomerogue;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.util.ArrayList;
 
 public class Enemy extends Character {
 
@@ -75,91 +77,89 @@ public class Enemy extends Character {
 
 	//Fuzzy pathfinding = fun times for all!
 	public void pathToHeroAndMove(int targetX, int targetY, Tile[][] map) {
-		return;
-		//SO. The first step in my fun little "fuzzy pathfinding" is to just draw a straight line from the enemy to the hero.
+		//Try to path straight from the monster to the hero.
 
 		//Coordinates of the line that walks to the player.
-//		int straightX = x;
-//		int straightY = y;
-//
-//		/** List of tiles straight from the monster to the player. */
-//		ArrayList<Tile> straightTiles = new ArrayList<Tile>();
-//
-//		while(!(straightX == targetX && straightY == targetY)) {
-//			//Calculate which direction it would be smart to go in order to walk to the player.
-//			Point delta = walkStraight(straightX, straightY, targetX, targetY);
-//
-//			System.out.println("sx: " + straightX + ", sy: " + straightY + ", tx: " + targetX + ", ty: " + targetY);
-//
-//			straightX += delta.x;
-//			straightY += delta.y;
-//
-//			straightTiles.add(map[straightX][straightY]);
-//
-//			if(map[straightX][straightY].blocker) {
-//				map[straightX][straightY].illustrate(Color.red);
-//			} else {
-//				map[straightX][straightY].illustrate(Color.yellow);
-//			}
-//		}
-//
-//		for(int whichTile = 0; whichTile < straightTiles.size(); whichTile++) {
-//			//
-//			Tile t = straightTiles.get(whichTile);
-//
-//			//Go through until we run into sexy trouble (blocker)
-//			if(t.blocker) {
-//				//OH NO! Blocker found.  Send out "feelers" to go along right and left walls.
-//				Point rightFeeler = new Point(straightTiles.get(whichTile - 1).x, straightTiles.get(whichTile - 1).y);
-//				Point leftFeeler = new Point(rightFeeler.x, rightFeeler.y);
-//
-//				//figure out which direction they start off in.
-//				//Right:
-//				rightFeelerDirection = getIntialDirection(rightFeeler, new Point(t.x, t.y), true, map);
-//
-//				//Left:
-//				leftFeelerDirection = getIntialDirection(leftFeeler, new Point(t.x, t.y), false, map);
-//
-//				int numTiles = 0;
-//				while(numTiles < 20) {
-//					//follow right wall
-//					Point delta = followTheWall(rightFeeler.x, rightFeeler.y, true, rightFeelerDirection, map);
-//					rightFeeler.translate(delta.x, delta.y);
-//
-//					map[rightFeeler.x][rightFeeler.y].illustrate(Color.blue);
-//					
-//					//follow left wall
-//					delta = followTheWall(leftFeeler.x, leftFeeler.y, false, leftFeelerDirection, map);
-//					leftFeeler.translate(delta.x, delta.y);
-//					
-//					map[leftFeeler.x][leftFeeler.y].illustrate(Color.cyan);
-//					
-//					//TODO: lol check if we're "Backontrack" 
-//					
-//					numTiles++;
-//				}
-//			}
-//		}
+		int straightX = x;
+		int straightY = y;
+
+		/** List of tiles straight from the monster to the player. */
+		ArrayList<Tile> straightTiles = new ArrayList<Tile>();
+
+		while(!(straightX == targetX && straightY == targetY)) {
+			//Calculate which direction it would be smart to go in order to walk to the player.
+			Point delta = walkStraight(straightX, straightY, targetX, targetY);
+
+			//System.out.println("sx: " + straightX + ", sy: " + straightY + ", tx: " + targetX + ", ty: " + targetY);
+
+			straightX += delta.x;
+			straightY += delta.y;
+
+			straightTiles.add(map[straightX][straightY]);
+
+			if(map[straightX][straightY].blocker) {
+				map[straightX][straightY].illustrate(Color.red);
+			} else {
+				map[straightX][straightY].illustrate(Color.yellow);
+				System.out.println("Added " + straightX + ", " + straightY + " to illustrated list.");
+			}
+		}
+
+		//DEAL WITH OBSTACLES HERE
+		
+		/*for(int whichTile = 0; whichTile < straightTiles.size(); whichTile++) {
+			//
+			Tile t = straightTiles.get(whichTile);
+
+			//Go through until we run into sexy trouble (blocker)
+			if(t.blocker) {
+				//OH NO! Blocker found.  Send out "feelers" to go along right and left walls.
+				Point rightFeeler = new Point(straightTiles.get(whichTile - 1).x, straightTiles.get(whichTile - 1).y);
+				Point leftFeeler = new Point(rightFeeler.x, rightFeeler.y);
+
+				//figure out which direction they start off in.
+				//Right:
+				rightFeelerDirection = getDirection(rightFeeler, new Point(t.x, t.y), true, map);
+
+				//Left:
+				leftFeelerDirection = getDirection(leftFeeler, new Point(t.x, t.y), false, map);
+
+				int numTiles = 0;
+				while(numTiles < 100) {
+					//follow right wall
+					Point delta = getDirection(rightFeeler.x, rightFeeler.y, true, rightFeelerDirection, map);
+					rightFeeler.translate(delta.x, delta.y);
+
+					map[rightFeeler.x][rightFeeler.y].illustrate(Color.blue);
+					
+					//follow left wall
+					delta = getDirection(leftFeeler.x, leftFeeler.y, false, leftFeelerDirection, map);
+					leftFeeler.translate(delta.x, delta.y);
+					
+					map[leftFeeler.x][leftFeeler.y].illustrate(Color.cyan);
+					
+					//TODO: lol check if we're "Backontrack" 
+					
+					numTiles++;
+				}
+			}
+		}*/
 
 	}	
 
 	/**
-	 * Which direction should the "feelers" go to start?
+	 * Converts from point with directional components --> one number representin direction.
 	 * 
 	 * Directions:
 	 * 7 0 1
 	 * 6 X 2
 	 * 5 4 3
 	 * 
-	 * 
-	 * @param feeler Point describing where the "feeler" is
-	 * @param wall Point describing the wall the "feeler" is up against
-	 * @param goingRight True if this is a rightwards feeler, false if it is a leftwards feeler.
-	 * @param map Handle to the map
-	 * @return Which direction should it go, yo.
+	 * @param delta Point with |x| <= 1 and |y| <= 1 describing direction
+	 * @return Sweet, sweet directional number.
+	 * @throws PANICEVERYTHINGISBROKENERROR OH NO WHAT HAVE YOU DONE OH NOOOOO
 	 */
-	public int getIntialDirection(Point feeler, Point wall, boolean goingRight, Tile[][] map) {
-		return 0;
+	public int getNumberedDirection(Point delta) {
 		/*
 		 * The algorithm starts by looking at the direction between the feeler and its friend wall:
 		 *  _
@@ -186,30 +186,24 @@ public class Enemy extends Character {
 		 *  L       go in the direction of the L.)
 		 *  
 		 */
+		int diffX = delta.x;
+		int diffY = delta.y;
+		int result = -1;
 
-		//Start out by taking the direction between the wall and the feeler.
-//		int diffX = wall.x - feeler.x;
-//		int diffY = wall.y - feeler.y;
-//		
-//		
-//		Point difference = new Point(diffX, diffY);
-
-//		return getDirection(feeler, goingRight, map);
-		//End result direction
-//		int result = 0;
+		if(diffX == 0 && diffY == -1)  { result = 0; }
+		if(diffX == 1 && diffY == -1)  { result = 1; }
+		if(diffX == 1 && diffY == 0)   { result = 2; }
+		if(diffX == 1 && diffY == 1)   { result = 3; }
+		if(diffX == 0 && diffY == 1)   { result = 4; }
+		if(diffX == -1 && diffY == 1)  { result = 5; }
+		if(diffX == -1 && diffY == 0)  { result = 6; }
+		if(diffX == -1 && diffY == -1) { result = 7; }
 		
+		if(result == -1) {
+			throw new PANICEVERYTHINGISBROKENERROR();
+		}
 		
-
-//		if(diffX == 0 && diffY == -1)  { result = 0; }
-//		if(diffX == 1 && diffY == -1)  { result = 1; }
-//		if(diffX == 1 && diffY == 0)   { result = 2; }
-//		if(diffX == 1 && diffY == 1)   { result = 3; }
-//		if(diffX == 0 && diffY == 1)   { result = 4; }
-//		if(diffX == -1 && diffY == 1)  { result = 5; }
-//		if(diffX == -1 && diffY == 0)  { result = 6; }
-//		if(diffX == -1 && diffY == -1) { result = 7; }
-//		
-//		return getDirection(feeler, goingRight, map);
+		return result;
 	}
 
 	/**
