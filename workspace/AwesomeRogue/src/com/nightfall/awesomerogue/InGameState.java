@@ -192,7 +192,6 @@ public class InGameState extends GameState {
 							(j-CAMERA_Y)*TILE_SIZE, null);
 
 					if(map[i][j].illustrated) {
-						System.out.println("WE cool down here. How bout you?");
 						g2.setColor(map[i][j].color);
 						g2.fillRect((i-CAMERA_X)*TILE_SIZE, (j-CAMERA_Y)*TILE_SIZE, TILE_SIZE, TILE_SIZE);
 					}
