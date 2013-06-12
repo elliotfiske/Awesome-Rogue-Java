@@ -273,6 +273,13 @@ public class InGameState extends GameState {
 		//Parse the direction from the given KeyPress
 		Point p = getDirection(e);
 
+		//Wipe tiles of their illustrations
+		for(int x = 0; x < map.length; x++) {
+			for(int y = 0; y < map[0].length; y++) {
+				map[x][y].illustrated = false;
+			}
+		}
+		
 		if(!suspended) {
 			if(p.x == 0 && p.y == 0) {
 				if(e.getKeyCode() == KeyEvent.VK_SPACE) {
@@ -319,13 +326,6 @@ public class InGameState extends GameState {
 					}
 					else {
 						enemy.takeTurn(mainChar, map);
-					}
-				}
-				
-				//Wipe tiles of their illustrations
-				for(int x = 0; x < map.length; x++) {
-					for(int y = 0; y < map[0].length; y++) {
-						map[x][y].illustrated = false;
 					}
 				}
 	
