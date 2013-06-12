@@ -18,6 +18,9 @@ public class Enemy extends Character {
 	private int x, y, whichEnemy, health = 0;
 	String name;
 	String icon;
+	
+	private int xBounty, yBounty;
+	private Tile bounty;
 
 	public Enemy /* number one */ (int x, int y, int whichEnemy) {
 		super(x, y, enemyIcons[whichEnemy]);
@@ -57,6 +60,12 @@ public class Enemy extends Character {
 		icon = enemyIcons[whichEnemy];
 		
 		setCurrentWeapon(new EnemyWeapon(whichEnemy));
+	}
+	
+	public void setBounty(int x, int y, Tile bountyTile) {
+		xBounty = x;
+		yBounty = y;
+		bounty = bountyTile;
 	}
 
 	public void move(int dx, int dy, Tile[][] map) {
@@ -398,10 +407,15 @@ public class Enemy extends Character {
 	 * 
 	 * @param damage How much damage to do to the monster.
 	 */
-	public void getHit(int damage) {
+	public void getHit(int damage, Tile[][] map, Character[][] entities) {
 		health -= damage;
 		if(health <= 0) {
 			die();
+			entities[x][y] = null;
+			
+			if(bounty != null) {
+				map[xBounty][yBounty] = bounty;
+			}
 
 			if(whichEnemy == WIZARD) {
 				//win

@@ -175,7 +175,7 @@ public class Character {
 		return character;
 	}
 
-	public void getHit(int damage) {
+	public void getHit(int damage, Tile[][] map, Character[][] entities) {
 		System.out.println("I took "+damage+" damage but I don't know how to handle it");
 	}
 	
