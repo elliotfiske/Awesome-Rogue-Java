@@ -74,4 +74,13 @@ public class MainCharacter extends Character {
 			}
 		}
 	}
+	
+	//Overrides the move() method (only really matters if we're debugging and want to walk through walls.)
+	public void move(int dx, int dy, Tile[][] map, Character[][] entities) {
+		if(InGameState.GODMODE_WALKTHRUWALLS) {
+			initPos(getX() + dx, getY() + dy);
+		} else {
+			super.move(dx, dy, map, entities);
+		}
+	}
 }

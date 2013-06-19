@@ -103,8 +103,7 @@ public class Enemy extends Character {
 
 			straightX += delta.x;
 			straightY += delta.y;
-
-			straightTiles.add(map[straightX][straightY]);
+			straightTiles.add(new Tile(map[straightX][straightY].type, 0, straightX, straightY));
 
 			if(map[straightX][straightY].blocker) {
 				map[straightX][straightY].illustrate(Color.red);
@@ -114,17 +113,25 @@ public class Enemy extends Character {
 		}
 
 		//DEAL WITH OBSTACLES HERE
-		/*
+		
 		for(int whichTile = 0; whichTile < straightTiles.size(); whichTile++) {
-			//
 			Tile t = straightTiles.get(whichTile);
 
 			//Go through until we run into sexy trouble (blocker)
 			if(t.blocker) {
 				//OH NO! Blocker found.  Send out "feelers" to go along right and left walls.
-				Point rightFeeler = new Point(straightTiles.get(whichTile - 1).x, straightTiles.get(whichTile - 1).y);
-				Point leftFeeler = new Point(rightFeeler.x, rightFeeler.y);
-
+				//Start feelers at the square on the straight-line path right BEFORE the wall.
+				Point rightFeeler = null;
+				Point leftFeeler = null;
+				if(whichTile == 0) {
+					//If the very first tile looked at was a blocker, use the enemy coordinates.
+					rightFeeler = new Point(x, y);
+					leftFeeler = new Point(x, y);
+				} else {
+					rightFeeler = new Point(straightTiles.get(whichTile - 1).x, straightTiles.get(whichTile - 1).y);
+					leftFeeler = new Point(rightFeeler.x, rightFeeler.y);
+				}
+				
 				//figure out which direction they start off in.
 				//Right:
 				System.out.println("t.x: " + t.x + ", t.y: " + t.y + " rightFeeler is: " + rightFeeler.x + ", " + rightFeeler.y);
@@ -134,7 +141,8 @@ public class Enemy extends Character {
 				lastWallLeft = getDirection(leftFeeler, new Point(t.x, t.y), false, map);
 
 				int numTiles = 0;
-				while(numTiles < 100) {
+				boolean backOnTrack = false;
+				while(numTiles < 100 || !backOnTrack) {
 					//follow right wall
 					lastWallRight = getDirection(rightFeeler, lastWallRight, true, map);
 
@@ -150,7 +158,7 @@ public class Enemy extends Character {
 					numTiles++;
 				}
 			}
-		}*/
+		}
 
 	}	
 
@@ -227,6 +235,8 @@ public class Enemy extends Character {
 		
 		diffX = feeler.x - lastWall.x;
 		diffY = feeler.y - lastWall.y;
+		
+		System.out.println("DiffX: " + diffX + ", DiffY: " + diffY);
 		
 		int result = getNumberedDirection(new Point(diffX, diffY));
 		

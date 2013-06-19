@@ -24,6 +24,10 @@ public class InGameState extends GameState {
 	
 	public static final int TILE_SIZE = 12;
 
+	//Enable to debug stuff
+	public static final boolean GODMODE_VISION = true;
+	public static final boolean GODMODE_WALKTHRUWALLS = true;
+	
 	/**
 	 * Describes the cell location of the upper lefthand corner of the area
 	 * we render.
@@ -184,7 +188,7 @@ public class InGameState extends GameState {
 		// Draw the tiles of the map.
 		for(int i = CAMERA_X; i < CAMERA_X + INGAME_WINDOW_WIDTH && i < map.length; i++) {
 			for(int j = CAMERA_Y; j < CAMERA_Y + INGAME_WINDOW_HEIGHT && j < map[0].length; j++) {
-				if(map[i][j].visible) {
+				if(map[i][j].visible || GODMODE_VISION) { //TODO: Switch back from god-mode vision
 
 					//Draw the tile image (its type should correspond to the index in tileImages[] that
 					//represents it)
@@ -375,6 +379,9 @@ public class InGameState extends GameState {
 			//Generate a sweet new Caves level.
 			map = new Tile[80][70];
 			levelGen.makeLevel(map, LevelGenerator.CAVE, 80, 70, 1);
+			
+			mainChar.initPos(8, 8);
+			
 			enemies = enemyList;
 		}
 		

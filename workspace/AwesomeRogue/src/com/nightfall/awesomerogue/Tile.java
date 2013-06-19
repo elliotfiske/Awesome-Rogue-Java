@@ -39,14 +39,10 @@ public class Tile {
 
 		this.type = type;
 	}
-
-	public Tile(int type, int id) {
-		this(type);
-		this.id = id;
-	}
 	
 	public Tile(int type, int id, int x, int y) {
-		this(type, id);
+		this(type);
+		this.id = id;
 		this.x = x;
 		this.y = y;
 	}

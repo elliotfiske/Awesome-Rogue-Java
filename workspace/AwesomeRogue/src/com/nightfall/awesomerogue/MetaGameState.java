@@ -84,7 +84,7 @@ public class MetaGameState extends GameState {
 		
 		map = LevelGenerator.makeMetaGame(META_MAP_WIDTH, META_MAP_HEIGHT);
 		map[0][0].visible = true;
-		map[0][0].type = 0;
+		map[0][0].type = 3; //TODO: change back to 0 if you want intro level
 		
 		map[META_MAP_WIDTH-1][META_MAP_HEIGHT-1].visible = true;
 		map[META_MAP_WIDTH-1][META_MAP_HEIGHT-1].type = 1;

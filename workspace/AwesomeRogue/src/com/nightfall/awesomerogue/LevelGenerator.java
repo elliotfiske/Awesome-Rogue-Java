@@ -15,7 +15,7 @@ public class LevelGenerator {
 	 */
 	private int difficulty;
 	
-	private static final int SEED = 20;
+	private static final int SEED = 37;//20;
 
 	//---------------------------CAVE GENERATION CONSTANTS--------------------------------//
 	/**
@@ -224,7 +224,7 @@ public class LevelGenerator {
 		for(int x = 0; x < width; x++) {
 			for(int y = 0; y < height; y++) {
 				if(numMap[x][y] == Tile.FLOOR) {
-					Tile tileForList = new Tile(Tile.FLOOR, tempMap[x][y]);
+					Tile tileForList = new Tile(Tile.FLOOR, tempMap[x][y], x, y);
 
 					//Check if this is the first Tile we've found with this ID.
 					//If it is, an error will pop up.
@@ -290,7 +290,7 @@ public class LevelGenerator {
 		//Plop down some enemies based on the difficulty.
 		if(difficulty == 1) {
 			Enemy bob = new Enemy(30, 40, Enemy.RAT);
-			InGameState.enemyList.add(bob);
+			//InGameState.enemyList.add(bob);
 		}
 		
 		if(difficulty == 2) {
