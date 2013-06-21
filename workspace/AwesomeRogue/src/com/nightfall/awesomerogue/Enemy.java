@@ -113,7 +113,7 @@ public class Enemy extends Character {
 		}
 
 		//DEAL WITH OBSTACLES HERE
-		
+		/*
 		for(int whichTile = 0; whichTile < straightTiles.size(); whichTile++) {
 			Tile t = straightTiles.get(whichTile);
 
@@ -134,7 +134,6 @@ public class Enemy extends Character {
 				
 				//figure out which direction they start off in.
 				//Right:
-				System.out.println("t.x: " + t.x + ", t.y: " + t.y + " rightFeeler is: " + rightFeeler.x + ", " + rightFeeler.y);
 				lastWallRight = getDirection(rightFeeler, new Point(t.x, t.y), true, map);
 
 				//Left:
@@ -144,6 +143,9 @@ public class Enemy extends Character {
 				boolean backOnTrack = false;
 				while(numTiles < 100 || !backOnTrack) {
 					//follow right wall
+					System.out.println("lastWallRight is: " + lastWallRight.x + ", " + lastWallRight.y + 
+						" rightFeeler is: " + rightFeeler.x + ", " + rightFeeler.y);
+				
 					lastWallRight = getDirection(rightFeeler, lastWallRight, true, map);
 
 					map[rightFeeler.x][rightFeeler.y].illustrate(Color.blue);
@@ -158,7 +160,7 @@ public class Enemy extends Character {
 					numTiles++;
 				}
 			}
-		}
+		}*/
 
 	}	
 
@@ -189,7 +191,7 @@ public class Enemy extends Character {
 		if(diffX == -1 && diffY == -1) { result = 7; }
 		
 		if(result == -1) {
-			throw new PANICEVERYTHINGISBROKENERROR();
+			throw new PANICEVERYTHINGISBROKENERROR("DiffX and DiffY are wrong! They're " + diffX + ", " + diffY);
 		}
 		
 		return result;
@@ -204,7 +206,7 @@ public class Enemy extends Character {
 	 * @param map The array of Tiles.
 	 * @return The last WALL the feeler touched. This is important to the wall-following algorithm.
 	 */
-	private Point getDirection(Point feeler, Point lastWall, boolean goingRight, Tile[][] map) {
+	public Point getDirection(Point feeler, Point lastWall, boolean goingRight, Tile[][] map) {
 		/*
 		 * The algorithm starts by looking at the direction between the feeler and its last-touched wall:
 		 *  _
@@ -236,7 +238,6 @@ public class Enemy extends Character {
 		diffX = feeler.x - lastWall.x;
 		diffY = feeler.y - lastWall.y;
 		
-		System.out.println("DiffX: " + diffX + ", DiffY: " + diffY);
 		
 		int result = getNumberedDirection(new Point(diffX, diffY));
 		
@@ -247,7 +248,10 @@ public class Enemy extends Character {
 			if(goingRight) {
 				result = (result + 1) % 8;
 			} else {
-				result = (result - 1) % 8;
+				result = (result - 1);
+				if(result < 0) {
+					result = 7;
+				}
 			}
 
 			diffX = getPointDirection(result).x;
@@ -255,28 +259,34 @@ public class Enemy extends Character {
 			
 			if(!map[feeler.x + diffX][feeler.y + diffY].blocker) {
 				//We did it!
-				//Move the feeler to the proper location:
-				feeler.x += diffX;
-				feeler.y += diffY;
-				
-				//Return as a result the last wall we've touched.
+				//Grab the result of this function: the last-touched wall.
 				int wallDirection = getNumberedDirection(new Point(diffX, diffY));
 				
 				//(it should be one cycle back).
 				if(goingRight) {
-					wallDirection = (wallDirection - 1) % 8;
+					wallDirection = (wallDirection - 1);
+					if(wallDirection < 0) {
+						wallDirection = 7;
+					}
 				} else {
 					wallDirection = (wallDirection + 1) % 8;
 				}
 				
-				return getPointDirection(wallDirection);
+				Point wallDiff = getPointDirection(wallDirection);
+				Point lastWallTouched = new Point(feeler.x + wallDiff.x, feeler.y + wallDiff.y);
+				
+				//Move the feeler to the proper location:
+				feeler.x += diffX;
+				feeler.y += diffY;
+				
+				return lastWallTouched;
 			}
 			
 			numTries++;
 		}
 		
 		//oops.
-		throw new PANICEVERYTHINGISBROKENERROR();
+		throw new PANICEVERYTHINGISBROKENERROR("We couldn't find the next Tile for the feeler to move to :(");
 	}
 
 	/**
@@ -315,6 +325,9 @@ public class Enemy extends Character {
 			break;
 		}
 		
+		if(diffX == 0 && diffY == 0) {
+			throw new PANICEVERYTHINGISBROKENERROR("Oh man.  You put in a direction number outside of 0-7 you dolt.  Entered value: " + numDirection);
+		}
 		return new Point(diffX, diffY);
 		
 	}

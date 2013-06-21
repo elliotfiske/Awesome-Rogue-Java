@@ -39,6 +39,7 @@ public class TestCasesAreFun {
 	 */
 
 	public static void main(String[] args) {
+		
 		//testEnemyStraightLine();
 		testEnemyWallFollow();
 //		generateGrids();
@@ -58,13 +59,22 @@ public class TestCasesAreFun {
 		//7 0 1
 		//6   2
 		//5 4 3
+		boolean pass = true;
+		
 		Enemy e = new Enemy(0, 0, 0);
+		Point feeler = new Point(4,4);
+		Point lastWall = e.getDirection(feeler, new Point(4,5), true, map);
+		pass &= assertEquals(new Point(3,4), lastWall);
+		pass &= assertEquals(new Point(3,3), feeler);
 		
-		//assertEquals(7, e.getIntialDirection(new Point(4, 4), new Point(3, 4), true, map));
-
-		//assertEquals(0, e.getIntialDirection(new Point(4, 4), new Point(3, 4), false, map));
+		lastWall = e.getDirection(feeler, lastWall, true, map);
+		pass &= assertEquals(new Point(2,4), feeler);
+		pass &= assertEquals(new Point(3,4), lastWall);
 		
-		//assertEquals(0, e.followTheWall(feelerX, feelerY, goingRight, leftFeelerDirection, map));
+		if(pass) {
+			System.out.println("hooray you did it whoo");
+		}
+		
 	}
 
 
