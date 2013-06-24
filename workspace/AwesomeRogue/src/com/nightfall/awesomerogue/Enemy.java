@@ -140,10 +140,8 @@ public class Enemy extends Character {
 				//Left:
 				lastWallLeft = getDirection(leftFeeler, new Point(t.x, t.y), false, map);
 
-				ArrayList<Point> rightFeelerList = new ArrayList<Point>();
-				ArrayList<Point> leftFeelerList = new ArrayList<Point>();
-				rightFeelerList.add(new Point(rightFeeler.x, rightFeeler.y));
-				leftFeelerList.add(new Point(leftFeeler.x, leftFeeler.y));
+				Point lastRightFeeler = new Point(rightFeeler.x, rightFeeler.y);
+				Point lastLeftFeeler = new Point(leftFeeler.x, leftFeeler.y);
 
 				map[rightFeeler.x][rightFeeler.y].illustrate(Color.blue);
 				map[leftFeeler.x][leftFeeler.y].illustrate(Color.cyan);
@@ -165,19 +163,29 @@ public class Enemy extends Character {
 					//So here, we store the right feeler and left feeler coordinates in an ArrayList.
 					//This is to solve the problem where the feeler would not realize it's backOnTrack
 					//if it diagonally intersected the straightTiles path.
-					rightFeelerList.add(new Point(rightFeeler.x, rightFeeler.y));
-					leftFeelerList.add(new Point(leftFeeler.x, leftFeeler.y));
+					lastRightFeeler = new Point(rightFeeler.x, rightFeeler.y);
+					lastLeftFeeler = new Point(leftFeeler.x, leftFeeler.y);
 					
 					//If we intersect with any straightTiles, we are officially backOnTrack :3
-					if(straightTiles.contains(map[rightFeeler.x][rightFeeler.y])) {
+					//(Also, make sure we didn't accidentally go backwards :P)
+					if(straightTiles.indexOf(map[rightFeeler.x][rightFeeler.y]) > whichTile &&
+							straightTiles.indexOf(map[rightFeeler.x][rightFeeler.y]) != -1) {
+						
 						map[rightFeeler.x][rightFeeler.y].illustrate(Color.green);
 						backOnTrack = true;
+						
 					}
 					
-					if(straightTiles.contains(map[leftFeeler.x][leftFeeler.y])) {
+					if(straightTiles.indexOf(map[leftFeeler.x][leftFeeler.y]) > whichTile &&
+							straightTiles.indexOf(map[leftFeeler.x][leftFeeler.y]) != -1) {
+						
 						map[leftFeeler.x][leftFeeler.y].illustrate(Color.green);
 						backOnTrack = true;
+						
 					}
+					
+					//See if the PREVIOUS rightFeeler and the CURRENT rightFeeler cross over the straight tiles path.
+					//straightTiles.
 					
 					
 					numTiles++;
