@@ -62,14 +62,37 @@ public class TestCasesAreFun {
 		boolean pass = true;
 		
 		Enemy e = new Enemy(0, 0, 0);
-		Point feeler = new Point(4,4);
-		Point lastWall = e.getDirection(feeler, new Point(4,5), true, map);
-		pass &= assertEquals(new Point(3,4), lastWall);
-		pass &= assertEquals(new Point(3,3), feeler);
+		
+		Point leftFeeler = new Point(3,1);
+		Point lastWall = new Point(3,0);
+		lastWall = e.getDirection(leftFeeler, lastWall, false, map);
+		pass &= assertEquals(new Point(2,1), leftFeeler);
+		pass &= assertEquals(new Point(2,0), lastWall);
+		
+		lastWall = e.getDirection(leftFeeler, lastWall, false, map);
+		pass &= assertEquals(new Point(1,1), leftFeeler);
+		pass &= assertEquals(new Point(1,0), lastWall);
+		
+		lastWall = e.getDirection(leftFeeler, lastWall, false, map);
+		pass &= assertEquals(new Point(1,2), leftFeeler);
+		pass &= assertEquals(new Point(0,2), lastWall);
+		
+		/*Point feeler = new Point(4, 4);
+		Point lastWall = e.getDirection(feeler, new Point(4, 5), true, map);
+		pass &= assertEquals(new Point(3, 4), lastWall);
+		pass &= assertEquals(new Point(3, 3), feeler);
 		
 		lastWall = e.getDirection(feeler, lastWall, true, map);
-		pass &= assertEquals(new Point(2,4), feeler);
-		pass &= assertEquals(new Point(3,4), lastWall);
+		pass &= assertEquals(new Point(2, 4), feeler);
+		pass &= assertEquals(new Point(3, 4), lastWall);
+		
+		lastWall = e.getDirection(feeler, lastWall, true, map);
+		pass &= assertEquals(new Point(1, 4), feeler);
+		pass &= assertEquals(new Point(1, 5), lastWall);
+		
+		lastWall = e.getDirection(feeler, lastWall, true, map);
+		pass &= assertEquals(new Point(1, 3), feeler);
+		pass &= assertEquals(new Point(0, 3), lastWall);*/
 		
 		if(pass) {
 			System.out.println("hooray you did it whoo");

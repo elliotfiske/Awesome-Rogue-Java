@@ -26,7 +26,7 @@ public class InGameState extends GameState {
 
 	//Enable to debug stuff
 	public static final boolean GODMODE_VISION = true;
-	public static final boolean GODMODE_WALKTHRUWALLS = true;
+	public static final boolean GODMODE_WALKTHRUWALLS = false;
 	
 	/**
 	 * Describes the cell location of the upper lefthand corner of the area
@@ -532,5 +532,34 @@ public class InGameState extends GameState {
 
 	public void addCharacter(Character character) {
 		enemies.add(character);
+	}
+	
+	/**
+	 * Helper method to grab a specified Tile from the map, and handle outta bounds problems.
+	 * @param x X coord of the tile to grab.
+	 * @param y Y coord of the tile to grab.
+	 */
+	public Tile tileAt(int x, int y) {
+		if(x < 0) {
+			System.out.println("X is negative! (" + x + ") Adjusting to 0.");
+			x = 0;
+		}
+		
+		if(x >= map.length) {
+			System.out.println("X is too big! (" + x + ") Adjusting to " + map.length);
+			x = map.length;
+		}
+		
+		if(y < 0) {
+			System.out.println("Y is negative! (" + y + ") Adjusting to 0.");
+			y = 0;
+		}
+		
+		if(y >= map[0].length) {
+			System.out.println("Y is too big! (" + y + ") Adjusting to " + map[0].length);
+			y = map.length;
+		}
+		
+		return map[x][y];
 	}
 }

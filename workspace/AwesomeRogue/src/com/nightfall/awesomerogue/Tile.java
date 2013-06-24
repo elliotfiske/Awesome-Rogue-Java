@@ -79,4 +79,19 @@ public class Tile {
 		this.color = color;
 		illustrated = true;
 	}
+	
+	public boolean equals(Object o) {
+		if(o == null) {
+			return false;
+		}
+		
+		if(o instanceof Tile) {
+			Tile t = (Tile) o;
+			if(t.x == x && t.y == y) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
 }

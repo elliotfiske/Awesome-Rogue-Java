@@ -103,7 +103,7 @@ public class Enemy extends Character {
 
 			straightX += delta.x;
 			straightY += delta.y;
-			straightTiles.add(new Tile(map[straightX][straightY].type, 0, straightX, straightY));
+			straightTiles.add(new Tile( map[straightX][straightY].type , 0, straightX, straightY));
 
 			if(map[straightX][straightY].blocker) {
 				map[straightX][straightY].illustrate(Color.red);
@@ -113,12 +113,13 @@ public class Enemy extends Character {
 		}
 
 		//DEAL WITH OBSTACLES HERE
-		/*
+		
 		for(int whichTile = 0; whichTile < straightTiles.size(); whichTile++) {
 			Tile t = straightTiles.get(whichTile);
 
 			//Go through until we run into sexy trouble (blocker)
-			if(t.blocker) {
+			//Also make sure that the tile PREVIOUS to this one is NOT a blocker (so we don't do two blockers in a row).
+			if(t.blocker && !straightTiles.get(whichTile - 1).blocker) {
 				//OH NO! Blocker found.  Send out "feelers" to go along right and left walls.
 				//Start feelers at the square on the straight-line path right BEFORE the wall.
 				Point rightFeeler = null;
@@ -132,20 +133,26 @@ public class Enemy extends Character {
 					leftFeeler = new Point(rightFeeler.x, rightFeeler.y);
 				}
 				
-				//figure out which direction they start off in.
+				//Get started on feelin' things out.
 				//Right:
 				lastWallRight = getDirection(rightFeeler, new Point(t.x, t.y), true, map);
 
 				//Left:
 				lastWallLeft = getDirection(leftFeeler, new Point(t.x, t.y), false, map);
 
+				ArrayList<Point> rightFeelerList = new ArrayList<Point>();
+				ArrayList<Point> leftFeelerList = new ArrayList<Point>();
+				rightFeelerList.add(new Point(rightFeeler.x, rightFeeler.y));
+				leftFeelerList.add(new Point(leftFeeler.x, leftFeeler.y));
+
+				map[rightFeeler.x][rightFeeler.y].illustrate(Color.blue);
+				map[leftFeeler.x][leftFeeler.y].illustrate(Color.cyan);
+				
 				int numTiles = 0;
 				boolean backOnTrack = false;
-				while(numTiles < 100 || !backOnTrack) {
+				while(numTiles < 100 && !backOnTrack) {
 					//follow right wall
-					System.out.println("lastWallRight is: " + lastWallRight.x + ", " + lastWallRight.y + 
-						" rightFeeler is: " + rightFeeler.x + ", " + rightFeeler.y);
-				
+					
 					lastWallRight = getDirection(rightFeeler, lastWallRight, true, map);
 
 					map[rightFeeler.x][rightFeeler.y].illustrate(Color.blue);
@@ -155,12 +162,28 @@ public class Enemy extends Character {
 										
 					map[leftFeeler.x][leftFeeler.y].illustrate(Color.cyan);
 					
-					//TODO: lol check if we're "Backontrack" 
+					//So here, we store the right feeler and left feeler coordinates in an ArrayList.
+					//This is to solve the problem where the feeler would not realize it's backOnTrack
+					//if it diagonally intersected the straightTiles path.
+					rightFeelerList.add(new Point(rightFeeler.x, rightFeeler.y));
+					leftFeelerList.add(new Point(leftFeeler.x, leftFeeler.y));
+					
+					//If we intersect with any straightTiles, we are officially backOnTrack :3
+					if(straightTiles.contains(map[rightFeeler.x][rightFeeler.y])) {
+						map[rightFeeler.x][rightFeeler.y].illustrate(Color.green);
+						backOnTrack = true;
+					}
+					
+					if(straightTiles.contains(map[leftFeeler.x][leftFeeler.y])) {
+						map[leftFeeler.x][leftFeeler.y].illustrate(Color.green);
+						backOnTrack = true;
+					}
+					
 					
 					numTiles++;
 				}
 			}
-		}*/
+		}
 
 	}	
 
@@ -235,9 +258,8 @@ public class Enemy extends Character {
 		 */
 		int diffX = 0, diffY = 0;
 		
-		diffX = feeler.x - lastWall.x;
-		diffY = feeler.y - lastWall.y;
-		
+		diffX = lastWall.x - feeler.x;
+		diffY = lastWall.y - feeler.y;
 		
 		int result = getNumberedDirection(new Point(diffX, diffY));
 		
@@ -256,6 +278,12 @@ public class Enemy extends Character {
 
 			diffX = getPointDirection(result).x;
 			diffY = getPointDirection(result).y;
+			
+			//Outta bounds check!
+			if(feeler.x + diffX < 0 || feeler.x + diffX >= map.length ||
+					feeler.y + diffY < 0 || feeler.y + diffY >= map[0].length) {
+				continue; //pretend it's a blocker.
+			}
 			
 			if(!map[feeler.x + diffX][feeler.y + diffY].blocker) {
 				//We did it!
