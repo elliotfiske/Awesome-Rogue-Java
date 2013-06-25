@@ -114,7 +114,7 @@ public class Enemy extends Character {
 
 		//DEAL WITH OBSTACLES HERE
 		
-		for(int whichTile = 0; whichTile < straightTiles.size(); whichTile++) {
+		for(int whichTile = 1; whichTile < straightTiles.size(); whichTile++) {
 			Tile t = straightTiles.get(whichTile);
 
 			//Go through until we run into sexy trouble (blocker)
@@ -148,7 +148,7 @@ public class Enemy extends Character {
 				
 				int numTiles = 0;
 				boolean backOnTrack = false;
-				while(numTiles < 100 && !backOnTrack) {
+				while(numTiles < 10 && !backOnTrack) {
 					//follow right wall
 					
 					lastWallRight = getDirection(rightFeeler, lastWallRight, true, map);
@@ -160,33 +160,16 @@ public class Enemy extends Character {
 										
 					map[leftFeeler.x][leftFeeler.y].illustrate(Color.cyan);
 					
-					//So here, we store the right feeler and left feeler coordinates in an ArrayList.
-					//This is to solve the problem where the feeler would not realize it's backOnTrack
-					//if it diagonally intersected the straightTiles path.
+					//See if the PREVIOUS rightFeeler and the CURRENT rightFeeler cross over the straight tiles path.
+					//Point intersection = findIntersection(straightTiles, rightFeeler, lastRightFeeler, whichTile, map);
+					//if(!intersection.equals(new Point(-1, -1))) {
+						backOnTrack = true;
+					//}
+					
+					//Store the previous feeler coordinates to make sure we don't accidentally let something slip
+					//diagonally through.
 					lastRightFeeler = new Point(rightFeeler.x, rightFeeler.y);
 					lastLeftFeeler = new Point(leftFeeler.x, leftFeeler.y);
-					
-					//If we intersect with any straightTiles, we are officially backOnTrack :3
-					//(Also, make sure we didn't accidentally go backwards :P)
-					if(straightTiles.indexOf(map[rightFeeler.x][rightFeeler.y]) > whichTile &&
-							straightTiles.indexOf(map[rightFeeler.x][rightFeeler.y]) != -1) {
-						
-						map[rightFeeler.x][rightFeeler.y].illustrate(Color.green);
-						backOnTrack = true;
-						
-					}
-					
-					if(straightTiles.indexOf(map[leftFeeler.x][leftFeeler.y]) > whichTile &&
-							straightTiles.indexOf(map[leftFeeler.x][leftFeeler.y]) != -1) {
-						
-						map[leftFeeler.x][leftFeeler.y].illustrate(Color.green);
-						backOnTrack = true;
-						
-					}
-					
-					//See if the PREVIOUS rightFeeler and the CURRENT rightFeeler cross over the straight tiles path.
-					Point intersection = findIntersection(straightTiles, rightFeeler, lastRightFeeler, whichTile);
-					
 					
 					numTiles++;
 				}
@@ -195,19 +178,49 @@ public class Enemy extends Character {
 	}	
 	
 	/**
-	 * This method looks for an intersection between the straightTiles path and the 
-	 * @param straightTiles
-	 * @param rightFeeler
-	 * @param lastRightFeeler
-	 * @param whichTile
-	 * @return
+	 * This method looks for an intersection between the straightTiles path and the feeler path.
+	 * @param straightTiles The list of tiles that lead straight to the player.
+	 * @param rightFeeler The "feeler" that was sent out along the right wall.
+	 * @param lastRightFeeler The "feeler" that was sent out along the left wall.
+	 * @param whichTile The spot in the straightTiles ArrayList that we know will move us forward.
+	 * @param map A handle to the map.
+	 * @return The Point they intersect, or (-1, -1) if they don't.
 	 */
 	public Point findIntersection(ArrayList<Tile> straightTiles,
-			Point feeler, Point lastFeeler, int whichTile) {
+			Point feeler, Point lastFeeler, int whichTile, Tile[][] map) {
 		
-		return null;
+		//3 points to check:
+		// xp
+		// fx
+		//
+		//"f", and both "x"s.
+		
+		//check the "f"
+		if(straightTiles.indexOf(map[feeler.x][feeler.y]) > whichTile &&
+				straightTiles.indexOf(map[feeler.x][feeler.y]) != -1) {
+			map[feeler.x][feeler.y].illustrate(Color.green);
+			return new Point(feeler.x, feeler.y);
+		}
+		
+		//check one "x"
+		if(straightTiles.indexOf(map[feeler.x][lastFeeler.y]) > whichTile &&
+				straightTiles.indexOf(map[feeler.x][lastFeeler.y]) != -1) {
+			map[feeler.x][lastFeeler.y].illustrate(Color.green);
+			//still return the feeler position b/c we know it's on a floor tile.
+			return new Point(feeler.x, feeler.y);
+		}
+		
+		//check other "x"
+		if(straightTiles.indexOf(map[lastFeeler.x][feeler.y]) > whichTile &&
+				straightTiles.indexOf(map[lastFeeler.x][lastFeeler.y]) != -1) {
+			map[lastFeeler.x][feeler.y].illustrate(Color.green);
+			//still return the feeler position b/c we know it's on a floor tile.
+			return new Point(feeler.x, feeler.y);
+		}
+		
+		return new Point(-1, -1);
 	}
-
+	
 	/**
 	 * Converts from point with directional components --> one number representin direction.
 	 * 

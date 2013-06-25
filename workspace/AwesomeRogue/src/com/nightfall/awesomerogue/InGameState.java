@@ -208,7 +208,7 @@ public class InGameState extends GameState {
 				} else if(map[i][j].seen) {
 					//The tile is in our memory.  Draw it, but darkened.
 
-					//TODO: actually darken the tile.  Dunno how to do it right now.
+					//TODO: actually darken the tile.  Dunno how to do it right now... your MOM is dead code.
 					g2.drawImage(tileImages[ map[i][j].type*2+1 ], (i-CAMERA_X)*TILE_SIZE,
 							(j-CAMERA_Y)*TILE_SIZE, null);
 				}
@@ -378,7 +378,7 @@ public class InGameState extends GameState {
 		else if(levelNum == 3) {
 			//Generate a sweet new Caves level.
 			map = new Tile[80][70];
-			levelGen.makeLevel(map, LevelGenerator.CAVE, 80, 70, 1);
+			levelGen.makeLevel(map, LevelGenerator.CAVE, 80, 70, 2);
 			
 			mainChar.initPos(8, 8);
 			
