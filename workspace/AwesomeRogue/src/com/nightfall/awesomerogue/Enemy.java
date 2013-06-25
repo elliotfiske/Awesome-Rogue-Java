@@ -185,15 +185,28 @@ public class Enemy extends Character {
 					}
 					
 					//See if the PREVIOUS rightFeeler and the CURRENT rightFeeler cross over the straight tiles path.
-					//straightTiles.
+					Point intersection = findIntersection(straightTiles, rightFeeler, lastRightFeeler, whichTile);
 					
 					
 					numTiles++;
 				}
 			}
 		}
-
 	}	
+	
+	/**
+	 * This method looks for an intersection between the straightTiles path and the 
+	 * @param straightTiles
+	 * @param rightFeeler
+	 * @param lastRightFeeler
+	 * @param whichTile
+	 * @return
+	 */
+	public Point findIntersection(ArrayList<Tile> straightTiles,
+			Point feeler, Point lastFeeler, int whichTile) {
+		
+		return null;
+	}
 
 	/**
 	 * Converts from point with directional components --> one number representin direction.
