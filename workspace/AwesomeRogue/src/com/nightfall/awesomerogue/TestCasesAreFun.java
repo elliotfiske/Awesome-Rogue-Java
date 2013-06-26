@@ -13,11 +13,11 @@ public class TestCasesAreFun {
 	static Tile w = new Tile(Tile.WALL);
 	static Tile[][] map = 
 		{{w,w,w,w,w,w},
-		 {w,f,f,f,f,w},
-		 {w,f,w,f,f,w},
-		 {w,f,w,f,w,w},
-		 {w,f,w,f,f,w},
-		 {w,w,w,w,w,w}};
+		{w,f,f,f,f,w},
+		{w,f,w,f,f,w},
+		{w,f,w,f,w,w},
+		{w,f,w,f,f,w},
+		{w,w,w,w,w,w}};
 
 	/*
 	 * 
@@ -39,19 +39,19 @@ public class TestCasesAreFun {
 	 */
 
 	public static void main(String[] args) {
-		
+
 		//testEnemyStraightLine();
 		testEnemyWallFollow();
-//		generateGrids();
+		//		generateGrids();
 	}
 
 	//TEST IF THE ENEMIES CAN WALK IN A STRAIGHT LINE K
 	public static void testEnemyStraightLine() {
 		Enemy e = new Enemy(0, 0, 0);
-
-		assertEquals(new Point(-1, -1), e.walkStraight(25, 25, 20, 20));
-
-		assertEquals(new Point(-1, 1), e.walkStraight(25, 15, 20, 20));
+		e.walkStraight(new Point(25, 25), new Point(20, 20));
+		//assertEquals(new Point(-1, -1),);
+		e.walkStraight(new Point(25, 15), new Point(20, 20));
+		//assertEquals(new Point(-1, 1), );
 	}
 
 	//TEST IF ENEMIES CAN FOLLOW A WALL LIKE A CLEVER LITTLE ENEMY
@@ -60,44 +60,44 @@ public class TestCasesAreFun {
 		//6   2
 		//5 4 3
 		boolean pass = true;
-		
+
 		Enemy e = new Enemy(0, 0, 0);
-		
+
 		Point leftFeeler = new Point(3,1);
 		Point lastWall = new Point(3,0);
 		lastWall = e.getDirection(leftFeeler, lastWall, false, map);
 		pass &= assertEquals(new Point(2,1), leftFeeler);
 		pass &= assertEquals(new Point(2,0), lastWall);
-		
+
 		lastWall = e.getDirection(leftFeeler, lastWall, false, map);
 		pass &= assertEquals(new Point(1,1), leftFeeler);
 		pass &= assertEquals(new Point(1,0), lastWall);
-		
+
 		lastWall = e.getDirection(leftFeeler, lastWall, false, map);
 		pass &= assertEquals(new Point(1,2), leftFeeler);
 		pass &= assertEquals(new Point(0,2), lastWall);
-		
+
 		/*Point feeler = new Point(4, 4);
 		Point lastWall = e.getDirection(feeler, new Point(4, 5), true, map);
 		pass &= assertEquals(new Point(3, 4), lastWall);
 		pass &= assertEquals(new Point(3, 3), feeler);
-		
+
 		lastWall = e.getDirection(feeler, lastWall, true, map);
 		pass &= assertEquals(new Point(2, 4), feeler);
 		pass &= assertEquals(new Point(3, 4), lastWall);
-		
+
 		lastWall = e.getDirection(feeler, lastWall, true, map);
 		pass &= assertEquals(new Point(1, 4), feeler);
 		pass &= assertEquals(new Point(1, 5), lastWall);
-		
+
 		lastWall = e.getDirection(feeler, lastWall, true, map);
 		pass &= assertEquals(new Point(1, 3), feeler);
 		pass &= assertEquals(new Point(0, 3), lastWall);*/
-		
+
 		if(pass) {
 			System.out.println("hooray you did it whoo");
 		}
-		
+
 	}
 
 
@@ -124,13 +124,13 @@ public class TestCasesAreFun {
 
 	public static void generateGrids() {
 		//lol
-//		for(int x = 0; x < 6; x++) {
-//			for(int y = 0; y < 6; y++) {
-//				System.out.print("("+y+","+x+")  ");
-//			}
-//			System.out.println();
-//		}
-		
+		//		for(int x = 0; x < 6; x++) {
+		//			for(int y = 0; y < 6; y++) {
+		//				System.out.print("("+y+","+x+")  ");
+		//			}
+		//			System.out.println();
+		//		}
+
 		printMap(0,0);
 		printMap(1,0);
 		printMap(2,0);
@@ -166,7 +166,7 @@ public class TestCasesAreFun {
 		printMap(4,4);
 		printMap(5,4);
 	}
-	
+
 	public static void printMap(int x, int y) {
 		if(map[x][y].type == Tile.FLOOR) {
 			System.out.print("F ");

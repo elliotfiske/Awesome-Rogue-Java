@@ -94,26 +94,21 @@ public class Enemy extends Character {
 		//Try to path straight from the monster to the hero.
 
 		//Coordinates of the line that walks to the player.
-		int straightX = x;
-		int straightY = y;
+		Point straightPoint = new Point(x, y);
 
 		/** List of tiles straight from the monster to the player. */
 		ArrayList<Tile> straightTiles = new ArrayList<Tile>();
 
-		while(!(straightX == targetX && straightY == targetY)) {
+		while(!(straightPoint.x == targetX && straightPoint.y == targetY)) {
 			//Calculate which direction it would be smart to go in order to walk to the player.
-			Point delta = walkStraight(straightX, straightY, targetX, targetY);
+			walkStraight(straightPoint, new Point(targetX, targetY));
+			
+			straightTiles.add(new Tile( map[straightPoint.x][straightPoint.y].type , 0, straightPoint.x, straightPoint.y));
 
-			//System.out.println("sx: " + straightX + ", sy: " + straightY + ", tx: " + targetX + ", ty: " + targetY);
-
-			straightX += delta.x;
-			straightY += delta.y;
-			straightTiles.add(new Tile( map[straightX][straightY].type , 0, straightX, straightY));
-
-			if(map[straightX][straightY].blocker) {
-				map[straightX][straightY].illustrate(Color.red);
+			if(map[straightPoint.x][straightPoint.y].blocker) {
+				//map[straightPoint.x][straightPoint.y].illustrate(Color.red); TODO
 			} else {
-				map[straightX][straightY].illustrate(Color.yellow);
+				//map[straightPoint.x][straightPoint.y].illustrate(Color.yellow); TODO
 			}
 		}
 
@@ -123,12 +118,20 @@ public class Enemy extends Character {
 		 * and only really cares that there does exist a path to you at the end. */
 		ArrayList<Point> firstCorrectPath = null;
 
-		for(int whichTile = 1; whichTile < straightTiles.size(); whichTile++) {
+		for(int whichTile = 0; whichTile < straightTiles.size(); whichTile++) {
 			Tile t = straightTiles.get(whichTile);
-
+			Tile prevTile = null;
+			
+			//Ran into some nasty array index out of bounds exceptions don'cha know.
+			if(whichTile == 0) {
+				prevTile = map[x][y];
+			} else {
+				prevTile = straightTiles.get(whichTile - 1);
+			}
+			
 			//Go through until we run into sexy trouble (blocker)
 			//Also make sure that the tile PREVIOUS to this one is NOT a blocker (so we don't do two blockers in a row).
-			if(t.blocker && !straightTiles.get(whichTile - 1).blocker) {
+			if(t.blocker && !prevTile.blocker) {
 				//OH NO! Blocker found.  Send out "feelers" to go along right and left walls.
 				//Start feelers at the square on the straight-line path right BEFORE the wall.
 				Point rightFeeler = null;
@@ -161,8 +164,8 @@ public class Enemy extends Character {
 				leftPath.add(new Point(leftFeeler.x, leftFeeler.y));
 				rightPath.add(new Point(rightFeeler.x, rightFeeler.y));
 
-				map[rightFeeler.x][rightFeeler.y].illustrate(Color.blue);
-				map[leftFeeler.x][leftFeeler.y].illustrate(Color.cyan);
+//				map[rightFeeler.x][rightFeeler.y].illustrate(Color.blue); //TODO
+//				map[leftFeeler.x][leftFeeler.y].illustrate(Color.cyan);
 
 				int numTiles = 0;
 				while(numTiles < 100) {
@@ -170,12 +173,12 @@ public class Enemy extends Character {
 
 					lastWallRight = getDirection(rightFeeler, lastWallRight, true, map);
 
-					map[rightFeeler.x][rightFeeler.y].illustrate(Color.blue);
+					//map[rightFeeler.x][rightFeeler.y].illustrate(Color.blue); TODO
 
 					//follow left wall
 					lastWallLeft = getDirection(leftFeeler, lastWallLeft, false, map);
 
-					map[leftFeeler.x][leftFeeler.y].illustrate(Color.cyan);
+					//map[leftFeeler.x][leftFeeler.y].illustrate(Color.cyan);
 
 					leftPath.add(new Point(leftFeeler.x, leftFeeler.y));
 					rightPath.add(new Point(rightFeeler.x, rightFeeler.y));
@@ -209,14 +212,56 @@ public class Enemy extends Character {
 
 		//The LAST AND FINAL thing this algorithm does is look for the best way to follow the twisty path we've just
 		//laid out for the enemy.
+		int proposedDX = 0;
+		int proposedDY = 0;
 		if(firstCorrectPath != null) {
-			for(Point p : firstCorrectPath) {
-				map[p.x][p.y].illustrate(Color.pink);
+			
+			boolean weDidIt = false;
+			for(int i = firstCorrectPath.size() - 1; i > 0; i--) {
+				System.out.println("i: " + i + " size: " + firstCorrectPath.size());
+				Point pointToCheck = firstCorrectPath.get(i);
+				map[pointToCheck.x][pointToCheck.y].illustrate(Color.pink);
+				//If there's a straight, unblocked path to the pink tile we've just found our
+				//route to the player.
+				Point finalPath = new Point(x, y);
+				
+				/** The step we WOULD take to follow this new path is: */
+				Point firstStep = new Point(finalPath.x, finalPath.y);
+				walkStraight(firstStep, new Point(targetX, targetY));
+				
+				//optimism!
+				weDidIt = true;
+				while(finalPath.x != pointToCheck.x && finalPath.y != pointToCheck.y) {
+					walkStraight(finalPath, pointToCheck);
+					map[finalPath.x][finalPath.y].illustrate(Color.black);
+					if(map[finalPath.x][finalPath.y].blocker) {
+						//Outta luck.  Try the next one!
+						weDidIt = false;
+						break;
+					}
+				}
+				
+				//straight path found! rejoice!
+				if(weDidIt) {
+					System.out.println("did it lol");
+					proposedDX = firstStep.x;
+					proposedDY = firstStep.y;
+					map[firstStep.x + x][firstStep.y + y].illustrate(Color.ORANGE);
+					break;
+				}
+			}
+			
+			//Don't worry.  Just follow the feelers from before.
+			if(!weDidIt) {
+				
 			}
 		} else {
 			//There must have been no obstacles.  Follow the straight path.
-			move(straightTiles.get(0).x - x, straightTiles.get(0).y - y, map);
+			proposedDX = straightTiles.get(0).x - x;
+			proposedDY = straightTiles.get(0).y - y;
 		}
+		
+		
 	}	
 
 	/**
@@ -449,31 +494,37 @@ public class Enemy extends Character {
 	 * @return Point with x from -1 --> 1 saying you should move that far in the x direction, 
 	 * 		   and y from -1 --> 1 saying you should move that far in the y direction
 	 */
-	public Point walkStraight(int x, int y, int targetX, int targetY) {
+	public void walkStraight(Point straightPoint, Point targetPoint) {
 		Point result = new Point(-100,-100);
 
+		int x = straightPoint.x;
+		int y = straightPoint.y;
+		
+		int targetX = targetPoint.x;
+		int targetY = targetPoint.y;
+		
 		int diffX = targetX - x;
 		int diffY = targetY - y;
 
 		//Figure out the slope to the target
 		//First, prevent /0 error:
 		if(diffX == 0 && diffY < 0) {
-			result.x = 0;
-			result.y = -1;
-			return result;
+			straightPoint.x +=  0;
+			straightPoint.y +=  -1;
+			return;
 		}
 
 		if(diffX == 0 && diffY > 0) {
-			result.x = 0;
-			result.y = 1;
-			return result;
+			straightPoint.x +=  0;
+			straightPoint.y +=  1;
+			return;
 		}
 
 		//Make sure it handles diffy = 0 correctly
 		if(diffY == 0) {
-			result.x = (int) Math.signum((float) diffX);
-			result.y = 0;
-			return result;
+			straightPoint.x += (int) Math.signum((float) diffX);
+			straightPoint.y +=  0;
+			return;
 		}
 
 		double slope = (double) diffY / diffX;
@@ -521,7 +572,8 @@ public class Enemy extends Character {
 			result.y = 1 * (int) Math.signum((float) diffY);
 		}
 
-		return result;
+		straightPoint.x += result.x;
+		straightPoint.y += result.y;
 	}
 
 	/**
