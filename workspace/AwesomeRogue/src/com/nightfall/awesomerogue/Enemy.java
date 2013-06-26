@@ -20,7 +20,7 @@ public class Enemy extends Character {
 	private int x, y, whichEnemy, health = 0;
 	String name;
 	String icon;
-	
+
 	private int xBounty, yBounty;
 	private Tile bounty;
 
@@ -60,10 +60,10 @@ public class Enemy extends Character {
 		}
 
 		icon = enemyIcons[whichEnemy];
-		
+
 		setCurrentWeapon(new EnemyWeapon(whichEnemy));
 	}
-	
+
 	public void setBounty(int x, int y, Tile bountyTile) {
 		xBounty = x;
 		yBounty = y;
@@ -76,7 +76,7 @@ public class Enemy extends Character {
 
 		//sanity check here.
 	}
-	
+
 	public int getX() { return x; }
 	public int getY() { return y; }
 
@@ -85,6 +85,11 @@ public class Enemy extends Character {
 	}
 
 	//Fuzzy pathfinding = fun times for all!
+	/**
+	 * @param targetX
+	 * @param targetY
+	 * @param map
+	 */
 	public void pathToHeroAndMove(int targetX, int targetY, Tile[][] map) {
 		//Try to path straight from the monster to the hero.
 
@@ -113,7 +118,11 @@ public class Enemy extends Character {
 		}
 
 		//DEAL WITH OBSTACLES HERE
-		
+
+		/** Save the FIRST list of tiles we get.  This is because the enemy is looking to address the FIRST obstacle in his way,
+		 * and only really cares that there does exist a path to you at the end. */
+		ArrayList<Point> firstCorrectPath = null;
+
 		for(int whichTile = 1; whichTile < straightTiles.size(); whichTile++) {
 			Tile t = straightTiles.get(whichTile);
 
@@ -124,15 +133,21 @@ public class Enemy extends Character {
 				//Start feelers at the square on the straight-line path right BEFORE the wall.
 				Point rightFeeler = null;
 				Point leftFeeler = null;
+				ArrayList<Point> leftPath = new ArrayList<Point>();
+				ArrayList<Point> rightPath = new ArrayList<Point>();
 				if(whichTile == 0) {
 					//If the very first tile looked at was a blocker, use the enemy coordinates.
 					rightFeeler = new Point(x, y);
 					leftFeeler = new Point(x, y);
+					leftPath.add(new Point(leftFeeler.x, leftFeeler.y));
+					rightPath.add(new Point(rightFeeler.x, rightFeeler.y));
 				} else {
 					rightFeeler = new Point(straightTiles.get(whichTile - 1).x, straightTiles.get(whichTile - 1).y);
 					leftFeeler = new Point(rightFeeler.x, rightFeeler.y);
+					leftPath.add(new Point(leftFeeler.x, leftFeeler.y));
+					rightPath.add(new Point(rightFeeler.x, rightFeeler.y));
 				}
-				
+
 				//Get started on feelin' things out.
 				//Right:
 				lastWallRight = getDirection(rightFeeler, new Point(t.x, t.y), true, map);
@@ -143,40 +158,67 @@ public class Enemy extends Character {
 				Point lastRightFeeler = new Point(rightFeeler.x, rightFeeler.y);
 				Point lastLeftFeeler = new Point(leftFeeler.x, leftFeeler.y);
 
+				leftPath.add(new Point(leftFeeler.x, leftFeeler.y));
+				rightPath.add(new Point(rightFeeler.x, rightFeeler.y));
+
 				map[rightFeeler.x][rightFeeler.y].illustrate(Color.blue);
 				map[leftFeeler.x][leftFeeler.y].illustrate(Color.cyan);
-				
+
 				int numTiles = 0;
-				boolean backOnTrack = false;
-				while(numTiles < 10 && !backOnTrack) {
+				while(numTiles < 100) {
 					//follow right wall
-					
+
 					lastWallRight = getDirection(rightFeeler, lastWallRight, true, map);
 
 					map[rightFeeler.x][rightFeeler.y].illustrate(Color.blue);
-					
+
 					//follow left wall
 					lastWallLeft = getDirection(leftFeeler, lastWallLeft, false, map);
-										
+
 					map[leftFeeler.x][leftFeeler.y].illustrate(Color.cyan);
-					
-					//See if the PREVIOUS rightFeeler and the CURRENT rightFeeler cross over the straight tiles path.
-					//Point intersection = findIntersection(straightTiles, rightFeeler, lastRightFeeler, whichTile, map);
-					//if(!intersection.equals(new Point(-1, -1))) {
-						backOnTrack = true;
-					//}
-					
+
+					leftPath.add(new Point(leftFeeler.x, leftFeeler.y));
+					rightPath.add(new Point(rightFeeler.x, rightFeeler.y));
+
+					//See if the PREVIOUS feeler and the CURRENT feeler cross over the straight tiles path.
+					Point intersection = findIntersection(straightTiles, rightFeeler, lastRightFeeler, whichTile, map);
+					if(!intersection.equals(new Point(-1, -1))) {
+						if(firstCorrectPath == null) {
+							firstCorrectPath = rightPath;
+						}
+						break;
+					}
+
+					intersection = findIntersection(straightTiles, leftFeeler, lastLeftFeeler, whichTile, map);
+					if(!intersection.equals(new Point(-1, -1))) {
+						if(firstCorrectPath == null) {
+							firstCorrectPath = leftPath;
+						}
+						break;
+					}
+
 					//Store the previous feeler coordinates to make sure we don't accidentally let something slip
 					//diagonally through.
 					lastRightFeeler = new Point(rightFeeler.x, rightFeeler.y);
 					lastLeftFeeler = new Point(leftFeeler.x, leftFeeler.y);
-					
+
 					numTiles++;
 				}
 			}
 		}
+
+		//The LAST AND FINAL thing this algorithm does is look for the best way to follow the twisty path we've just
+		//laid out for the enemy.
+		if(firstCorrectPath != null) {
+			for(Point p : firstCorrectPath) {
+				map[p.x][p.y].illustrate(Color.pink);
+			}
+		} else {
+			//There must have been no obstacles.  Follow the straight path.
+			move(straightTiles.get(0).x - x, straightTiles.get(0).y - y, map);
+		}
 	}	
-	
+
 	/**
 	 * This method looks for an intersection between the straightTiles path and the feeler path.
 	 * @param straightTiles The list of tiles that lead straight to the player.
@@ -188,20 +230,20 @@ public class Enemy extends Character {
 	 */
 	public Point findIntersection(ArrayList<Tile> straightTiles,
 			Point feeler, Point lastFeeler, int whichTile, Tile[][] map) {
-		
+
 		//3 points to check:
 		// xp
 		// fx
 		//
 		//"f", and both "x"s.
-		
+
 		//check the "f"
 		if(straightTiles.indexOf(map[feeler.x][feeler.y]) > whichTile &&
 				straightTiles.indexOf(map[feeler.x][feeler.y]) != -1) {
 			map[feeler.x][feeler.y].illustrate(Color.green);
 			return new Point(feeler.x, feeler.y);
 		}
-		
+
 		//check one "x"
 		if(straightTiles.indexOf(map[feeler.x][lastFeeler.y]) > whichTile &&
 				straightTiles.indexOf(map[feeler.x][lastFeeler.y]) != -1) {
@@ -209,7 +251,7 @@ public class Enemy extends Character {
 			//still return the feeler position b/c we know it's on a floor tile.
 			return new Point(feeler.x, feeler.y);
 		}
-		
+
 		//check other "x"
 		if(straightTiles.indexOf(map[lastFeeler.x][feeler.y]) > whichTile &&
 				straightTiles.indexOf(map[lastFeeler.x][lastFeeler.y]) != -1) {
@@ -217,10 +259,10 @@ public class Enemy extends Character {
 			//still return the feeler position b/c we know it's on a floor tile.
 			return new Point(feeler.x, feeler.y);
 		}
-		
+
 		return new Point(-1, -1);
 	}
-	
+
 	/**
 	 * Converts from point with directional components --> one number representin direction.
 	 * 
@@ -246,11 +288,11 @@ public class Enemy extends Character {
 		if(diffX == -1 && diffY == 1)  { result = 5; }
 		if(diffX == -1 && diffY == 0)  { result = 6; }
 		if(diffX == -1 && diffY == -1) { result = 7; }
-		
+
 		if(result == -1) {
 			throw new PANICEVERYTHINGISBROKENERROR("DiffX and DiffY are wrong! They're " + diffX + ", " + diffY);
 		}
-		
+
 		return result;
 	}
 
@@ -291,12 +333,12 @@ public class Enemy extends Character {
 		 *  
 		 */
 		int diffX = 0, diffY = 0;
-		
+
 		diffX = lastWall.x - feeler.x;
 		diffY = lastWall.y - feeler.y;
-		
+
 		int result = getNumberedDirection(new Point(diffX, diffY));
-		
+
 		//anti-infinity fail-safe
 		int numTries = 0;
 		while(numTries < 10) {
@@ -312,18 +354,18 @@ public class Enemy extends Character {
 
 			diffX = getPointDirection(result).x;
 			diffY = getPointDirection(result).y;
-			
+
 			//Outta bounds check!
 			if(feeler.x + diffX < 0 || feeler.x + diffX >= map.length ||
 					feeler.y + diffY < 0 || feeler.y + diffY >= map[0].length) {
 				continue; //pretend it's a blocker.
 			}
-			
+
 			if(!map[feeler.x + diffX][feeler.y + diffY].blocker) {
 				//We did it!
 				//Grab the result of this function: the last-touched wall.
 				int wallDirection = getNumberedDirection(new Point(diffX, diffY));
-				
+
 				//(it should be one cycle back).
 				if(goingRight) {
 					wallDirection = (wallDirection - 1);
@@ -333,20 +375,20 @@ public class Enemy extends Character {
 				} else {
 					wallDirection = (wallDirection + 1) % 8;
 				}
-				
+
 				Point wallDiff = getPointDirection(wallDirection);
 				Point lastWallTouched = new Point(feeler.x + wallDiff.x, feeler.y + wallDiff.y);
-				
+
 				//Move the feeler to the proper location:
 				feeler.x += diffX;
 				feeler.y += diffY;
-				
+
 				return lastWallTouched;
 			}
-			
+
 			numTries++;
 		}
-		
+
 		//oops.
 		throw new PANICEVERYTHINGISBROKENERROR("We couldn't find the next Tile for the feeler to move to :(");
 	}
@@ -359,7 +401,7 @@ public class Enemy extends Character {
 	 */
 	private Point getPointDirection(int numDirection) {
 		int diffX = 0, diffY = 0;
-		
+
 		switch(numDirection) {
 		case 0:
 			diffX = 0; diffY = -1; 
@@ -386,17 +428,17 @@ public class Enemy extends Character {
 			diffX = -1; diffY = -1; 
 			break;
 		}
-		
+
 		if(diffX == 0 && diffY == 0) {
 			throw new PANICEVERYTHINGISBROKENERROR("Oh man.  You put in a direction number outside of 0-7 you dolt.  Entered value: " + numDirection);
 		}
 		return new Point(diffX, diffY);
-		
+
 	}
 
 	private Point lastWallLeft;
 	private Point lastWallRight;
-	
+
 	/**
 	 * Handy helper method.  Calculates the direction an enemy should logically take
 	 * to walk STRAIGHT from (x, y) to (targetX, targetY).
@@ -493,7 +535,7 @@ public class Enemy extends Character {
 		g2.drawString(icon, ((x - camX)*12 + 2),
 				((y - camY)*12 + 10));	
 	}
-	
+
 	/**
 	 * Enemies have hit points (unlike the player's "Awesome level.")
 	 * 
@@ -506,7 +548,7 @@ public class Enemy extends Character {
 		if(health <= 0) {
 			die();
 			entities[x][y] = null;
-			
+
 			if(bounty != null) {
 				map[xBounty][yBounty] = bounty;
 			}
@@ -516,7 +558,7 @@ public class Enemy extends Character {
 			}
 
 			System.out.println("The " + name + " is slain!");
-			
+
 		}
 	}
 }
