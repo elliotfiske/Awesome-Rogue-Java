@@ -245,7 +245,7 @@ public class InGameState extends GameState {
 				enemies.remove(i--);
 				continue;
 			}
-			if(map[e.getX()][e.getY()].visible){ 
+			if(map[e.getX()][e.getY()].visible || GODMODE_VISION){ 
 				e.draw(g2, CAMERA_X, CAMERA_Y);
 			}
 		}
@@ -285,6 +285,14 @@ public class InGameState extends GameState {
 		}
 		
 		if(!suspended) {
+			
+			if(e.getKeyCode() == KeyEvent.VK_F) {
+				for(int i = 0; i < enemies.size(); i ++) {
+					Character enemy = enemies.get(i);
+					enemy.takeTurn(mainChar, map);
+				}
+			}
+			
 			if(p.x == 0 && p.y == 0) {
 				if(e.getKeyCode() == KeyEvent.VK_SPACE) {
 					InGameState.waitOn("attack");
@@ -320,7 +328,7 @@ public class InGameState extends GameState {
 		
 				//TODO: Weapons and usable stuff goes here.
 		
-				//TODO: Have the enemies take a turn here.
+				//TODO: Have the enemies take a turn here. 
 				for(int i = 0; i < enemies.size(); i ++) {
 					Character enemy = enemies.get(i);
 					if(enemy.dead()) {
@@ -329,7 +337,7 @@ public class InGameState extends GameState {
 						i -- ;
 					}
 					else {
-						enemy.takeTurn(mainChar, map);
+						enemy.takeTurn(mainChar, map); //TODO: I made it so that enemies move when you hit F
 					}
 				}
 	

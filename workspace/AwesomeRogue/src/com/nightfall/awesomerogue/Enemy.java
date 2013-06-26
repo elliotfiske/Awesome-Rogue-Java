@@ -235,6 +235,7 @@ public class Enemy extends Character {
 					walkStraight(finalPath, pointToCheck);
 					map[finalPath.x][finalPath.y].illustrate(Color.black);
 					if(map[finalPath.x][finalPath.y].blocker) {
+						map[finalPath.x][finalPath.y].illustrate(Color.red);
 						//Outta luck.  Try the next one!
 						weDidIt = false;
 						break;
@@ -244,9 +245,9 @@ public class Enemy extends Character {
 				//straight path found! rejoice!
 				if(weDidIt) {
 					System.out.println("did it lol");
-					proposedDX = firstStep.x;
-					proposedDY = firstStep.y;
-					map[firstStep.x + x][firstStep.y + y].illustrate(Color.ORANGE);
+					proposedDX = firstStep.x - x;
+					proposedDY = firstStep.y - y;
+					//map[firstStep.x][firstStep.y].illustrate(Color.ORANGE);
 					break;
 				}
 			}
@@ -259,9 +260,11 @@ public class Enemy extends Character {
 			//There must have been no obstacles.  Follow the straight path.
 			proposedDX = straightTiles.get(0).x - x;
 			proposedDY = straightTiles.get(0).y - y;
+			//map[x + proposedDX][y + proposedDY].illustrate(Color.ORANGE);
 		}
 		
-		
+		x += proposedDX;
+		y += proposedDY;
 	}	
 
 	/**
