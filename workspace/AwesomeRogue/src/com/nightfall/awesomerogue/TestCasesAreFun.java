@@ -48,9 +48,9 @@ public class TestCasesAreFun {
 	//TEST IF THE ENEMIES CAN WALK IN A STRAIGHT LINE K
 	public static void testEnemyStraightLine() {
 		Enemy e = new Enemy(0, 0, 0);
-		e.walkStraight(new Point(25, 25), new Point(20, 20));
+		e.walkStraight(new Point(25, 25), new Point(20, 20), 3);
 		//assertEquals(new Point(-1, -1),);
-		e.walkStraight(new Point(25, 15), new Point(20, 20));
+		e.walkStraight(new Point(25, 15), new Point(20, 20), 3);
 		//assertEquals(new Point(-1, 1), );
 	}
 

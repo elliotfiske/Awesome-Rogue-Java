@@ -101,14 +101,14 @@ public class Enemy extends Character {
 
 		while(!(straightPoint.x == targetX && straightPoint.y == targetY)) {
 			//Calculate which direction it would be smart to go in order to walk to the player.
-			walkStraight(straightPoint, new Point(targetX, targetY));
+			walkStraight(straightPoint, new Point(targetX, targetY), 3);
 			
 			straightTiles.add(new Tile( map[straightPoint.x][straightPoint.y].type , 0, straightPoint.x, straightPoint.y));
 
 			if(map[straightPoint.x][straightPoint.y].blocker) {
-				//map[straightPoint.x][straightPoint.y].illustrate(Color.red); TODO
+				map[straightPoint.x][straightPoint.y].illustrate(Color.red);//TODO
 			} else {
-				//map[straightPoint.x][straightPoint.y].illustrate(Color.yellow); TODO
+				map[straightPoint.x][straightPoint.y].illustrate(Color.yellow);// TODO
 			}
 		}
 
@@ -164,8 +164,8 @@ public class Enemy extends Character {
 				leftPath.add(new Point(leftFeeler.x, leftFeeler.y));
 				rightPath.add(new Point(rightFeeler.x, rightFeeler.y));
 
-//				map[rightFeeler.x][rightFeeler.y].illustrate(Color.blue); //TODO
-//				map[leftFeeler.x][leftFeeler.y].illustrate(Color.cyan);
+				//map[rightFeeler.x][rightFeeler.y].illustrate(Color.blue); //TODO
+				//map[leftFeeler.x][leftFeeler.y].illustrate(Color.cyan);
 
 				int numTiles = 0;
 				while(numTiles < 100) {
@@ -173,7 +173,7 @@ public class Enemy extends Character {
 
 					lastWallRight = getDirection(rightFeeler, lastWallRight, true, map);
 
-					//map[rightFeeler.x][rightFeeler.y].illustrate(Color.blue); TODO
+					//map[rightFeeler.x][rightFeeler.y].illustrate(Color.blue); //TODO
 
 					//follow left wall
 					lastWallLeft = getDirection(leftFeeler, lastWallLeft, false, map);
@@ -218,7 +218,6 @@ public class Enemy extends Character {
 			
 			boolean weDidIt = false;
 			for(int i = firstCorrectPath.size() - 1; i > 0; i--) {
-				System.out.println("i: " + i + " size: " + firstCorrectPath.size());
 				Point pointToCheck = firstCorrectPath.get(i);
 				map[pointToCheck.x][pointToCheck.y].illustrate(Color.pink);
 				//If there's a straight, unblocked path to the pink tile we've just found our
@@ -227,15 +226,15 @@ public class Enemy extends Character {
 				
 				/** The step we WOULD take to follow this new path is: */
 				Point firstStep = new Point(finalPath.x, finalPath.y);
-				walkStraight(firstStep, new Point(targetX, targetY));
+				walkStraight(firstStep, new Point(targetX, targetY), 1);
 				
 				//optimism!
 				weDidIt = true;
 				while(finalPath.x != pointToCheck.x && finalPath.y != pointToCheck.y) {
-					walkStraight(finalPath, pointToCheck);
-					map[finalPath.x][finalPath.y].illustrate(Color.black);
+					walkStraight(finalPath, pointToCheck, 1);
+					//map[finalPath.x][finalPath.y].illustrate(Color.black); //TODO
 					if(map[finalPath.x][finalPath.y].blocker) {
-						map[finalPath.x][finalPath.y].illustrate(Color.red);
+						//map[finalPath.x][finalPath.y].illustrate(Color.red); //TODO
 						//Outta luck.  Try the next one!
 						weDidIt = false;
 						break;
@@ -490,14 +489,13 @@ public class Enemy extends Character {
 	/**
 	 * Handy helper method.  Calculates the direction an enemy should logically take
 	 * to walk STRAIGHT from (x, y) to (targetX, targetY).
-	 * @param x Start x
-	 * @param y Start y
-	 * @param targetX Destination x
-	 * @param targetY Destination y
+	 * @param Point straightPoint The Point that is going to be modified to be further down the "straight" path
+	 * @param Point targetPoint The Point that the straightPoint is moving towards.
+	 * @param int smoothness Basically the "slope" that the path follows.  If 1, will always move diagonally if it can.
 	 * @return Point with x from -1 --> 1 saying you should move that far in the x direction, 
 	 * 		   and y from -1 --> 1 saying you should move that far in the y direction
 	 */
-	public void walkStraight(Point straightPoint, Point targetPoint) {
+	public void walkStraight(Point straightPoint, Point targetPoint, int smoothness) {
 		Point result = new Point(-100,-100);
 
 		int x = straightPoint.x;
@@ -538,7 +536,7 @@ public class Enemy extends Character {
 		//  |      ^
 		//  |  or  |
 		//  v      |
-		if(slope <= -2) {
+		if(slope <= -smoothness) {
 			result.x = 0;
 			result.y = 1 * (int) Math.signum((float) diffY);
 		}
@@ -546,7 +544,7 @@ public class Enemy extends Character {
 		//    /        ^ 
 		//   /   or   /
 		//  L        /
-		if(-2 < slope && slope < -0.5) {
+		if(-smoothness < slope && slope < -1/smoothness) {
 			result.x = 1 * (int) Math.signum((float) diffX);
 			result.y = 1 * (int) Math.signum((float) diffY);
 		}
@@ -554,7 +552,7 @@ public class Enemy extends Character {
 		//
 		// < - -   or  - - >
 		//
-		if(-0.5 <= slope && slope <= 0.5) {
+		if(-1/smoothness <= slope && slope <= 1/smoothness) {
 			result.x = 1 * (int) Math.signum((float) diffX);
 			result.y = 0;
 		}
@@ -562,7 +560,7 @@ public class Enemy extends Character {
 		// ^       \
 		//  \  or   \
 		//   \       V
-		if(0.5 < slope && slope < 2) {
+		if(1/smoothness < slope && slope < smoothness) {
 			result.x = 1 * (int) Math.signum((float) diffX);
 			result.y = 1 * (int) Math.signum((float) diffY);
 		}
@@ -570,7 +568,7 @@ public class Enemy extends Character {
 		//  |      ^
 		//  |  or  |
 		//  v      |
-		if(slope >= 2) {
+		if(slope >= smoothness) {
 			result.x = 0;
 			result.y = 1 * (int) Math.signum((float) diffY);
 		}
