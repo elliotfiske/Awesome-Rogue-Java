@@ -106,9 +106,9 @@ public class Enemy extends Character {
 			straightTiles.add(new Tile( map[straightPoint.x][straightPoint.y].type , 0, straightPoint.x, straightPoint.y));
 
 			if(map[straightPoint.x][straightPoint.y].blocker) {
-				map[straightPoint.x][straightPoint.y].illustrate(Color.red);//TODO
+				//map[straightPoint.x][straightPoint.y].illustrate(Color.red);//TODO
 			} else {
-				map[straightPoint.x][straightPoint.y].illustrate(Color.yellow);// TODO
+				//map[straightPoint.x][straightPoint.y].illustrate(Color.yellow);// TODO
 			}
 		}
 
@@ -219,22 +219,29 @@ public class Enemy extends Character {
 			boolean weDidIt = false;
 			for(int i = firstCorrectPath.size() - 1; i > 0; i--) {
 				Point pointToCheck = firstCorrectPath.get(i);
-				map[pointToCheck.x][pointToCheck.y].illustrate(Color.pink);
+				map[pointToCheck.x][pointToCheck.y].illustrate(Color.pink); //TODO
+				
 				//If there's a straight, unblocked path to the pink tile we've just found our
 				//route to the player.
 				Point finalPath = new Point(x, y);
 				
+				ArrayList<Point> finalPathPoints = new ArrayList<Point>();
+				finalPathPoints.add(finalPath);
+				
 				/** The step we WOULD take to follow this new path is: */
 				Point firstStep = new Point(finalPath.x, finalPath.y);
-				walkStraight(firstStep, new Point(targetX, targetY), 1);
+				walkStraight(firstStep, new Point(pointToCheck.x, pointToCheck.y), 3);
 				
 				//optimism!
 				weDidIt = true;
-				while(finalPath.x != pointToCheck.x && finalPath.y != pointToCheck.y) {
-					walkStraight(finalPath, pointToCheck, 1);
+				
+				while(finalPath.x != pointToCheck.x || finalPath.y != pointToCheck.y) {
+					walkStraight(finalPath, pointToCheck, 3);
+					finalPathPoints.add(finalPath);
 					//map[finalPath.x][finalPath.y].illustrate(Color.black); //TODO
 					if(map[finalPath.x][finalPath.y].blocker) {
 						//map[finalPath.x][finalPath.y].illustrate(Color.red); //TODO
+						System.out.println("this SHOULD trigger...");
 						//Outta luck.  Try the next one!
 						weDidIt = false;
 						break;
@@ -246,7 +253,10 @@ public class Enemy extends Character {
 					System.out.println("did it lol");
 					proposedDX = firstStep.x - x;
 					proposedDY = firstStep.y - y;
-					//map[firstStep.x][firstStep.y].illustrate(Color.ORANGE);
+					for(Point p : finalPathPoints) {
+						map[p.x][p.y].illustrate(Color.green);
+					}
+					//map[firstStep.x][firstStep.y].illustrate(Color.ORANGE); //TODO
 					break;
 				}
 			}
@@ -259,7 +269,7 @@ public class Enemy extends Character {
 			//There must have been no obstacles.  Follow the straight path.
 			proposedDX = straightTiles.get(0).x - x;
 			proposedDY = straightTiles.get(0).y - y;
-			//map[x + proposedDX][y + proposedDY].illustrate(Color.ORANGE);
+			map[x + proposedDX][y + proposedDY].illustrate(Color.ORANGE);
 		}
 		
 		x += proposedDX;
@@ -495,7 +505,7 @@ public class Enemy extends Character {
 	 * @return Point with x from -1 --> 1 saying you should move that far in the x direction, 
 	 * 		   and y from -1 --> 1 saying you should move that far in the y direction
 	 */
-	public void walkStraight(Point straightPoint, Point targetPoint, int smoothness) {
+	public void walkStraight(Point straightPoint, Point targetPoint, double smoothness) {
 		Point result = new Point(-100,-100);
 
 		int x = straightPoint.x;
