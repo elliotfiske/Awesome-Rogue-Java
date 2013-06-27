@@ -187,7 +187,7 @@ public class LevelGenerator {
 			}
 		}
 
-		for(int iterations = 0; iterations < 10; iterations++) {
+		for(int iterations = 0; iterations < 1000; iterations++) {
 			for(int x = 0; x < width; x++) {
 				for(int y = 0; y < height; y++) {
 
@@ -265,12 +265,22 @@ public class LevelGenerator {
 		//Make a list of all the matchmakings we've done so far, make sure we don't leave anyone out :I
 		
 		//Go through the ArrayLists of Tile ID groupings.
+		//find the ID that has the most tiles
+		int recordHigh = 0;
+		int recordID = 0;
 		for(ArrayList<Tile> tileGroup : compactList) {
 			//Choose a random tile from the group.
-			tileGroup.get(numGen.nextInt(tileGroup.size()));
+			if(tileGroup.size() > recordHigh) {
+				recordHigh = tileGroup.size();
+				recordID = tileGroup.get(0).getID();
+			}
+			//tileGroup.get(numGen.nextInt(tileGroup.size()));
 			
 			//Start radiating out from this tile and stop 
 		}
+		
+		System.out.println("WINRAR ID: " + recordID + " with " + recordHigh + " tiles!");
+		
 		
 		//Convert the map of 0's and 1's to floors and walls.
 		for(int x = 0; x < width; x++) {
