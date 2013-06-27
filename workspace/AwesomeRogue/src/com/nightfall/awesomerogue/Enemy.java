@@ -219,14 +219,14 @@ public class Enemy extends Character {
 			boolean weDidIt = false;
 			for(int i = firstCorrectPath.size() - 1; i > 0; i--) {
 				Point pointToCheck = firstCorrectPath.get(i);
-				map[pointToCheck.x][pointToCheck.y].illustrate(Color.pink); //TODO
+				//map[pointToCheck.x][pointToCheck.y].illustrate(Color.pink); //TODO
 				
 				//If there's a straight, unblocked path to the pink tile we've just found our
 				//route to the player.
 				Point finalPath = new Point(x, y);
 				
 				ArrayList<Point> finalPathPoints = new ArrayList<Point>();
-				finalPathPoints.add(finalPath);
+				finalPathPoints.add(new Point(finalPath.x, finalPath.y));
 				
 				/** The step we WOULD take to follow this new path is: */
 				Point firstStep = new Point(finalPath.x, finalPath.y);
@@ -237,11 +237,10 @@ public class Enemy extends Character {
 				
 				while(finalPath.x != pointToCheck.x || finalPath.y != pointToCheck.y) {
 					walkStraight(finalPath, pointToCheck, 3);
-					finalPathPoints.add(finalPath);
+					finalPathPoints.add(new Point(finalPath.x, finalPath.y));
 					//map[finalPath.x][finalPath.y].illustrate(Color.black); //TODO
 					if(map[finalPath.x][finalPath.y].blocker) {
 						//map[finalPath.x][finalPath.y].illustrate(Color.red); //TODO
-						System.out.println("this SHOULD trigger...");
 						//Outta luck.  Try the next one!
 						weDidIt = false;
 						break;
@@ -250,11 +249,12 @@ public class Enemy extends Character {
 				
 				//straight path found! rejoice!
 				if(weDidIt) {
-					System.out.println("did it lol");
 					proposedDX = firstStep.x - x;
 					proposedDY = firstStep.y - y;
+					int wut = 0;
 					for(Point p : finalPathPoints) {
-						map[p.x][p.y].illustrate(Color.green);
+						//map[p.x][p.y].illustrate(Color.green); //TODO
+						//System.out.println("wut" + wut);
 					}
 					//map[firstStep.x][firstStep.y].illustrate(Color.ORANGE); //TODO
 					break;
@@ -269,7 +269,7 @@ public class Enemy extends Character {
 			//There must have been no obstacles.  Follow the straight path.
 			proposedDX = straightTiles.get(0).x - x;
 			proposedDY = straightTiles.get(0).y - y;
-			map[x + proposedDX][y + proposedDY].illustrate(Color.ORANGE);
+			//map[x + proposedDX][y + proposedDY].illustrate(Color.ORANGE);
 		}
 		
 		x += proposedDX;
@@ -297,14 +297,12 @@ public class Enemy extends Character {
 		//check the "f"
 		if(straightTiles.indexOf(map[feeler.x][feeler.y]) > whichTile &&
 				straightTiles.indexOf(map[feeler.x][feeler.y]) != -1) {
-			map[feeler.x][feeler.y].illustrate(Color.green);
 			return new Point(feeler.x, feeler.y);
 		}
 
 		//check one "x"
 		if(straightTiles.indexOf(map[feeler.x][lastFeeler.y]) > whichTile &&
 				straightTiles.indexOf(map[feeler.x][lastFeeler.y]) != -1) {
-			map[feeler.x][lastFeeler.y].illustrate(Color.green);
 			//still return the feeler position b/c we know it's on a floor tile.
 			return new Point(feeler.x, feeler.y);
 		}
@@ -312,7 +310,6 @@ public class Enemy extends Character {
 		//check other "x"
 		if(straightTiles.indexOf(map[lastFeeler.x][feeler.y]) > whichTile &&
 				straightTiles.indexOf(map[lastFeeler.x][lastFeeler.y]) != -1) {
-			map[lastFeeler.x][feeler.y].illustrate(Color.green);
 			//still return the feeler position b/c we know it's on a floor tile.
 			return new Point(feeler.x, feeler.y);
 		}

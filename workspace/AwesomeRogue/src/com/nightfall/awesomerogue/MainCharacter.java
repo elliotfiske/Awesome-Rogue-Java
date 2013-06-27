@@ -11,11 +11,14 @@ public class MainCharacter extends Character {
 	
 	private InGameState currentGameState;
 	
+	private boolean[] passives;	
+	
 	public MainCharacter(int x, int y) {
 		super(x, y, "@");
 		awesome = 100;
 		setCurrentWeapon(new Pistol());
 		skills = new Skill[3];
+		passives = new boolean[Passive.NUM_PASSIVES];
 	}
 	
 	public int getAwesome() { return awesome; }
@@ -30,6 +33,10 @@ public class MainCharacter extends Character {
 		}
 		// We already have 3 skills! Need to replace and old one
 		// TODO once we actually have 3 skills/levels
+	}
+	
+	public void getPassive(int whichPassive) {
+		passives[whichPassive] = true;
 	}
 	
 	public void setLevel(InGameState level) {
@@ -82,5 +89,9 @@ public class MainCharacter extends Character {
 		} else {
 			super.move(dx, dy, map, entities);
 		}
+	}
+
+	public boolean hasPassive(int passive) {
+		return passives[passive] || InGameState.EVERY_PASSIVE_UNLOCKED;
 	}
 }

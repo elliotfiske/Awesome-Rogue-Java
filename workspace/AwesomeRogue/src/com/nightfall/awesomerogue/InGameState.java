@@ -25,9 +25,10 @@ public class InGameState extends GameState {
 	public static final int TILE_SIZE = 12;
 
 	//Enable to debug stuff
-	public static final boolean GODMODE_VISION = true;
-	public static final boolean GODMODE_WALKTHRUWALLS = false;
+	public static final boolean GODMODE_VISION = false;
+	public static final boolean GODMODE_WALKTHRUWALLS = true;
 	private boolean GODMODE_FROZEN_ENEMIES = false;
+	public static final boolean EVERY_PASSIVE_UNLOCKED = true;
 
 	/**
 	 * Describes the cell location of the upper lefthand corner of the area
@@ -207,9 +208,10 @@ public class InGameState extends GameState {
 					}
 
 				} else if(map[i][j].seen) {
+					//your MOM is dead code
 					//The tile is in our memory.  Draw it, but darkened.
 
-					//TODO: actually darken the tile.  Dunno how to do it right now... your MOM is dead code.
+					//TODO: actually darken the tile.  Dunno how to do it right now
 					g2.drawImage(tileImages[ map[i][j].type*2+1 ], (i-CAMERA_X)*TILE_SIZE,
 							(j-CAMERA_Y)*TILE_SIZE, null);
 				}
@@ -248,6 +250,9 @@ public class InGameState extends GameState {
 			}
 			if(map[e.getX()][e.getY()].visible || GODMODE_VISION){ 
 				e.draw(g2, CAMERA_X, CAMERA_Y);
+			} else if(mainChar.hasPassive(Passive.XRAY_GOGGLES)) {
+				g2.setColor(Color.red);
+				g2.drawString("?", (e.getX()-CAMERA_X)*TILE_SIZE, (e.getY()-CAMERA_Y)*TILE_SIZE + TILE_SIZE );
 			}
 		}
 
