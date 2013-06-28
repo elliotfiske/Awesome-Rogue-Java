@@ -5,7 +5,7 @@ import java.awt.Point;
 import java.util.ArrayList;
 
 public abstract class Skill {
-	public static ArrayList<Skill> allSkills;
+	public static ArrayList<Object> allSkills;
 	
 	private int cooldown, maxCooldown;
 	
@@ -14,8 +14,8 @@ public abstract class Skill {
 		this.cooldown = cooldown;
 	}
 	
-	public static void refreshSkills() {
-		allSkills = new ArrayList<Skill>();
+	public static void addSkills() {
+		allSkills = new ArrayList<Object>();
 		allSkills.add(new FalconPunch());
 		allSkills.add(new GrenadeLauncher());
 	}
@@ -32,4 +32,6 @@ public abstract class Skill {
 	public void setCooldown(int cooldown) { this.cooldown = cooldown; }
 	public int getMaxCooldown() { return maxCooldown; }
 	public void setMaxCooldown(int maxCooldown) { this.maxCooldown = maxCooldown; }
+	
+	
 }

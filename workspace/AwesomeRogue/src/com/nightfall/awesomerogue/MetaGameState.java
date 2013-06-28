@@ -48,7 +48,7 @@ public class MetaGameState extends GameState {
 	public MetaGameState(GamePanel gameCanvas) throws IOException {
 		super(gameCanvas);
 		
-		Skill.refreshSkills();
+		Skill.addSkills();
 
 		imgSFX = new ImageSFX();
 

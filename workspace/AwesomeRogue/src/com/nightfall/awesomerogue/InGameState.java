@@ -27,7 +27,8 @@ public class InGameState extends GameState {
 	//Enable to debug stuff
 	public static final boolean GODMODE_VISION = false;
 	public static final boolean GODMODE_WALKTHRUWALLS = true;
-	private boolean GODMODE_FROZEN_ENEMIES = false;
+	public static final boolean GODMODE_CAN_FREEZE_ENEMIES = true;
+	private boolean areEnemiesFrozen = false;
 	public static final boolean EVERY_PASSIVE_UNLOCKED = true;
 
 	/**
@@ -290,9 +291,9 @@ public class InGameState extends GameState {
 			}
 		}
 
-		if(e.getKeyCode() == KeyEvent.VK_F) {
+		if(e.getKeyCode() == KeyEvent.VK_F && GODMODE_CAN_FREEZE_ENEMIES) {
 			for(int i = 0; i < enemies.size(); i ++) {
-				GODMODE_FROZEN_ENEMIES = !GODMODE_FROZEN_ENEMIES;
+				areEnemiesFrozen = !areEnemiesFrozen;
 			}
 		}
 
@@ -344,7 +345,7 @@ public class InGameState extends GameState {
 						i -- ;
 					}
 					else {
-						if(!GODMODE_FROZEN_ENEMIES) {
+						if(!areEnemiesFrozen) {
 							enemy.takeTurn(mainChar, map); //TODO: I made it so that enemies freeze when you hit f
 						}
 					}

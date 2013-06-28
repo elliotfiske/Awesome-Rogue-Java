@@ -7,27 +7,34 @@ public class MainCharacter extends Character {
 	public static final int VISIONRANGE = 35;
 	
 	private int awesome;
-	private Skill[] skills;
+	/** Array containing a list of the actives you've gotten so far */
+	private int[] skills;
+	private int numSkills;
 	
 	private InGameState currentGameState;
+	private Active actives; //Our handle to the actives.
 	
+	/** Passives kind of works backwards from how skills work, since you can have ANY
+	 * number of passives.  You check to see if you have a passive by calling passives[int passiveId],
+	 * whereas skills[] just contains a list of the id's of the actives you've gathered. */
 	private boolean[] passives;	
 	
 	public MainCharacter(int x, int y) {
 		super(x, y, "@");
 		awesome = 100;
 		setCurrentWeapon(new Pistol());
-		skills = new Skill[3];
+		skills = new int[4];
 		passives = new boolean[Passive.NUM_PASSIVES];
 	}
 	
 	public int getAwesome() { return awesome; }
 	
 	public void findArtifact() {
+		//For now just add a random skill I guess?
 		int randomArtifact = (int)Math.floor(Math.random()*Skill.allSkills.size());
 		for(int i = 0; i < 3; i ++) {
-			if(skills[i] == null) {
-				skills[i] = Skill.allSkills.remove(randomArtifact);
+			if(skills[i] == Active.EMPTY_SLOT) {
+				skills[i] = randomArtifact;
 				return;
 			}
 		}
@@ -46,7 +53,7 @@ public class MainCharacter extends Character {
 	public InGameState getLevel() { return currentGameState; }
 	
 	public void prepareSkill(int skill) {
-		if(skills[skill] != null) {
+		if(skills[skill] != Active.EMPTY_SLOT) {
 			// Prepare the skill. If it fires as well, it will return false
 			// So we don't want to say to wait on it
 			if(skills[skill].prepare()) {
@@ -66,8 +73,8 @@ public class MainCharacter extends Character {
 	}
 	
 	public void activateSkill(int skill, Point p) {
-		if(skills[skill] != null) {
-			skills[skill].activate(p, this);
+		if(skills[skill] != Active.EMPTY_SLOT) {
+			actives.doActive(skills[skill]);
 			switch(skill) {
 			case 0:
 				InGameState.endWait("Z");
@@ -93,5 +100,9 @@ public class MainCharacter extends Character {
 
 	public boolean hasPassive(int passive) {
 		return passives[passive] || InGameState.EVERY_PASSIVE_UNLOCKED;
+	}
+	
+	public int howManySkills() {
+		return numSkills;
 	}
 }
