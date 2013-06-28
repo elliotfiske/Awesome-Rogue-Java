@@ -298,9 +298,6 @@ public class InGameState extends GameState {
 		}
 
 		if(!suspended) {
-
-
-
 			if(p.x == 0 && p.y == 0) {
 				if(e.getKeyCode() == KeyEvent.VK_SPACE) {
 					InGameState.waitOn("attack");
