@@ -224,7 +224,7 @@ public class LevelGenerator {
 		for(int x = 0; x < width; x++) {
 			for(int y = 0; y < height; y++) {
 				if(numMap[x][y] == Tile.FLOOR) {
-					Tile tileForList = new Tile(Tile.FLOOR, tempMap[x][y]);
+					Tile tileForList = new Tile(Tile.FLOOR, tempMap[x][y], x, y);
 
 					//Check if this is the first Tile we've found with this ID.
 					//If it is, an error will pop up.
@@ -340,9 +340,9 @@ public class LevelGenerator {
 		Tile[][] map = new Tile[38][35];
 		for(int i = 0; i < map.length; i ++) {
 			for(int j = 0; j < map[0].length; j ++) {
-				map[i][j] = new Tile(Tile.FLOOR);
+				map[i][j] = new Tile(Tile.FLOOR, i, j);
 				if(i == 0 || j == 0 || i == map.length-1 || j == map[0].length-1) {
-					map[i][j] = new Tile(Tile.WALL);
+					map[i][j] = new Tile(Tile.WALL, i, j);
 				}
 			}
 		}
@@ -350,13 +350,13 @@ public class LevelGenerator {
 		for(int i = ROOM_MIN; i <= ROOM_MAX; i++) {
 			if(i == CENTER) {
 				for(int j = CENTER+1; j < ROOM_MAX; j ++) {
-					map[i][j] = new Tile(Tile.WALL);
+					map[i][j] = new Tile(Tile.WALL, i, j);
 				}
 			}
 			else {
 				for(int j = ROOM_MIN+1; j < ROOM_MAX; j ++) {
 					if(j != CENTER || i > CENTER) {
-						map[i][j] = new Tile(Tile.WALL);
+						map[i][j] = new Tile(Tile.WALL, i, j);
 					}
 				}
 			}
@@ -365,7 +365,7 @@ public class LevelGenerator {
 		for(int i = ROOM_MIN; i < map.length; i++) {
 			for(int j = 0; j <= ROOM_MIN; j ++) {
 				if(j == ROOM_MIN || i == ROOM_MIN) {
-					map[i][j] = new Tile(Tile.WALL);
+					map[i][j] = new Tile(Tile.WALL, i, j);
 				}
 				map[i][j].room = 0;
 			}
@@ -374,7 +374,7 @@ public class LevelGenerator {
 		for(int i = ROOM_MAX; i < map.length; i++) {
 			for(int j = ROOM_MIN; j < map[0].length; j ++) {
 				if(i == ROOM_MAX) {
-					map[i][j] = new Tile(Tile.WALL);
+					map[i][j] = new Tile(Tile.WALL, i, j);
 				}
 				map[i][j].room = 1;
 			}
@@ -383,17 +383,17 @@ public class LevelGenerator {
 		for(int i = 0; i < ROOM_MAX; i++) {
 			for(int j = ROOM_MAX; j < map[0].length; j ++) {
 				if(j == ROOM_MAX) {
-					map[i][j] = new Tile(Tile.WALL);
+					map[i][j] = new Tile(Tile.WALL, i, j);
 				}
 				map[i][j].room = 2;
 			}
 		}
-		map[ROOM_MAX+5][ROOM_MIN] = new Tile(Tile.DOOR);
-		map[ROOM_MAX][ROOM_MAX+5] = new Tile(Tile.DOOR);
-		map[ROOM_MIN-5][ROOM_MAX] = new Tile(Tile.DOOR);
-		map[ROOM_MIN][CENTER] = new Tile(Tile.DOOR);
-		map[CENTER][ROOM_MIN] = new Tile(Tile.DOOR);
-		map[(int)Math.floor(ROOM_MIN/2)][5] = new Tile(Tile.CHEST);
+		map[ROOM_MAX+5][ROOM_MIN] = new Tile(Tile.DOOR, ROOM_MAX+5, ROOM_MIN);
+		map[ROOM_MAX][ROOM_MAX+5] = new Tile(Tile.DOOR, ROOM_MAX, ROOM_MAX + 5);
+		map[ROOM_MIN-5][ROOM_MAX] = new Tile(Tile.DOOR, ROOM_MIN - 5, ROOM_MAX);
+		map[ROOM_MIN][CENTER] = new Tile(Tile.DOOR, ROOM_MIN, CENTER);
+		map[CENTER][ROOM_MIN] = new Tile(Tile.DOOR, CENTER, ROOM_MIN);
+		map[(int)Math.floor(ROOM_MIN/2)][5] = new Tile(Tile.CHEST, (int)Math.floor(ROOM_MIN/2), 5);
 		
 		enemies.add(new Enemy((int) (Math.random()*(ROOM_MIN-2)+1),(int) (Math.random()*(ROOM_MIN-2)+1), Enemy.ANGRY_MUSHROOM));
 		

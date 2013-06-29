@@ -105,9 +105,9 @@ public class Enemy extends Character {
 		}
 
 		//DEAL WITH OBSTACLES HERE
-		/*
+		
 		for(int whichTile = 0; whichTile < straightTiles.size(); whichTile++) {
-			//
+
 			Tile t = straightTiles.get(whichTile);
 
 			//Go through until we run into sexy trouble (blocker)
@@ -141,7 +141,7 @@ public class Enemy extends Character {
 					numTiles++;
 				}
 			}
-		}*/
+		}
 
 	}	
 
@@ -161,7 +161,7 @@ public class Enemy extends Character {
 		int diffX = delta.x;
 		int diffY = delta.y;
 		int result = -1;
-
+		
 		if(diffX == 0 && diffY == -1)  { result = 0; }
 		if(diffX == 1 && diffY == -1)  { result = 1; }
 		if(diffX == 1 && diffY == 0)   { result = 2; }
@@ -170,9 +170,10 @@ public class Enemy extends Character {
 		if(diffX == -1 && diffY == 1)  { result = 5; }
 		if(diffX == -1 && diffY == 0)  { result = 6; }
 		if(diffX == -1 && diffY == -1) { result = 7; }
-		
+
 		if(result == -1) {
-			throw new PANICEVERYTHINGISBROKENERROR();
+			System.out.println("diffx:" + diffX + ", diffy: " + diffY);
+			throw new PANICEVERYTHINGISBROKENERROR("Something went wrong between the feeler and its friend-wall...");
 		}
 		
 		return result;
@@ -257,7 +258,7 @@ public class Enemy extends Character {
 		}
 		
 		//oops.
-		throw new PANICEVERYTHINGISBROKENERROR();
+		throw new PANICEVERYTHINGISBROKENERROR("We couldn't find a free space... surrounded on all sides??");
 	}
 
 	/**
