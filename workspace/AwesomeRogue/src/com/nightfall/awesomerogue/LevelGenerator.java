@@ -187,7 +187,7 @@ public class LevelGenerator {
 			}
 		}
 
-		for(int iterations = 0; iterations < 10; iterations++) {
+		for(int iterations = 0; iterations < 1000; iterations++) {
 			for(int x = 0; x < width; x++) {
 				for(int y = 0; y < height; y++) {
 
@@ -265,12 +265,22 @@ public class LevelGenerator {
 		//Make a list of all the matchmakings we've done so far, make sure we don't leave anyone out :I
 		
 		//Go through the ArrayLists of Tile ID groupings.
+		//find the ID that has the most tiles
+		int recordHigh = 0;
+		int recordID = 0;
 		for(ArrayList<Tile> tileGroup : compactList) {
 			//Choose a random tile from the group.
-			tileGroup.get(numGen.nextInt(tileGroup.size()));
+			if(tileGroup.size() > recordHigh) {
+				recordHigh = tileGroup.size();
+				recordID = tileGroup.get(0).getID();
+			}
+			//tileGroup.get(numGen.nextInt(tileGroup.size()));
 			
 			//Start radiating out from this tile and stop 
 		}
+		
+		System.out.println("WINRAR ID: " + recordID + " with " + recordHigh + " tiles!");
+		
 		
 		//Convert the map of 0's and 1's to floors and walls.
 		for(int x = 0; x < width; x++) {
@@ -289,7 +299,7 @@ public class LevelGenerator {
 		
 		//Plop down some enemies based on the difficulty.
 		if(difficulty == 1) {
-			Enemy bob = new Enemy(30, 40, Enemy.RAT);
+			Enemy bob = new Enemy(25, 10, Enemy.RAT);
 			InGameState.enemyList.add(bob);
 		}
 		
@@ -338,6 +348,8 @@ public class LevelGenerator {
 		int ROOM_MIN = CENTER-5;
 		int ROOM_MAX = CENTER+5;
 		Tile[][] map = new Tile[38][35];
+		
+		// Create whole level (all floors)
 		for(int i = 0; i < map.length; i ++) {
 			for(int j = 0; j < map[0].length; j ++) {
 				map[i][j] = new Tile(Tile.FLOOR, i, j);
@@ -347,6 +359,7 @@ public class LevelGenerator {
 			}
 		}
 		
+		// Make the corridor in the middle of the floor
 		for(int i = ROOM_MIN; i <= ROOM_MAX; i++) {
 			if(i == CENTER) {
 				for(int j = CENTER+1; j < ROOM_MAX; j ++) {
@@ -362,6 +375,7 @@ public class LevelGenerator {
 			}
 		}
 		
+		// Initial room
 		for(int i = ROOM_MIN; i < map.length; i++) {
 			for(int j = 0; j <= ROOM_MIN; j ++) {
 				if(j == ROOM_MIN || i == ROOM_MIN) {
@@ -371,15 +385,26 @@ public class LevelGenerator {
 			}
 		}
 		
+		// Room with attack directions
+		// And lots of little mushrooms
 		for(int i = ROOM_MAX; i < map.length; i++) {
 			for(int j = ROOM_MIN; j < map[0].length; j ++) {
 				if(i == ROOM_MAX) {
 					map[i][j] = new Tile(Tile.WALL, i, j);
 				}
 				map[i][j].room = 1;
+				
+				// Add mushroom?
+				if(i > ROOM_MAX && i < map.length - 1 && j > ROOM_MIN && j < map[0].length - 1) {
+					if(Math.random() > 0.9) {
+						Enemy e = new Enemy(i, j, Enemy.MUSHROOM);
+						enemies.add(e);
+					}
+				}
 			}
 		}
 		
+		// Room with skills
 		for(int i = 0; i < ROOM_MAX; i++) {
 			for(int j = ROOM_MAX; j < map[0].length; j ++) {
 				if(j == ROOM_MAX) {
@@ -388,14 +413,19 @@ public class LevelGenerator {
 				map[i][j].room = 2;
 			}
 		}
+		
+		//Add doors
 		map[ROOM_MAX+5][ROOM_MIN] = new Tile(Tile.DOOR, ROOM_MAX+5, ROOM_MIN);
 		map[ROOM_MAX][ROOM_MAX+5] = new Tile(Tile.DOOR, ROOM_MAX, ROOM_MAX + 5);
 		map[ROOM_MIN-5][ROOM_MAX] = new Tile(Tile.DOOR, ROOM_MIN - 5, ROOM_MAX);
 		map[ROOM_MIN][CENTER] = new Tile(Tile.DOOR, ROOM_MIN, CENTER);
 		map[CENTER][ROOM_MIN] = new Tile(Tile.DOOR, CENTER, ROOM_MIN);
-		map[(int)Math.floor(ROOM_MIN/2)][5] = new Tile(Tile.CHEST, (int)Math.floor(ROOM_MIN/2), 5);
 		
-		enemies.add(new Enemy((int) (Math.random()*(ROOM_MIN-2)+1),(int) (Math.random()*(ROOM_MIN-2)+1), Enemy.ANGRY_MUSHROOM));
+		map[(int)Math.floor(ROOM_MIN/2)][5] = new Tile(Tile.CHEST, (int)Math.floor(ROOM_MIN/2), 5);
+		// Create boss mushroom
+		Enemy e = new Enemy((int) (Math.random()*(ROOM_MIN-2)+1),(int) (Math.random()*(ROOM_MIN-2)+1), Enemy.ANGRY_MUSHROOM);
+		e.setBounty((int)Math.floor(ROOM_MIN/2), 5, new Tile(Tile.CHEST));
+		enemies.add(e);
 		
 		return map;
 	}

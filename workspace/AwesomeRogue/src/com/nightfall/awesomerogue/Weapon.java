@@ -42,9 +42,9 @@ public class Weapon {
 		projectile.update(map, entities);
 	}
 	
-	public void update(Character character) {
-		character.getHit(damage);
-	}
+	//public void update(Character character) {
+		//character.getHit(damage, null);
+	//}
 
 	public int getDamage() {
 		return damage;
@@ -101,7 +101,7 @@ public class Weapon {
 				System.out.println("Hit something!");
 				if(entities[targetX][targetY] != null) {
 					System.out.println("It's an enemy!");
-					entities[targetX][targetY].getHit(damage);
+					entities[targetX][targetY].getHit(damage, map, entities);
 				}
 				drawing = false;
 			}

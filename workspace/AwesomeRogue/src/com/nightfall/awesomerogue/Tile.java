@@ -39,14 +39,10 @@ public class Tile {
 
 		this.type = type;
 	}
-
-	public Tile(int type, int id) {
-		this(type);
-		this.id = id;
-	}
 	
 	public Tile(int type, int id, int x, int y) {
-		this(type, id);
+		this(type);
+		this.id = id;
 		this.x = x;
 		this.y = y;
 	}
@@ -88,5 +84,20 @@ public class Tile {
 	public void illustrate(Color color) {
 		this.color = color;
 		illustrated = true;
+	}
+	
+	public boolean equals(Object o) {
+		if(o == null) {
+			return false;
+		}
+		
+		if(o instanceof Tile) {
+			Tile t = (Tile) o;
+			if(t.x == x && t.y == y) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 }

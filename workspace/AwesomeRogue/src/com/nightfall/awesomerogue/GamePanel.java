@@ -162,7 +162,7 @@ public class GamePanel extends JPanel implements Runnable {
 			if(requestFocusCounter == 60) {
 				if(!this.isFocusOwner()) {
 					requestFocus();
-					System.out.println("yanked the focus back from GameFrame");
+					//System.out.println("yanked the focus back from GameFrame");
 				}
 				
 				requestFocusCounter = 0;

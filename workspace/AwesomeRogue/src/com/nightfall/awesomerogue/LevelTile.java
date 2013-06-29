@@ -11,9 +11,6 @@ public class LevelTile {
 	public int type;
 	private boolean clear;
 	
-	//ID used for map generation
-	private int id;
-	
 	public LevelTile(int type, boolean[] walls) {
 		this.type = type;
 
