@@ -65,7 +65,7 @@ public class InGameState extends GameState {
 
 	public static ArrayList<Character> enemyList;
 	private ArrayList<Character> enemies;
-	private Character[][] entities;
+	private static Character[][] entities;
 
 	private MetaGameState metaGame;
 
@@ -579,5 +579,13 @@ public class InGameState extends GameState {
 		}
 
 		return map[x][y];
+	}
+	
+	/**
+	 * Handle to the entities array
+	 * @return The array containing every enemy/character/pet
+	 */
+	public static Character[][] getEntities() {
+		return entities;
 	}
 }

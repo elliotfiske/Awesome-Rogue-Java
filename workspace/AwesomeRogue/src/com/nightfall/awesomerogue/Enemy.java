@@ -329,7 +329,7 @@ public class Enemy extends Character {
 	 * @return Sweet, sweet directional number.
 	 * @throws PANICEVERYTHINGISBROKENERROR OH NO WHAT HAVE YOU DONE OH NOOOOO
 	 */
-	public int getNumberedDirection(Point delta) {
+	public static int getNumberedDirection(Point delta) {
 		int diffX = delta.x;
 		int diffY = delta.y;
 		int result = -1;
@@ -453,7 +453,7 @@ public class Enemy extends Character {
 	 * @param numDirection Which direction you'd like converted to coordinates.
 	 * @return A Point containing the two coordinates you had in mind.
 	 */
-	private Point getPointDirection(int numDirection) {
+	public static Point getPointDirection(int numDirection) {
 		int diffX = 0, diffY = 0;
 
 		switch(numDirection) {

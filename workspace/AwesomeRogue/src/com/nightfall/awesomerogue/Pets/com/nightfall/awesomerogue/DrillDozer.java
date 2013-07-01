@@ -18,7 +18,13 @@ public class DrillDozer extends Character {
 	public void takeTurn(MainCharacter mainChar, Tile[][] map) {
 		lifespan--;
 		
-		move(direction.x, direction.y, map, idk lol);
+		move(direction.x, direction.y, map, InGameState.getEntities());
+		//Each turn, the Drill Dozer looks for the three tiles in front of it and melts 'em
+		//  xx           x   
+		//  7x    v      x<   etc.
+   		//       xxx     x
+		InGameState.waitOn(new DrillDozerEffect(getX(), getY(), direction, map, InGameState.getEntities()));
+		
 		
 		if(lifespan <= 0) {
 			die();
