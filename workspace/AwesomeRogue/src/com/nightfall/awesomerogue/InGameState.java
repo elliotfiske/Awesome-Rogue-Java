@@ -332,7 +332,10 @@ public class InGameState extends GameState {
 				}
 
 				//TODO: Weapons and usable stuff goes here.
-
+				
+				//Move the Drill Dozer!
+				
+				
 				//TODO: Have the enemies take a turn here. 
 				for(int i = 0; i < enemies.size(); i ++) {
 					Character enemy = enemies.get(i);

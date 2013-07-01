@@ -187,6 +187,9 @@ public class Character {
 
 	public void takeTurn(MainCharacter mainChar, Tile[][] map) {
 		// TODO Auto-generated method stub
+	}
+	
+	public void takeTurn(MainCharacter mainChar, Tile[][] map, Character[][] entities) {
 		
 	}
 }
