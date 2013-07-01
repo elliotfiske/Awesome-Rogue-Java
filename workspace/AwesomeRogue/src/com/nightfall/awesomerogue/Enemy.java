@@ -333,7 +333,7 @@ public class Enemy extends Character {
 		int diffX = delta.x;
 		int diffY = delta.y;
 		int result = -1;
-
+		
 		if(diffX == 0 && diffY == -1)  { result = 0; }
 		if(diffX == 1 && diffY == -1)  { result = 1; }
 		if(diffX == 1 && diffY == 0)   { result = 2; }

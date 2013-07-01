@@ -382,16 +382,16 @@ public class InGameState extends GameState {
 			map = new Tile[60][40];
 			for(int i = 0; i < map.length; i ++) {
 				for(int j = 0; j < map[0].length; j ++) {
-					map[i][j] = new Tile(Tile.FLOOR);
+					map[i][j] = new Tile(Tile.FLOOR, i, j);
 					if(i == 0 || i == 5 || j == 0 || j == 5 || i == map.length-1 || j == map[0].length-1) {
-						map[i][j] = new Tile(Tile.WALL);
+						map[i][j] = new Tile(Tile.WALL, i, j);
 					}
 				}
 			}
-
-			map[10][4] = new Tile(Tile.FLOOR);
-			map[5][4] = new Tile(Tile.FLOOR);
-			map[15][5] = new Tile(Tile.FLOOR);
+	
+			map[10][4] = new Tile(Tile.FLOOR, 10, 4);
+			map[5][4] = new Tile(Tile.FLOOR, 5, 4);
+			map[15][5] = new Tile(Tile.FLOOR, 15, 5);
 		}
 		else if(levelNum == 3) {
 			//Generate a sweet new Caves level.

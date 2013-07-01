@@ -46,6 +46,12 @@ public class Tile {
 		this.x = x;
 		this.y = y;
 	}
+	
+	public Tile(int type, int x, int y) {
+		this(type);
+		this.x = x;
+		this.y = y;
+	}
 
 	public void doAction(Character character) {
 		switch(type) {		// Screw subclasses just for the doAction...
