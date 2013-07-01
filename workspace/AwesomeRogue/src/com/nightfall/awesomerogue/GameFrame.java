@@ -22,6 +22,8 @@ public class GameFrame extends JFrame implements WindowListener {
 		
 		long period = (long) 1000.0/fps;
 		
+		Sprites.loadSprites();
+		
 		new GameFrame(period);
 	}
 	

@@ -9,6 +9,7 @@ public class DrillDozerEffect extends Effect {
 	Point direction;
 	Tile[][] map;
 	Character[][] entities;
+	int[][] crackedTiles;
 	
 	public DrillDozerEffect(int x, int y, Point direction, Tile[][] map, Character[][] entities) {
 		this.x = x;
@@ -24,28 +25,45 @@ public class DrillDozerEffect extends Effect {
 		//Look at 3 tiles: the one we're exactly pointed at, the one clockwise around us, and the one counter
 		//clockwise around us.
 		
+		boolean done = true;
+		
 		//Number one:
-		drill(x + direction.x, y + direction.y);
+		done &= drill(x + direction.x, y + direction.y, g2);
 		
 		//Number two:
 		int newDirection = (Enemy.getNumberedDirection(direction) + 1) % 8;
 		Point newPoint = Enemy.getPointDirection(newDirection);
-		drill(x + newPoint.x, y + newPoint.y);
+		done &= drill(x + newPoint.x, y + newPoint.y, g2);
 		
 		//Number 3:
 		newDirection = Enemy.getNumberedDirection(direction) - 1;
 		if(newDirection == -1) { newDirection = 7; }
 		newPoint = Enemy.getPointDirection(newDirection);
-		drill(x + newPoint.x, y + newPoint.y);
+		done &= drill(x + newPoint.x, y + newPoint.y, g2);
 	}
 
 	/**
-	 * "Drills" selected tile.  Will push enemies out of way + damage them, and melt walls that are in the way.
+	 * "Drills" selected tile.  Will push enemies out of way + damage them, and melt walls that are in the way. Also
+	 * iterates the "cracked tile" effect.
 	 * @param drillX
 	 * @param drillY
+	 * @return true when it's done, false if it's not done displaying the drilling animation.
 	 */
-	private void drill(int drillX, int drillY) {
+	private boolean drill(int drillX, int drillY, Graphics2D g2) {
+		if(entities[drillX][drillY] instanceof Enemy) {
+			//force march 'em TODO
+		}
 		
+		crackedTiles[drillX][drillY]++;
+		
+		if(crackedTiles[drillX][drillY] == Sprites.cracks.length - 1) {
+			map[drillX][drillY].type = Tile.FLOOR;
+			return true;
+		}
+		
+		g2.drawImage(Sprites.cracks[crackedTiles[drillX][drillY]], drillX, drillY, null);
+		
+		return false;
 	}
 
 	@Override

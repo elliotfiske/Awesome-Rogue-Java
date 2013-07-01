@@ -209,7 +209,6 @@ public class InGameState extends GameState {
 					}
 
 				} else if(map[i][j].seen) {
-					//your MOM is dead code
 					//The tile is in our memory.  Draw it, but darkened.
 
 					//TODO: actually darken the tile.  Dunno how to do it right now
