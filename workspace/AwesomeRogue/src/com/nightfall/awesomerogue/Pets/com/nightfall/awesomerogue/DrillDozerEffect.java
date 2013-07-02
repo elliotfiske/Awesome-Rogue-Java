@@ -17,6 +17,7 @@ public class DrillDozerEffect extends Effect {
 		this.direction = direction;
 		this.map = map;
 		this.entities = entities;
+		crackedTiles = new int[map.length][map[0].length];
 	}
 	
 	@Override
@@ -40,6 +41,11 @@ public class DrillDozerEffect extends Effect {
 		if(newDirection == -1) { newDirection = 7; }
 		newPoint = Enemy.getPointDirection(newDirection);
 		done &= drill(x + newPoint.x, y + newPoint.y, g2);
+		
+		//If all the tiles have been drilled, finish drilling for this turn
+		if(done) {
+			setRunning(false);
+		}
 	}
 
 	/**
@@ -56,8 +62,8 @@ public class DrillDozerEffect extends Effect {
 		
 		crackedTiles[drillX][drillY]++;
 		
-		if(crackedTiles[drillX][drillY] == Sprites.cracks.length - 1) {
-			map[drillX][drillY].type = Tile.FLOOR;
+		if(crackedTiles[drillX][drillY] >= Sprites.cracks.length - 1) {
+			map[drillX][drillY] = new Tile(Tile.FLOOR, drillX, drillY);
 			return true;
 		}
 		

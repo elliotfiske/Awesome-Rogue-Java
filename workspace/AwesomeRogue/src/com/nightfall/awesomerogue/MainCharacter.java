@@ -30,6 +30,7 @@ public class MainCharacter extends Character {
 		
 		skills[0] = Active.FALCON_PUNCH;
 		skills[1] = Active.GRENADE_LAUNCHER;
+		skills[2] = Active.DRILL_DOZER;
 	}
 
 	public int getAwesome() { return awesome; }

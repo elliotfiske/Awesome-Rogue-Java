@@ -12,7 +12,7 @@ public class Sprites {
 	public static BufferedImage[] cracks;
 	
 	public static void loadSprites() {
-		cracks = GameFrame.loadAnimation("cracks.png", 160);
+		cracks = GameFrame.loadAnimation("BreakBlox.png", 16);
 	}
 	
 }
