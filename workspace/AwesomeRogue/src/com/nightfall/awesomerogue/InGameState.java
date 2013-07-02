@@ -30,6 +30,7 @@ public class InGameState extends GameState {
 	public static final boolean GODMODE_CAN_FREEZE_ENEMIES = true;
 	private boolean areEnemiesFrozen = false;
 	public static final boolean EVERY_PASSIVE_UNLOCKED = true;
+	public static final boolean GODMODE_EARTHQUAKE = true;
 
 	/**
 	 * Describes the cell location of the upper lefthand corner of the area
@@ -280,6 +281,16 @@ public class InGameState extends GameState {
 		//	clearLevel();
 		//}
 
+		//DEBUG: are we suspended?
+		if(e.getKeyCode() == KeyEvent.VK_S) {
+			System.out.print("Are we suspended? ");
+			if(suspended) {
+				System.out.println("WE SURE ARE!");
+			} else {
+				System.out.println("WE ARE NOT NOT NOT!");
+			}
+		}
+		
 		//Parse the direction from the given KeyPress
 		Point p = getDirection(e);
 
@@ -291,8 +302,17 @@ public class InGameState extends GameState {
 		}
 
 		if(e.getKeyCode() == KeyEvent.VK_F && GODMODE_CAN_FREEZE_ENEMIES) {
-			for(int i = 0; i < enemies.size(); i ++) {
-				areEnemiesFrozen = !areEnemiesFrozen;
+			areEnemiesFrozen = !areEnemiesFrozen;
+		}
+
+		if(e.getKeyCode() == KeyEvent.VK_T && GODMODE_EARTHQUAKE) {
+			for(int i = 0; i < enemies.size(); i++) {
+				//Choose random direction
+				int randDirection = (int) (Math.random() * 8);
+				//convert to point coords
+				Point randDirectionP = Enemy.getPointDirection(randDirection);
+				//Shove 'em!
+				enemies.get(i).forceMarch(randDirectionP.x * 5, randDirectionP.y * 5);
 			}
 		}
 
@@ -331,10 +351,10 @@ public class InGameState extends GameState {
 				}
 
 				//TODO: Weapons and usable stuff goes here.
-				
+
 				//Move the Drill Dozer!
-				
-				
+
+
 				//TODO: Have the enemies take a turn here. 
 				for(int i = 0; i < enemies.size(); i ++) {
 					Character enemy = enemies.get(i);
@@ -345,7 +365,7 @@ public class InGameState extends GameState {
 					}
 					else {
 						if(!areEnemiesFrozen) {
-							enemy.takeTurn(mainChar, map); //TODO: I made it so that enemies freeze when you hit f
+							enemy.takeTurn(mainChar, map);
 						}
 					}
 				}
@@ -387,7 +407,7 @@ public class InGameState extends GameState {
 					}
 				}
 			}
-	
+
 			map[10][4] = new Tile(Tile.FLOOR, 10, 4);
 			map[5][4] = new Tile(Tile.FLOOR, 5, 4);
 			map[15][5] = new Tile(Tile.FLOOR, 15, 5);
@@ -579,7 +599,7 @@ public class InGameState extends GameState {
 
 		return map[x][y];
 	}
-	
+
 	/**
 	 * Handle to the entities array
 	 * @return The array containing every enemy/character/pet

@@ -23,4 +23,8 @@ public class Grenade extends Character {
 			InGameState.waitOn(new Explosion(getX(), getY()));
 		}
 	}
+	
+	public int getWeight() {
+		return 5;
+	}
 }

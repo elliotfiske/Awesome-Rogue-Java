@@ -20,6 +20,7 @@ public class Enemy extends Character {
 	private int x, y, whichEnemy, health = 0;
 	String name;
 	String icon;
+	int weight;
 
 	private int xBounty, yBounty;
 	private Tile bounty;
@@ -35,27 +36,33 @@ public class Enemy extends Character {
 		case ANGRY_MUSHROOM:
 			health = 15;
 			name = "angry mushroom";
+			weight = 20;
 			break;
 		case MUSHROOM:
 			health = 1;
 			name = "mushroom";
+			weight = 15;
 			break;
 		case RAT:
 			health = 10;
 			name = "rat";
+			weight = 15;
 			break;
 		case ZOMBIE:
 			health = 30;
 			name = "zombie";
+			weight = 30;
 			break;
 		case SKELETON:
 			health = 40;
 			name = "skeleton";
+			weight = 10;
 			break;
 		case WIZARD:
 			health = 50;
 			name = "ALLAN PLEASE PUT IN WIZARD NAME";
 			//TODO: implement sweet wizard name maker
+			weight = 35;
 			break;
 		}
 
@@ -620,5 +627,9 @@ public class Enemy extends Character {
 			System.out.println("The " + name + " is slain!");
 
 		}
+	}
+	
+	public int getWeight() {
+		return weight;
 	}
 }

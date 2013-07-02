@@ -88,7 +88,7 @@ public class Character {
 	public void forceMarch(int dx, int dy, boolean inAir) {
 		forceMarch = true;
 		forceMarchTo = new Point(x + dx, y + dy);
-		InGameState.waitOn("animation");
+		InGameState.waitOn("forcemarch" + getClass());
 		
 		if(inAir) altitude ++;
 	}
@@ -101,6 +101,10 @@ public class Character {
 		if(forceMarch) {
 			int targetX = x;
 			int targetY = y;
+			
+			/** Not really speed, just an estimator of how far they're gonna go. */
+			int speed = Math.abs(forceMarchTo.x - x) + Math.abs(forceMarchTo.y - y);
+			
 			// Calculate how far we want to move!
 			if(forceMarchTo.x < x) {
 				targetX --;
@@ -116,7 +120,57 @@ public class Character {
 				targetY ++;
 			}
 			
-			if(!map[targetX][targetY].blocker && entities[targetX][targetY] == null ||
+			if(map[targetX][targetY].blocker) {
+				//you hit a wall ouuuch
+				if(this instanceof MainCharacter) {
+					System.out.println("You slam into a wall!");
+				}
+				
+				if(this instanceof Enemy) {
+					System.out.println("The " + ((Enemy) this).getName() + " slams into a wall!");
+				}
+
+				altitude = 0;
+				InGameState.endWait("forcemarch" + getClass());
+				forceMarch = false;
+			}
+			
+			if(entities[targetX][targetY] != null && forceMarch) {
+				//We just slammed into somebody.  LOOKS LIKE THEY'RE COMIN' ALONG FOR THE RIDE
+				//Consider their weight, though.  Inelastic collision!
+				int myWeight = getWeight();
+				int hisWeight = entities[targetX][targetY].getWeight();
+				
+				//If they're huge, they won't get knocked back as far.  Will never go below 1, though.
+				int newSpeed = (int) (speed - Math.floor((double) hisWeight / (double) myWeight));
+				if(newSpeed < 1) { newSpeed = 1; }
+				
+				//Now we gotta recalculate our target points.
+				//First, reverse engineer the direction.
+				Point direction = new Point((int) Math.signum(forceMarchTo.x - x), (int) Math.signum(forceMarchTo.y - y));
+				//Now, move the guy we ran into to this new target! (direction * speed)
+				entities[targetX][targetY].forceMarch(direction.x * newSpeed, direction.y * newSpeed);
+				//Meanwhile, adjust our target to one behind the other guy's.
+				forceMarch(direction.x * (newSpeed-1), direction.y * (newSpeed-1));
+			}
+			
+			//Have we arrived at our destination?
+			if(forceMarch && forceMarchTo.x == x && forceMarchTo.y == y) {
+				//Feel free to move about the cabin
+				InGameState.endWait("forcemarch" + getClass());
+				forceMarch = false;
+				altitude = 0;
+			}
+			
+			//I guess we have no choice left but to move :P
+			if(forceMarch) {
+				entities[x][y] = null;
+				entities[targetX][targetY] = this;
+				x = targetX;
+				y = targetY;
+			}
+			
+			/*if((!map[targetX][targetY].blocker && entities[targetX][targetY] == null) ||
 					entities[targetX][targetY].getAltitude() != altitude) {
 				entities[x][y] = null;
 				x = targetX;
@@ -150,7 +204,7 @@ public class Character {
 				InGameState.endWait("animation");
 				forceMarch = false;
 				if(altitude > 0) altitude --;
-			}
+			}*/
 		}
 	}
 	
@@ -191,5 +245,13 @@ public class Character {
 	
 	public void takeTurn(MainCharacter mainChar, Tile[][] map, Character[][] entities) {
 		
+	}
+	
+	/**
+	 * How heavy you are.  Important for collisions.
+	 */
+	public int getWeight() {
+		//Defaults to 10
+		return 10;
 	}
 }

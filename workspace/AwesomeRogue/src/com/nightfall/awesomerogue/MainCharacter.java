@@ -81,6 +81,11 @@ public class MainCharacter extends Character {
 	}
 
 	public void activateSkill(int skill, Point target) {
+		//Before if you hit a key that wasn't a direction you would drop a grenade on your feet.
+		if(target.equals(new Point(0,0))) {
+			return;
+		}
+		
 		if(skills[skill] != Active.EMPTY_SLOT) {
 			actives.doActive(skills[skill], target);
 			switch(skill) {
