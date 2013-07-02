@@ -1,6 +1,5 @@
 package com.nightfall.awesomerogue;
 
-import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
 
@@ -88,7 +87,7 @@ public class Character {
 	public void forceMarch(int dx, int dy, boolean inAir) {
 		forceMarch = true;
 		forceMarchTo = new Point(x + dx, y + dy);
-		InGameState.waitOn("forcemarch" + getClass());
+		InGameState.waitOn("forcemarch" + getClass().getName());
 		
 		if(inAir) altitude ++;
 	}
@@ -99,28 +98,29 @@ public class Character {
 		}
 		
 		if(forceMarch) {
-			int targetX = x;
-			int targetY = y;
+			System.out.println("hey hey hey");
+			int proposedX = x;
+			int proposedY = y;
 			
 			/** Not really speed, just an estimator of how far they're gonna go. */
 			int speed = Math.abs(forceMarchTo.x - x) + Math.abs(forceMarchTo.y - y);
 			
 			// Calculate how far we want to move!
 			if(forceMarchTo.x < x) {
-				targetX --;
+				proposedX --;
 			}
 			else if(forceMarchTo.x > x) {
-				targetX ++;
+				proposedX ++;
 			}
 			
 			if(forceMarchTo.y < y) {
-				targetY --;
+				proposedY --;
 			}
 			else if(forceMarchTo.y > y) {
-				targetY ++;
+				proposedY ++;
 			}
 			
-			if(map[targetX][targetY].blocker) {
+			if(map[proposedX][proposedY].blocker) {
 				//you hit a wall ouuuch
 				if(this instanceof MainCharacter) {
 					System.out.println("You slam into a wall!");
@@ -131,15 +131,16 @@ public class Character {
 				}
 
 				altitude = 0;
-				InGameState.endWait("forcemarch" + getClass());
+				InGameState.endWait("forcemarch" + getClass().getName());
 				forceMarch = false;
+				System.out.println("Line 136?");
 			}
 			
-			if(entities[targetX][targetY] != null && forceMarch) {
+			if(entities[proposedX][proposedY] != null && forceMarch && entities[proposedX][proposedY] != this) {
 				//We just slammed into somebody.  LOOKS LIKE THEY'RE COMIN' ALONG FOR THE RIDE
 				//Consider their weight, though.  Inelastic collision!
 				int myWeight = getWeight();
-				int hisWeight = entities[targetX][targetY].getWeight();
+				int hisWeight = entities[proposedX][proposedY].getWeight();
 				
 				//If they're huge, they won't get knocked back as far.  Will never go below 1, though.
 				int newSpeed = (int) (speed - Math.floor((double) hisWeight / (double) myWeight));
@@ -149,25 +150,28 @@ public class Character {
 				//First, reverse engineer the direction.
 				Point direction = new Point((int) Math.signum(forceMarchTo.x - x), (int) Math.signum(forceMarchTo.y - y));
 				//Now, move the guy we ran into to this new target! (direction * speed)
-				entities[targetX][targetY].forceMarch(direction.x * newSpeed, direction.y * newSpeed);
+				entities[proposedX][proposedY].forceMarch(direction.x * newSpeed, direction.y * newSpeed);
 				//Meanwhile, adjust our target to one behind the other guy's.
 				forceMarch(direction.x * (newSpeed-1), direction.y * (newSpeed-1));
+				System.out.println("line 155? Other guy: " + entities[proposedX][proposedY].getClass().getName());
 			}
 			
 			//Have we arrived at our destination?
-			if(forceMarch && forceMarchTo.x == x && forceMarchTo.y == y) {
+			if(forceMarchTo.x == x && forceMarchTo.y == y) {
 				//Feel free to move about the cabin
-				InGameState.endWait("forcemarch" + getClass());
+				InGameState.endWait("forcemarch" + getClass().getName());
 				forceMarch = false;
 				altitude = 0;
+				System.out.println("line 163?");
 			}
 			
 			//I guess we have no choice left but to move :P
 			if(forceMarch) {
 				entities[x][y] = null;
-				entities[targetX][targetY] = this;
-				x = targetX;
-				y = targetY;
+				entities[proposedX][proposedY] = this;
+				x = proposedX;
+				y = proposedY;
+				System.out.println("line 171?");
 			}
 			
 			/*if((!map[targetX][targetY].blocker && entities[targetX][targetY] == null) ||

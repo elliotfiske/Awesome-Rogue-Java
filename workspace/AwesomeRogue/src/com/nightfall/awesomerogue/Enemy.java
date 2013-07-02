@@ -279,8 +279,13 @@ public class Enemy extends Character {
 			//map[x + proposedDX][y + proposedDY].illustrate(Color.ORANGE);
 		}
 		
+		Character[][] entities = InGameState.getEntities();
+		entities[x][y] = null;
+		
 		x += proposedDX;
 		y += proposedDY;
+		
+		entities[x][y] = this;
 	}	
 
 	/**

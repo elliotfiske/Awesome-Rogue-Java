@@ -128,14 +128,13 @@ public class InGameState extends GameState {
 	public void update() {
 		if(suspended) {
 			String waiting = waitingOn.get(waitingOn.size()-1);
-			if(waiting.equals("animation")) {
-				mainChar.update(map, entities);
-				for(int i = 0; i < enemies.size(); i++) {
-					Character e = enemies.get(i);
-					e.update(map, entities);
-				}
-				calculateLighting();
+			mainChar.update(map, entities);
+			for(int i = 0; i < enemies.size(); i++) {
+				Character e = enemies.get(i);
+				e.update(map, entities);
 			}
+			calculateLighting();
+
 		}
 	}
 
@@ -285,12 +284,15 @@ public class InGameState extends GameState {
 		if(e.getKeyCode() == KeyEvent.VK_S) {
 			System.out.print("Are we suspended? ");
 			if(suspended) {
-				System.out.println("WE SURE ARE!");
+				System.out.println("WE SURE ARE! Dumping waitstack:");
+				for(String s : waitingOn) {
+					System.out.println(s);
+				}
 			} else {
 				System.out.println("WE ARE NOT NOT NOT!");
 			}
 		}
-		
+
 		//Parse the direction from the given KeyPress
 		Point p = getDirection(e);
 
