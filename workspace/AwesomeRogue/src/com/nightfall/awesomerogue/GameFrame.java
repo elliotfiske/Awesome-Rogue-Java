@@ -79,8 +79,6 @@ public class GameFrame extends JFrame implements WindowListener {
 			for(int i=0; i < number; i ++) {
 				strip[i] = new BufferedImage(imWidth, height, BufferedImage.TYPE_INT_ARGB);
 				
-				System.out.println("LOADED NUMBA " + i + " OF " + filename);
-				
 				Graphics2D stripGC = strip[i].createGraphics();
 				stripGC.drawImage(stripIm, 0, 0, imWidth, height, i*imWidth, 0, (i*imWidth)+imWidth, height, null);
 			}

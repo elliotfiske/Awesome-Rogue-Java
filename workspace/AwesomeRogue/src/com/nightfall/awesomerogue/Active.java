@@ -81,6 +81,7 @@ public class Active {
 	}
 	
 	private void prepHulkSerum() {
+		InGameState.newOngoingEffect(new OngoingHulkOut(10, mainChar));
 		System.out.println("Your vision clouds with green as your body swells to grotesque proportions! (Continue...)");
 		InGameState.endWait("Z");
 		InGameState.endWait("X");
@@ -89,9 +90,6 @@ public class Active {
 	}
 	
 	public void hulkOut() {
-		mainChar.hulking = true;
-
-		InGameState.waitOn(new HulkOut());
-		//Hulk effect (add green overlay maybe?)
+		//hm
 	}
 }

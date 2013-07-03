@@ -57,6 +57,7 @@ public class InGameState extends GameState {
 
 	public static ArrayList<String> waitingOn;
 	private static ArrayList<Effect> effects;
+	private static ArrayList<OngoingEffect> ongoingEffects;
 	public static boolean suspended = false; //we could just check if waitingOn.size() == 0, but this is faster
 
 	private BufferedImage[] tileImages;
@@ -75,6 +76,8 @@ public class InGameState extends GameState {
 
 		this.metaGame = metaGame;
 		mainChar = character;
+		//give the main character a map he's lost
+		mainChar.giveMap(map);
 		mainChar.setLevel(this);
 
 		tileImages = metaGame.getTileImages();
@@ -98,6 +101,7 @@ public class InGameState extends GameState {
 		imgSFX = new ImageSFX();
 
 		effects = new ArrayList<Effect>();
+		ongoingEffects = new ArrayList<OngoingEffect>();
 
 		guiBG = ImageIO.read(new File("img/guiBG.png"));
 
@@ -115,7 +119,8 @@ public class InGameState extends GameState {
 		if(needsInit) {
 			initLevel(3);
 
-			mainChar = new MainCharacter(10,10);
+			System.out.println("eh?");
+			mainChar = new MainCharacter(10,10,map);
 			mainChar.setLevel(this);
 		}
 	}
@@ -138,8 +143,14 @@ public class InGameState extends GameState {
 		}
 	}
 
+	public static void newOngoingEffect(OngoingEffect oe) {
+		//Run the intro of the ongoing effect
+		waitOn(oe.getIntro());
+		ongoingEffects.add(oe);
+	}
+	
 	public static void waitOn(Effect effect) {
-		waitOn("animation");
+		waitOn("effect" + effect.getClass().getName());
 		effects.add(effect);
 	}
 
@@ -168,13 +179,38 @@ public class InGameState extends GameState {
 		imgSFX.drawResizedImage(g2, guiBG, 0, 0, GamePanel.PWIDTH, GamePanel.PHEIGHT);
 		g2.drawImage(mapImg, INGAME_WINDOW_OFFSET_X, INGAME_WINDOW_OFFSET_Y, null);
 
-		if(waitingOn.contains("animation")) {
+		boolean effectHappening = false;
+		boolean effectOngoing = false;
+		
+		for(String waitingItem : waitingOn) {
+			if(waitingItem.startsWith("effect")) {
+				effectHappening = true;
+			}
+		}
+		
+		if(ongoingEffects.size() > 0) {
+			effectOngoing = true;
+		}
+		
+		if(effectHappening) {
 			for(int i = 0; i < effects.size(); i++) {
 				Effect e = effects.get(i);
 				e.renderAndIterate(g2, map, entities);
 				if(!e.running()) {
-					endWait("animation");
+					endWait("effect" + e.getClass().getName());
 					effects.remove(i--); // and decrement i so we don't skip an effect
+				}
+			}
+		}
+		
+		if(effectOngoing) {
+			for(int i = 0; i < ongoingEffects.size(); i++) {
+				OngoingEffect e = ongoingEffects.get(i);
+				e.renderAndIterate(g2, map, entities);
+				if(!e.running()) {
+					//Run the outro of the ongoing effect and take it out
+					waitOn(e.getOutro());
+					ongoingEffects.remove(i--);
 				}
 			}
 		}
@@ -370,6 +406,12 @@ public class InGameState extends GameState {
 							enemy.takeTurn(mainChar, map);
 						}
 					}
+				}
+				
+				//Iterate the iteratable effects here (the dead ones are removed in render() )
+				for(int i = 0; i < ongoingEffects.size(); i++) {
+					OngoingEffect oe = ongoingEffects.get(i);
+					oe.turnIterate(map, entities);
 				}
 
 				calculateLighting();

@@ -1,6 +1,9 @@
 package com.nightfall.awesomerogue;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.Point;
+import java.util.Map;
 
 
 public class MainCharacter extends Character {
@@ -19,15 +22,20 @@ public class MainCharacter extends Character {
 	 * whereas skills[] just contains a list of the id's of the actives you've gathered. */
 	private boolean[] passives;
 
+	/** MainCharacter needs a map or he'll get lost */
+	private Tile[][] map;
+	
 	/** HULK SMASH??!? */
-	public boolean hulking;	
+	private boolean isHulking;	
 
-	public MainCharacter(int x, int y) {
+	public MainCharacter(int x, int y, Tile[][] map) {
 		super(x, y, "@");
 		awesome = 100;
 		setCurrentWeapon(new Pistol());
 		skills = new int[4];
 		passives = new boolean[Passive.NUM_PASSIVES];
+		
+		this.map = map;
 		
 		actives = new Active(this);
 		
@@ -120,5 +128,47 @@ public class MainCharacter extends Character {
 
 	public int howManySkills() {
 		return numSkills;
+	}
+	
+	@Override
+	public void draw(Graphics2D g2, int camX, int camY) {
+		if(!isHulking) {
+			super.draw(g2, camX, camY);
+		} else {
+			//TODO: replace with big green @
+			g2.setColor(Color.green);
+			g2.fillRect((getX()-camX)*12 - 12, ((getY()-camY)*12), InGameState.TILE_SIZE * 3, InGameState.TILE_SIZE * 3);
+		}
+	}
+
+	public void setHulking(boolean willBeHulking) {
+		
+		if(isHulking && !willBeHulking) {
+			//SHRIIINK
+			isHulking = false;
+		}
+		
+		if(!isHulking && willBeHulking) {
+			//TRANSFOOOORM
+			isHulking = true;
+			//knock down any walls around you
+			boolean blewStuffUp = false;
+			for(int dx = -1; dx <= 1; dx++) {
+				for(int dy = -1; dy <= 1; dy++) {
+					if(map[getX() + dx][getY() + dy].type == Tile.WALL) {
+						map[getX() + dx][getY() + dy] = new Tile(Tile.FLOOR, getX() + dx, getY() + dy);
+						blewStuffUp = true;
+					}
+				}
+			}
+			
+			if(blewStuffUp) {
+				System.out.println("You smash down the walls around you as you transform!");
+			}
+		}
+	}
+
+	public void giveMap(Tile[][] map) {
+		this.map = map;
 	}
 }
