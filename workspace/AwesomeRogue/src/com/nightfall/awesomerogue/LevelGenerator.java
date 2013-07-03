@@ -297,6 +297,19 @@ public class LevelGenerator {
 			}
 		}
 		
+		//Make sure you CAN NEVER ESCAPE
+		for(int x = 0; x < width; x++) {
+			for(int y = 0; y < height; y++) {
+				if(x == 0 || x == width - 1) {
+					map[x][y] = new Tile(Tile.IMPASSABLE, x, y);
+				}
+				
+				if(y == 0 || y == height - 1) {
+					map[x][y] = new Tile(Tile.IMPASSABLE, x, y);
+				}
+			}
+		}
+		
 		//Plop down some enemies based on the difficulty.
 		if(difficulty == 1) {
 			Enemy bob = new Enemy(25, 10, Enemy.RAT);

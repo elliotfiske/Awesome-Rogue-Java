@@ -10,6 +10,7 @@ public class Tile {
 	public static final int DOOR = 2;
 	public static final int OPEN_DOOR = 3;
 	public static final int CHEST = 4;
+	public static final int IMPASSABLE = 5; //"bedrock" so to speak
 
 	public boolean blocker = false;
 	public boolean visible = false, seen = false;

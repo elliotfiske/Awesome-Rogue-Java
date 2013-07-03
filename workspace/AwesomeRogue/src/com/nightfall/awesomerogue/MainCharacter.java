@@ -43,6 +43,10 @@ public class MainCharacter extends Character {
 		skills[1] = Active.HULK_SERUM;
 		skills[2] = Active.DRILL_DOZER;
 	}
+	
+	public MainCharacter(int x, int y) {
+		this(x, y, null);
+	}
 
 	public int getAwesome() { return awesome; }
 
@@ -117,6 +121,11 @@ public class MainCharacter extends Character {
 	public void move(int dx, int dy, Tile[][] map, Character[][] entities) {
 		if(InGameState.GODMODE_WALKTHRUWALLS) {
 			initPos(getX() + dx, getY() + dy);
+		} else if(isHulking) {
+			//HULK SMASH THROUGH WALLS
+			//check borders
+			
+			initPos(getX() + dx, getY() + dy);
 		} else {
 			super.move(dx, dy, map, entities);
 		}
@@ -137,7 +146,7 @@ public class MainCharacter extends Character {
 		} else {
 			//TODO: replace with big green @
 			g2.setColor(Color.green);
-			g2.fillRect((getX()-camX)*12 - 12, ((getY()-camY)*12), InGameState.TILE_SIZE * 3, InGameState.TILE_SIZE * 3);
+			g2.fillRect((getX()-camX)*12 - 12, ((getY()-camY)*12 - 12), InGameState.TILE_SIZE * 3, InGameState.TILE_SIZE * 3);
 		}
 	}
 
@@ -151,6 +160,7 @@ public class MainCharacter extends Character {
 		if(!isHulking && willBeHulking) {
 			//TRANSFOOOORM
 			isHulking = true;
+			
 			//knock down any walls around you
 			boolean blewStuffUp = false;
 			for(int dx = -1; dx <= 1; dx++) {
@@ -168,7 +178,9 @@ public class MainCharacter extends Character {
 		}
 	}
 
-	public void giveMap(Tile[][] map) {
-		this.map = map;
+	public void giveMap(Tile[][] inmap) {
+		this.map = inmap;
+		System.out.println("MAP RECEIVED");
+		Tile wat = map[20][20];
 	}
 }

@@ -45,7 +45,7 @@ public class InGameState extends GameState {
 	int mapHeight = 0;
 
 	private MainCharacter mainChar;
-
+	
 	private ImageSFX imgSFX;
 
 	private BufferedImage guiBG;
@@ -76,8 +76,6 @@ public class InGameState extends GameState {
 
 		this.metaGame = metaGame;
 		mainChar = character;
-		//give the main character a map he's lost
-		mainChar.giveMap(map);
 		mainChar.setLevel(this);
 
 		tileImages = metaGame.getTileImages();
@@ -462,6 +460,9 @@ public class InGameState extends GameState {
 			levelGen.makeLevel(map, LevelGenerator.CAVE, 80, 70, 1);
 
 			mainChar.initPos(8, 8);
+			
+			//give the main character a map he's lost
+			mainChar.giveMap(map);
 
 			enemies = enemyList;
 		}
