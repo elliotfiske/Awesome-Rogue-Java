@@ -64,6 +64,7 @@ public class DrillDozerEffect extends Effect {
 		
 		if(crackedTiles[drillX][drillY] >= Sprites.cracks.length - 1) {
 			map[drillX][drillY] = new Tile(Tile.FLOOR, drillX, drillY);
+			map[drillX][drillY].seen = true;
 			return true;
 		}
 		

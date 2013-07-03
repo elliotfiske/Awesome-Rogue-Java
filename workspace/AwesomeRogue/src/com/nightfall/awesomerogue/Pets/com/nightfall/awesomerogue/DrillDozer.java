@@ -32,4 +32,8 @@ public class DrillDozer extends Character {
 					"back into your pocket.");
 		}
 	}
+	
+	public String getName() {
+		return "Drill Dozer";
+	}
 }

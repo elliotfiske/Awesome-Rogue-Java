@@ -50,8 +50,10 @@ public class Character {
 			// Only do action if there's no enemy there though.
 			map[targetX][targetY].doAction(this);
 		}
-		else {
+		else if(entities[targetX][targetY] instanceof Enemy){
 			attack(new Point(dx, dy));
+		} else {
+			System.out.println("Your " + entities[targetX][targetY].getName() + " is in the way.");
 		}
 	}
 	

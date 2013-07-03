@@ -7,9 +7,10 @@ public class Active {
 	public static final int GRENADE_LAUNCHER = 1;
 	public static final int FALCON_PUNCH = 2;
 	public static final int DRILL_DOZER = 3;
+	public static final int HULK_SERUM = 4;
 	
 	/** number of implemented actives.  Be sure to update this if you add an active! */
-	public static final int NUM_ACTIVES = 3;
+	public static final int NUM_ACTIVES = 4;
 	
 	MainCharacter mainChar;
 	
@@ -29,6 +30,9 @@ public class Active {
 		case DRILL_DOZER:
 			prepDrillDozer();
 			break;
+		case HULK_SERUM:
+			prepHulkSerum();
+			break;
 		}
 	}
 	
@@ -42,6 +46,9 @@ public class Active {
 			break;
 		case DRILL_DOZER:
 			drillDozer(target);
+			break;
+		case HULK_SERUM:
+			hulkOut();
 			break;
 		}
 	}
@@ -71,5 +78,20 @@ public class Active {
 	
 	private void drillDozer(Point target) {
 		mainChar.getLevel().addCharacter(new DrillDozer(mainChar.getX(), mainChar.getY(), target));
+	}
+	
+	private void prepHulkSerum() {
+		System.out.println("Your vision clouds with green as your body swells to grotesque proportions! (Continue...)");
+		InGameState.endWait("Z");
+		InGameState.endWait("X");
+		InGameState.endWait("C");
+		hulkOut();
+	}
+	
+	public void hulkOut() {
+		mainChar.hulking = true;
+
+		InGameState.waitOn(new HulkOut());
+		//Hulk effect (add green overlay maybe?)
 	}
 }

@@ -17,7 +17,10 @@ public class MainCharacter extends Character {
 	/** Passives kind of works backwards from how skills work, since you can have ANY
 	 * number of passives.  You check to see if you have a passive by calling passives[int passiveId],
 	 * whereas skills[] just contains a list of the id's of the actives you've gathered. */
-	private boolean[] passives;	
+	private boolean[] passives;
+
+	/** HULK SMASH??!? */
+	public boolean hulking;	
 
 	public MainCharacter(int x, int y) {
 		super(x, y, "@");
@@ -29,7 +32,7 @@ public class MainCharacter extends Character {
 		actives = new Active(this);
 		
 		skills[0] = Active.FALCON_PUNCH;
-		skills[1] = Active.GRENADE_LAUNCHER;
+		skills[1] = Active.HULK_SERUM;
 		skills[2] = Active.DRILL_DOZER;
 	}
 

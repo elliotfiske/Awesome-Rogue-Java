@@ -27,4 +27,8 @@ public class Grenade extends Character {
 	public int getWeight() {
 		return 5;
 	}
+	
+	public String getName() {
+		return "Grenade";
+	}
 }
