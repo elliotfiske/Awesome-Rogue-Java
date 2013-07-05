@@ -15,7 +15,9 @@ public class HulkOut extends Effect {
 		for(currAlpha = 0; currAlpha < MAX_ALPHA; currAlpha += 1) {
 			Color transGreen = new Color(0, 255, 0, currAlpha);
 			g2.setColor(transGreen);
-			g2.fillRect(0, 0, 500, 500);
+
+			g2.fillRect(InGameState.INGAME_WINDOW_OFFSET_X, InGameState.INGAME_WINDOW_OFFSET_Y,
+					InGameState.INGAME_WINDOW_WIDTH * InGameState.TILE_SIZE, InGameState.INGAME_WINDOW_HEIGHT * InGameState.TILE_SIZE);
 		}
 		
 		setRunning(false);
@@ -25,6 +27,7 @@ public class HulkOut extends Effect {
 	public void render(Graphics2D g2) {
 		// TODO Auto-generated method stub
 		//Not sure this matters..?
+		System.out.println("hi");
 	}
 	
 }

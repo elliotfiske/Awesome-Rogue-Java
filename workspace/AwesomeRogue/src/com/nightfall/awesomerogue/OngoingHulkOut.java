@@ -24,7 +24,8 @@ public class OngoingHulkOut extends OngoingEffect {
 		
 		Color transGreen = new Color(0, 255, 0, HulkOut.MAX_ALPHA);
 		g2.setColor(transGreen);
-		g2.fillRect(0, 0, 500, 500);
+		g2.fillRect(InGameState.INGAME_WINDOW_OFFSET_X, InGameState.INGAME_WINDOW_OFFSET_Y,
+				InGameState.INGAME_WINDOW_WIDTH * InGameState.TILE_SIZE, InGameState.INGAME_WINDOW_HEIGHT * InGameState.TILE_SIZE);
 		
 	}
 

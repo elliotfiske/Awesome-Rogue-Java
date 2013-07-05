@@ -3,7 +3,7 @@ package com.nightfall.awesomerogue;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.util.Map;
+import java.util.ArrayList;
 
 
 public class MainCharacter extends Character {
@@ -117,15 +117,59 @@ public class MainCharacter extends Character {
 		}
 	}
 
-	//Overrides the move() method (only really matters if we're debugging and want to walk through walls.)
+	//Overrides the move() method (so I can be hulk)
 	public void move(int dx, int dy, Tile[][] map, Character[][] entities) {
 		if(InGameState.GODMODE_WALKTHRUWALLS) {
 			initPos(getX() + dx, getY() + dy);
 		} else if(isHulking) {
-			//HULK SMASH THROUGH WALLS
-			//check borders
+			//HULK SMASH THROUGH WALLS unless they are impassable
+			//Check all the walls where we will be occupying.
+			boolean canMove = true;
+			ArrayList<Point> walls = new ArrayList<Point>();
+			ArrayList<Point> doors = new ArrayList<Point>();
+			for(int offsetX = -1; offsetX <= 1; offsetX++) {
+				for(int offsetY = -1; offsetY <= 1; offsetY++) {
+					if(map[getX() + dx + offsetX][getY() + dy + offsetY].type == Tile.WALL) {
+						walls.add(new Point(getX() + dx + offsetX, getY() + dy + offsetY));
+					}
+					
+					if(map[getX() + dx + offsetX][getY() + dy + offsetY].type == Tile.DOOR) {
+						map[getX() + dx + offsetX][getY() + dy + offsetY] = new Tile(Tile.FLOOR, getX() + dx, getY() + dy);
+						doors.add(new Point(getX() + dx + offsetX, getY() + dy + offsetY));
+					}
+					
+					if(map[getX() + dx + offsetX][getY() + dy + offsetY].type == Tile.IMPASSABLE) {
+						canMove = false;
+						System.out.println("You pound your fists against the wall in vain; it won't budge.");
+					}
+				}
+			}
 			
-			initPos(getX() + dx, getY() + dy);
+			if(canMove) {
+				String wallString = "";
+				String doorString = "";
+				String conjunctionJunction = "";
+				if(walls.size() == 1)  wallString = "wall";
+				if(walls.size() > 1)   wallString = "walls";
+				if(doors.size() == 1)  doorString = "door";
+				if(doors.size() > 1)   doorString = "doors";
+				if(walls.size() > 0 && doors.size() > 0) conjunctionJunction = " and the ";
+				
+				if(walls.size() > 0 || doors.size() > 0) {
+					System.out.println("You smash through the " + wallString + conjunctionJunction + doorString + "!");
+				}
+				
+				for(Point p : walls) {
+					map[p.x][p.y] = new Tile(Tile.FLOOR, p.x, p.y);
+				}
+				
+				for(Point p : doors) {
+					map[p.x][p.y] = new Tile(Tile.FLOOR, p.x, p.y);
+				}
+				
+				initPos(getX() + dx, getY() + dy);
+			}
+			
 		} else {
 			super.move(dx, dy, map, entities);
 		}
@@ -176,6 +220,10 @@ public class MainCharacter extends Character {
 				System.out.println("You smash down the walls around you as you transform!");
 			}
 		}
+	}
+	
+	public boolean isHulking() {
+		return isHulking;
 	}
 
 	public void giveMap(Tile[][] inmap) {

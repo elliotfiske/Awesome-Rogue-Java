@@ -26,7 +26,7 @@ public class InGameState extends GameState {
 
 	//Enable to debug stuff
 	public static final boolean GODMODE_VISION = false;
-	public static final boolean GODMODE_WALKTHRUWALLS = true;
+	public static final boolean GODMODE_WALKTHRUWALLS = false;
 	public static final boolean GODMODE_CAN_FREEZE_ENEMIES = true;
 	private boolean areEnemiesFrozen = false;
 	public static final boolean EVERY_PASSIVE_UNLOCKED = true;
