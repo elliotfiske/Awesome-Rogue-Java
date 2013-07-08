@@ -280,12 +280,18 @@ public class Enemy extends Character {
 		}
 		
 		Character[][] entities = InGameState.getEntities();
-		entities[x][y] = null;
 		
-		x += proposedDX;
-		y += proposedDY;
-		
-		entities[x][y] = this;
+		//See if we can attack the player
+		if(entities[x + proposedDX][y + proposedDY] instanceof MainCharacter) {
+			System.out.println("The rat scratches you!");
+		} else {
+			entities[x][y] = null;
+			
+			x += proposedDX;
+			y += proposedDY;
+			
+			entities[x][y] = this;
+		}
 	}	
 
 	/**
