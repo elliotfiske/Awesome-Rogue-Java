@@ -285,15 +285,13 @@ public class Enemy extends Character {
 		if(entities[x + proposedDX][y + proposedDY] instanceof MainCharacter) {
 			System.out.println("The rat scratches you!");
 		} else {
-			entities[x][y] = null;
 			
-			x += proposedDX;
-			y += proposedDY;
+			moveEnemyTo(x + proposedDX, y + proposedDY);
 			
-			entities[x][y] = this;
+			//System.out.println("Entity changed? Entity[x][y]: " + entities[x][y].getClass().getName() + " at " + x + ", " + y); TODO
 		}
 	}	
-
+	
 	/**
 	 * This method looks for an intersection between the straightTiles path and the feeler path.
 	 * @param straightTiles The list of tiles that lead straight to the player.
@@ -643,4 +641,22 @@ public class Enemy extends Character {
 	public int getWeight() {
 		return weight;
 	}
+	
+	/**
+	 * Moves an enemy to the specified x and y coords.  Doesn't ask questions.  Gets the job done quick. $15.99 / hour.
+	 * @param x Where do we move the body
+	 * @param y WHERE DO WE MOVE THE BODY?
+	 */
+	private void moveEnemyTo(int x, int y) {
+		Character[][] entities = InGameState.getEntities();
+		
+		this.x = x;
+		this.y = y;
+		
+		initPos(x, y);
+		
+		entities[x][y] = null;
+		entities[this.x][this.y] = this;
+	}
+
 }

@@ -90,6 +90,7 @@ public class Character {
 		forceMarch = true;
 		forceMarchTo = new Point(x + dx, y + dy);
 		InGameState.waitOn("forcemarch" + getClass().getName());
+		System.out.println("Force march from " + x + ", " + y + " to " + forceMarchTo.x + ", " + forceMarchTo.y);
 		
 		if(inAir) altitude ++;
 	}
@@ -123,6 +124,8 @@ public class Character {
 			}
 			
 			if(map[proposedX][proposedY].blocker) {
+				System.out.println("tile at " + proposedX + ", " + proposedY + " is a blocker?");
+				
 				//you hit a wall ouuuch
 				if(this instanceof MainCharacter) {
 					System.out.println("You slam into a wall!");
@@ -259,5 +262,20 @@ public class Character {
 	public int getWeight() {
 		//Defaults to 10
 		return 10;
+	}
+	
+	/**
+	 * Calculates the difference between a character and this one and propels the other one away.
+	 * @param c The character to push away.
+	 */
+	public void knockAway(Character c) {
+		int distance = (int) (( (double) getWeight() / c.getWeight() + 1) * 2);
+		int dx = c.getX() - x;
+		int dy = c.getY() - y;
+		
+		dx = (int) Math.signum((double) dx);
+		dy = (int) Math.signum((double) dy);
+		
+		c.forceMarch(dx * distance, dy * distance);
 	}
 }

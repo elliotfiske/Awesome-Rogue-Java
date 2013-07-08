@@ -13,6 +13,9 @@ public class MainCharacter extends Character {
 	/** Array containing a list of the actives you've gotten so far */
 	private int[] skills;
 	private int numSkills;
+	
+	/** You've really let yourself go, main character.*/
+	private int weight = 20;
 
 	private InGameState currentGameState;
 	private Active actives; //Our handle to the actives.
@@ -142,6 +145,12 @@ public class MainCharacter extends Character {
 						canMove = false;
 						System.out.println("You pound your fists against the wall in vain; it won't budge.");
 					}
+					
+					//Knock away anything in my way.
+					Character victim = entities[getX() + dx + offsetX][getY() + dy + offsetY];
+					if(victim != null && !(victim instanceof MainCharacter)) { //I kept hitting myself around the room.  It was pretty funny, though.
+						knockAway(victim);
+					}
 				}
 			}
 			
@@ -199,11 +208,17 @@ public class MainCharacter extends Character {
 		if(isHulking && !willBeHulking) {
 			//SHRIIINK
 			isHulking = false;
+			
+			
+			weight = 20;
 		}
 		
 		if(!isHulking && willBeHulking) {
 			//TRANSFOOOORM
 			isHulking = true;
+			
+			//GAINS
+			weight = 100;
 			
 			//knock down any walls around you
 			boolean blewStuffUp = false;
@@ -230,5 +245,9 @@ public class MainCharacter extends Character {
 		this.map = inmap;
 		System.out.println("MAP RECEIVED");
 		Tile wat = map[20][20];
+	}
+	
+	public int getWeight() {
+		return weight;
 	}
 }
