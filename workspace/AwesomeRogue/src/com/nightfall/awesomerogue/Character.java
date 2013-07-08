@@ -6,7 +6,9 @@ import java.awt.Point;
 public class Character {
 	public static final int VISIONRANGE = 35;
 	
-	private int x, y;
+	protected int x;
+	protected int y;
+	
 	private int room;
 	String character;
 	
@@ -73,6 +75,7 @@ public class Character {
 	// This does not do any damage inherently, in case
 	// You punch the air or something. The weapon handles that.
 	public void attack(Point direction) {
+		
 		//if(enemy.getClass() == this.getClass()) return; // Friendly fire!
 		drawingAttack = true;
 		InGameState.waitOn("animation");
@@ -105,7 +108,7 @@ public class Character {
 			int proposedX = x;
 			int proposedY = y;
 			
-			/** Not really speed, just an estimator of how far they're gonna go. */
+			/** Rough estimate of speed based on how far they're gonna go */
 			int speed = Math.abs(forceMarchTo.x - x) + Math.abs(forceMarchTo.y - y);
 			
 			// Calculate how far we want to move!
@@ -242,7 +245,11 @@ public class Character {
 		System.out.println("I took "+damage+" damage but I don't know how to handle it");
 	}
 	
-	public void die() { dead = true; }
+	public void die() { 
+		dead = true; 
+		Character[][] entities = InGameState.getEntities();
+		entities[x][y] = null; 
+	}
 
 	public boolean dead() {
 		return dead;
@@ -268,8 +275,7 @@ public class Character {
 	 * Calculates the difference between a character and this one and propels the other one away.
 	 * @param c The character to push away.
 	 */
-	public void knockAway(Character c) {
-		int distance = (int) (( (double) getWeight() / c.getWeight() + 1) * 2);
+	public void knockAway(Character c, int distance) {
 		int dx = c.getX() - x;
 		int dy = c.getY() - y;
 		

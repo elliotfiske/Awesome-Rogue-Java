@@ -17,7 +17,7 @@ public class Enemy extends Character {
 
 	public static final String[] enemyIcons = {"M", "r", "R", "Z", "S", "W", "m"};
 
-	private int x, y, whichEnemy, health = 0;
+	private int whichEnemy, health = 0;
 	String name;
 	String icon;
 	int weight;
@@ -27,8 +27,6 @@ public class Enemy extends Character {
 
 	public Enemy /* number one */ (int x, int y, int whichEnemy) {
 		super(x, y, enemyIcons[whichEnemy]);
-		this.x = x;
-		this.y = y;
 
 		this.whichEnemy = whichEnemy;
 
@@ -78,14 +76,9 @@ public class Enemy extends Character {
 	}
 
 	public void move(int dx, int dy, Tile[][] map) {
-		x += dx;
-		y += dy;
-
+		initPos(dx, dy);
 		//sanity check here.
 	}
-
-	public int getX() { return x; }
-	public int getY() { return y; }
 
 	public void takeTurn(MainCharacter mainChar, Tile[][] map) {
 		pathToHeroAndMove(mainChar.getX(), mainChar.getY(), map);

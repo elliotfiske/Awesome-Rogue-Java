@@ -149,7 +149,7 @@ public class MainCharacter extends Character {
 					//Knock away anything in my way.
 					Character victim = entities[getX() + dx + offsetX][getY() + dy + offsetY];
 					if(victim != null && !(victim instanceof MainCharacter)) { //I kept hitting myself around the room.  It was pretty funny, though.
-						knockAway(victim);
+						knockAway(victim, 7);
 					}
 				}
 			}
@@ -184,6 +184,24 @@ public class MainCharacter extends Character {
 		}
 	}
 
+	public void attack(Point direction) {
+		
+		if(isHulking) {
+			Character[][] entities = InGameState.getEntities();
+			System.out.println("HULK SMASH!!");
+			for(int offsetX = -2; offsetX <= 2; offsetX++) {
+				for(int offsetY = -2; offsetY <= 2; offsetY++) {
+					Point spaceToCheck = new Point(getX() + offsetX, getY() + offsetY);
+					if(entities[spaceToCheck.x][spaceToCheck.y] != null && !(entities[spaceToCheck.x][spaceToCheck.y] instanceof MainCharacter) ) {
+						knockAway(entities[spaceToCheck.x][spaceToCheck.y], 7);
+					}
+				}
+			}
+		} else {
+			super.attack(direction);
+		}
+	}
+	
 	public boolean hasPassive(int passive) {
 		return passives[passive] || InGameState.EVERY_PASSIVE_UNLOCKED;
 	}
