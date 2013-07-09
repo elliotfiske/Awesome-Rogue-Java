@@ -22,6 +22,9 @@ public class Enemy extends Character {
 	String icon;
 	int weight;
 
+	/** Enemies have a speed/5 chance of moving */
+	int speed;
+
 	private int xBounty, yBounty;
 	private Tile bounty;
 
@@ -35,32 +38,38 @@ public class Enemy extends Character {
 			health = 15;
 			name = "angry mushroom";
 			weight = 20;
+			speed = 0;
 			break;
 		case MUSHROOM:
 			health = 1;
 			name = "mushroom";
 			weight = 15;
+			speed = 0;
 			break;
 		case RAT:
 			health = 10;
 			name = "rat";
 			weight = 15;
+			speed = 5;
 			break;
 		case ZOMBIE:
 			health = 30;
 			name = "zombie";
 			weight = 30;
+			speed = 2;
 			break;
 		case SKELETON:
 			health = 40;
 			name = "skeleton";
 			weight = 10;
+			speed = 5;
 			break;
 		case WIZARD:
 			health = 50;
 			name = "ALLAN PLEASE PUT IN WIZARD NAME";
 			//TODO: implement sweet wizard name maker
 			weight = 35;
+			speed = 5;
 			break;
 		}
 
@@ -80,8 +89,8 @@ public class Enemy extends Character {
 		//sanity check here.
 	}
 
-	public void takeTurn(MainCharacter mainChar, Tile[][] map) {
-		pathToHeroAndMove(mainChar.getX(), mainChar.getY(), map);
+	public void takeTurn(MainCharacter mainChar, Tile[][] map, Character[][] entities) {
+		pathToHeroAndMove(mainChar.getX(), mainChar.getY(), map, entities);
 	}
 
 	/**
@@ -92,6 +101,7 @@ public class Enemy extends Character {
 	 * @param camY Camera Y offset
 	 */
 	public void draw(Graphics2D g2, int camX, int camY) {
+		g2.setColor(Color.white);
 		g2.drawString(icon, ((x - camX)*12 + 2),
 				((y - camY)*12 + 10));	
 	}
@@ -121,16 +131,16 @@ public class Enemy extends Character {
 
 		}
 	}
-	
+
 	public int getWeight() {
 		return weight;
 	}
-	
+
 	public void die() {
 		super.die();
 		InGameState.removeEnemy(this);
 	}
-	
+
 	/**
 	 * Moves an enemy to the specified x and y coords.  Doesn't ask questions.  Gets the job done quick. $15.99 / hour.
 	 * @param x Where do we move the body
@@ -140,7 +150,7 @@ public class Enemy extends Character {
 		Character[][] entities = InGameState.getEntities();		
 		entities[this.x][this.y] = null;
 		entities[x][y] = this;
-		
+
 		this.x = x;
 		this.y = y;
 	}
@@ -151,7 +161,7 @@ public class Enemy extends Character {
 	 * @param targetY
 	 * @param map
 	 */
-	public void pathToHeroAndMove(int targetX, int targetY, Tile[][] map) {
+	public void pathToHeroAndMove(int targetX, int targetY, Tile[][] map, Character[][] entities) {
 		//Try to path straight from the monster to the hero.
 
 		//Coordinates of the line that walks to the player.
@@ -163,16 +173,22 @@ public class Enemy extends Character {
 		while(!(straightPoint.x == targetX && straightPoint.y == targetY)) {
 			//Calculate which direction it would be smart to go in order to walk to the player.
 			walkStraight(straightPoint, new Point(targetX, targetY), 3);
-			
+
 			straightTiles.add(new Tile( map[straightPoint.x][straightPoint.y].type , 0, straightPoint.x, straightPoint.y));
 
-			if(map[straightPoint.x][straightPoint.y].blocker) {
+			if(map[straightPoint.x][straightPoint.y].blocker || entities[straightPoint.x][straightPoint.y] != null) {
 				//map[straightPoint.x][straightPoint.y].illustrate(Color.red);//TODO
 			} else {
 				//map[straightPoint.x][straightPoint.y].illustrate(Color.yellow);// TODO
 			}
 		}
 
+		//First off, check if the enemies even CAN move:
+		double chanceOfMoving = speed / 5;
+		if(chanceOfMoving < Math.random()) {
+			return;
+		}
+		
 		//DEAL WITH OBSTACLES HERE
 
 		/** Save the FIRST list of tiles we get.  This is because the enemy is looking to address the FIRST obstacle in his way,
@@ -182,43 +198,38 @@ public class Enemy extends Character {
 		for(int whichTile = 0; whichTile < straightTiles.size(); whichTile++) {
 			Tile t = straightTiles.get(whichTile);
 			Tile prevTile = null;
-			
+
 			//Ran into some nasty array index out of bounds exceptions don'cha know.
 			if(whichTile == 0) {
 				prevTile = map[x][y];
 			} else {
 				prevTile = straightTiles.get(whichTile - 1);
 			}
+
+			Character charOnTile = entities[t.x][t.y];
+			Character charOnPrevTile = entities[prevTile.x][prevTile.y];
 			
-			//Go through until we run into sexy trouble (blocker)
+			//Go through until we run into sexy trouble (blocker) or another enemy.
 			//Also make sure that the tile PREVIOUS to this one is NOT a blocker (so we don't do two blockers in a row).
-			if(t.blocker && !prevTile.blocker) {
+			if((t.blocker && !prevTile.blocker) || (charOnTile != null && charOnPrevTile == null)) {
 				//OH NO! Blocker found.  Send out "feelers" to go along right and left walls.
 				//Start feelers at the square on the straight-line path right BEFORE the wall.
-				Point rightFeeler = null;
-				Point leftFeeler = null;
+				Point rightFeeler = new Point(prevTile.x, prevTile.y);
+				Point leftFeeler = new Point(prevTile.x, prevTile.y);
 				ArrayList<Point> leftPath = new ArrayList<Point>();
 				ArrayList<Point> rightPath = new ArrayList<Point>();
-				if(whichTile == 0) {
-					//If the very first tile looked at was a blocker, use the enemy coordinates.
-					rightFeeler = new Point(x, y);
-					leftFeeler = new Point(x, y);
-					leftPath.add(new Point(leftFeeler.x, leftFeeler.y));
-					rightPath.add(new Point(rightFeeler.x, rightFeeler.y));
-				} else {
-					rightFeeler = new Point(straightTiles.get(whichTile - 1).x, straightTiles.get(whichTile - 1).y);
-					leftFeeler = new Point(rightFeeler.x, rightFeeler.y);
-					leftPath.add(new Point(leftFeeler.x, leftFeeler.y));
-					rightPath.add(new Point(rightFeeler.x, rightFeeler.y));
-				}
-
+				leftPath.add(new Point(leftFeeler.x, leftFeeler.y));
+				rightPath.add(new Point(rightFeeler.x, rightFeeler.y));
+				
 				//Get started on feelin' things out.
 				//Right:
-				lastWallRight = getDirection(rightFeeler, new Point(t.x, t.y), true, map);
+				lastWallRight = getDirection(rightFeeler, new Point(t.x, t.y), true, map, entities);
 
 				//Left:
-				lastWallLeft = getDirection(leftFeeler, new Point(t.x, t.y), false, map);
+				lastWallLeft = getDirection(leftFeeler, new Point(t.x, t.y), false, map, entities);
 
+				
+				
 				Point lastRightFeeler = new Point(rightFeeler.x, rightFeeler.y);
 				Point lastLeftFeeler = new Point(leftFeeler.x, leftFeeler.y);
 
@@ -232,12 +243,12 @@ public class Enemy extends Character {
 				while(numTiles < 100) {
 					//follow right wall
 
-					lastWallRight = getDirection(rightFeeler, lastWallRight, true, map);
+					lastWallRight = getDirection(rightFeeler, lastWallRight, true, map, entities);
 
 					//map[rightFeeler.x][rightFeeler.y].illustrate(Color.blue); //TODO
 
 					//follow left wall
-					lastWallLeft = getDirection(leftFeeler, lastWallLeft, false, map);
+					lastWallLeft = getDirection(leftFeeler, lastWallLeft, false, map, entities);
 
 					//map[leftFeeler.x][leftFeeler.y].illustrate(Color.cyan);
 
@@ -276,26 +287,26 @@ public class Enemy extends Character {
 		int proposedDX = 0;
 		int proposedDY = 0;
 		if(firstCorrectPath != null) {
-			
+
 			boolean weDidIt = false;
 			for(int i = firstCorrectPath.size() - 1; i > 0; i--) {
 				Point pointToCheck = firstCorrectPath.get(i);
 				//map[pointToCheck.x][pointToCheck.y].illustrate(Color.pink); //TODO
-				
+
 				//If there's a straight, unblocked path to the pink tile we've just found our
 				//route to the player.
 				Point finalPath = new Point(x, y);
-				
+
 				ArrayList<Point> finalPathPoints = new ArrayList<Point>();
 				finalPathPoints.add(new Point(finalPath.x, finalPath.y));
-				
+
 				/** The step we WOULD take to follow this new path is: */
 				Point firstStep = new Point(finalPath.x, finalPath.y);
 				walkStraight(firstStep, new Point(pointToCheck.x, pointToCheck.y), 3);
-				
+
 				//optimism!
 				weDidIt = true;
-				
+
 				while(finalPath.x != pointToCheck.x || finalPath.y != pointToCheck.y) {
 					walkStraight(finalPath, pointToCheck, 3);
 					finalPathPoints.add(new Point(finalPath.x, finalPath.y));
@@ -307,7 +318,7 @@ public class Enemy extends Character {
 						break;
 					}
 				}
-				
+
 				//straight path found! rejoice!
 				if(weDidIt) {
 					proposedDX = firstStep.x - x;
@@ -321,10 +332,10 @@ public class Enemy extends Character {
 					break;
 				}
 			}
-			
+
 			//Don't worry.  Just follow the feelers from before.
 			if(!weDidIt) {
-				
+
 			}
 		} else {
 			//There must have been no obstacles.  Follow the straight path.
@@ -332,20 +343,18 @@ public class Enemy extends Character {
 			proposedDY = straightTiles.get(0).y - y;
 			//map[x + proposedDX][y + proposedDY].illustrate(Color.ORANGE);
 		}
-		
-		Character[][] entities = InGameState.getEntities();
-		
+
 		//See if we can attack the player
 		if(entities[x + proposedDX][y + proposedDY] instanceof MainCharacter) {
 			System.out.println("The rat scratches you!");
 		} else {
-			
+
 			moveEnemyTo(x + proposedDX, y + proposedDY);
-			
+
 			//System.out.println("Entity changed? Entity[x][y]: " + entities[x][y].getClass().getName() + " at " + x + ", " + y); TODO
 		}
 	}	
-	
+
 	/**
 	 * This method looks for an intersection between the straightTiles path and the feeler path.
 	 * @param straightTiles The list of tiles that lead straight to the player.
@@ -403,7 +412,7 @@ public class Enemy extends Character {
 		int diffX = delta.x;
 		int diffY = delta.y;
 		int result = -1;
-		
+
 		if(diffX == 0 && diffY == -1)  { result = 0; }
 		if(diffX == 1 && diffY == -1)  { result = 1; }
 		if(diffX == 1 && diffY == 0)   { result = 2; }
@@ -429,7 +438,7 @@ public class Enemy extends Character {
 	 * @param map The array of Tiles.
 	 * @return The last WALL the feeler touched. This is important to the wall-following algorithm.
 	 */
-	public Point getDirection(Point feeler, Point lastWall, boolean goingRight, Tile[][] map) {
+	public Point getDirection(Point feeler, Point lastWall, boolean goingRight, Tile[][] map, Character[][] entities) {
 		/*
 		 * The algorithm starts by looking at the direction between the feeler and its last-touched wall:
 		 *  _
@@ -485,7 +494,7 @@ public class Enemy extends Character {
 				continue; //pretend it's a blocker.
 			}
 
-			if(!map[feeler.x + diffX][feeler.y + diffY].blocker) {
+			if(!map[feeler.x + diffX][feeler.y + diffY].blocker && entities[feeler.x + diffX][feeler.y + diffY] == null) {
 				//We did it!
 				//Grab the result of this function: the last-touched wall.
 				int wallDirection = getNumberedDirection(new Point(diffX, diffY));
@@ -513,8 +522,9 @@ public class Enemy extends Character {
 			numTries++;
 		}
 
-		//oops.
-		throw new PANICEVERYTHINGISBROKENERROR("We couldn't find the next Tile for the feeler to move to :(");
+		//We're probably stuck in a crowd. Just chill.
+		System.out.println("The guy at " + x + ", " + y + "doesn't like you.  Zooming in now:");
+		return new Point(0,0);
 	}
 
 	/**
@@ -577,10 +587,10 @@ public class Enemy extends Character {
 
 		int x = straightPoint.x;
 		int y = straightPoint.y;
-		
+
 		int targetX = targetPoint.x;
 		int targetY = targetPoint.y;
-		
+
 		int diffX = targetX - x;
 		int diffY = targetY - y;
 

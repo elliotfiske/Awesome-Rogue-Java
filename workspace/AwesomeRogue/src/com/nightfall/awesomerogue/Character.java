@@ -1,5 +1,6 @@
 package com.nightfall.awesomerogue;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 
@@ -227,6 +228,7 @@ public class Character {
 	 * @param camY Where the camera is vertically.
 	 */
 	public void draw(Graphics2D g2, int camX, int camY) {
+		g2.setColor(Color.white);
 		g2.drawString(character, ((x-camX)*12), ((y-camY)*12+12));
 		if(drawingAttack) {
 			if(!currentWeapon.draw(g2, camX, camY)) {
@@ -252,10 +254,6 @@ public class Character {
 
 	public boolean dead() {
 		return dead;
-	}
-
-	public void takeTurn(MainCharacter mainChar, Tile[][] map) {
-		// TODO Auto-generated method stub
 	}
 	
 	public void takeTurn(MainCharacter mainChar, Tile[][] map, Character[][] entities) {

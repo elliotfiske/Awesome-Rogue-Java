@@ -25,7 +25,8 @@ public class InGameState extends GameState {
 	public static final int TILE_SIZE = 12;
 
 	//Enable to debug stuff
-	public static final boolean GODMODE_VISION = false;
+	public static final boolean GODMODE_VISION = true;
+	public static final boolean GODMODE_DRAW_IDS = false;
 	public static final boolean GODMODE_WALKTHRUWALLS = false;
 	public static final boolean GODMODE_CAN_FREEZE_ENEMIES = true;
 	private boolean areEnemiesFrozen = false;
@@ -137,7 +138,6 @@ public class InGameState extends GameState {
 				e.update(map, entities);
 			}
 			calculateLighting();
-
 		}
 	}
 
@@ -182,10 +182,8 @@ public class InGameState extends GameState {
 		boolean effectHappening = false;
 		boolean effectOngoing = false;
 		
-		for(String waitingItem : waitingOn) {
-			if(waitingItem.startsWith("effect")) {
-				effectHappening = true;
-			}
+		if(effects.size() > 0) {
+			effectHappening = true;
 		}
 		
 		if(ongoingEffects.size() > 0) {
@@ -239,7 +237,7 @@ public class InGameState extends GameState {
 						g2.fillRect((i-CAMERA_X)*TILE_SIZE, (j-CAMERA_Y)*TILE_SIZE, TILE_SIZE, TILE_SIZE);
 					}
 
-					if(map[i][j].getID() != 0) {
+					if(map[i][j].getID() != 0 && GODMODE_DRAW_IDS) {
 						g2.drawString(Integer.toString(map[i][j].getID() % 10), (i-CAMERA_X)*TILE_SIZE,
 								(j-CAMERA_Y)*TILE_SIZE + TILE_SIZE);
 					}
@@ -373,9 +371,10 @@ public class InGameState extends GameState {
 				//Move the main character
 				mainChar.move(p.x, p.y, map, entities);
 
-				//Move the camera appropriately
+				//Move the camera appropriately TODO: move it even more appropriately (finish what you started boy)
 				if(mainChar.getX() - CAMERA_X < INGAME_SCROLL_MINX) {
-					moveCamera(-1, 0);
+					int cameraMoveDistance = INGAME_SCROLL_MINX - (mainChar.getX() - CAMERA_X);
+					moveCamera(-cameraMoveDistance, 0);
 				}
 				else if(mainChar.getX() - CAMERA_X > INGAME_SCROLL_MAXX) {
 					moveCamera(1, 0);
@@ -385,7 +384,8 @@ public class InGameState extends GameState {
 					moveCamera(0, -1);
 				}
 				else if(mainChar.getY() - CAMERA_Y > INGAME_SCROLL_MAXY) {
-					moveCamera(0, 1);
+					int cameraMoveDistance = mainChar.getY() - CAMERA_Y - INGAME_SCROLL_MAXY;
+					moveCamera(0, cameraMoveDistance);
 				}
 
 				//TODO: Weapons and usable stuff goes here.
@@ -403,7 +403,7 @@ public class InGameState extends GameState {
 					}
 					else {
 						if(!areEnemiesFrozen) {
-							enemy.takeTurn(mainChar, map);
+							enemy.takeTurn(mainChar, map, entities);
 						}
 					}
 				}
@@ -459,9 +459,9 @@ public class InGameState extends GameState {
 		else if(levelNum == 3) {
 			//Generate a sweet new Caves level.
 			map = new Tile[80][70];
-			levelGen.makeLevel(map, LevelGenerator.CAVE, 80, 70, 1);
+			levelGen.makeLevel(map, LevelGenerator.CAVE, 80, 70, 2);
 
-			mainChar.initPos(8, 8);
+			mainChar.initPos(21, 58);
 			
 			//give the main character a map he's lost
 			mainChar.giveMap(map);
