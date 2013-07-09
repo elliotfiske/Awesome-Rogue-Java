@@ -22,6 +22,7 @@ public class Explosion extends Effect {
 	private Double direction;
 	
 	public Explosion(int x, int y) {
+		super("Explosion Effect");
 		this.x = x;
 		this.y = y;
 		sizeindex = 0;

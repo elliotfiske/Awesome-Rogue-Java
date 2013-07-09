@@ -9,6 +9,8 @@ public class OngoingHulkOut extends OngoingEffect {
 	private MainCharacter mainChar;
 	
 	public OngoingHulkOut(int duration, MainCharacter mainChar) {
+		super("Ongoing hulk out");
+		
 		this.duration = duration;
 		this.mainChar = mainChar;
 		

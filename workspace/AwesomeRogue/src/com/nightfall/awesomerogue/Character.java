@@ -10,7 +10,7 @@ public class Character {
 	protected int y;
 	
 	private int room;
-	String character;
+	String character = "default character?!?";
 	
 	private int altitude;	// 0 is default, meaning it's on the ground
 	
@@ -92,7 +92,7 @@ public class Character {
 	public void forceMarch(int dx, int dy, boolean inAir) {
 		forceMarch = true;
 		forceMarchTo = new Point(x + dx, y + dy);
-		InGameState.waitOn("forcemarch" + getClass().getName());
+		InGameState.waitOn("forcemarch" + this.getName());
 		System.out.println("Force march from " + x + ", " + y + " to " + forceMarchTo.x + ", " + forceMarchTo.y);
 		
 		if(inAir) altitude ++;
@@ -104,7 +104,6 @@ public class Character {
 		}
 		
 		if(forceMarch) {
-			System.out.println("hey hey hey");
 			int proposedX = x;
 			int proposedY = y;
 			
@@ -127,19 +126,17 @@ public class Character {
 			}
 			
 			if(map[proposedX][proposedY].blocker) {
-				System.out.println("tile at " + proposedX + ", " + proposedY + " is a blocker?");
-				
 				//you hit a wall ouuuch
 				if(this instanceof MainCharacter) {
 					System.out.println("You slam into a wall!");
 				}
 				
 				if(this instanceof Enemy) {
-					System.out.println("The " + ((Enemy) this).getName() + " slams into a wall!");
+					System.out.println("The " + this.getName() + " slams into a wall!");
 				}
 
 				altitude = 0;
-				InGameState.endWait("forcemarch" + getClass().getName());
+				InGameState.endWait("forcemarch" + this.getName());
 				forceMarch = false;
 				System.out.println("Line 136?");
 			}
@@ -161,13 +158,13 @@ public class Character {
 				entities[proposedX][proposedY].forceMarch(direction.x * newSpeed, direction.y * newSpeed);
 				//Meanwhile, adjust our target to one behind the other guy's.
 				forceMarch(direction.x * (newSpeed-1), direction.y * (newSpeed-1));
-				System.out.println("line 155? Other guy: " + entities[proposedX][proposedY].getClass().getName());
+				System.out.println("line 155? Other guy: " + entities[proposedX][proposedY].getName());
 			}
 			
 			//Have we arrived at our destination?
 			if(forceMarchTo.x == x && forceMarchTo.y == y) {
 				//Feel free to move about the cabin
-				InGameState.endWait("forcemarch" + getClass().getName());
+				InGameState.endWait("forcemarch" + this.getName());
 				forceMarch = false;
 				altitude = 0;
 				System.out.println("line 163?");

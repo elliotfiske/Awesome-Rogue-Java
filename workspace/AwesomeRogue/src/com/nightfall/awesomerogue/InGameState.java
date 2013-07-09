@@ -148,11 +148,12 @@ public class InGameState extends GameState {
 	}
 	
 	public static void waitOn(Effect effect) {
-		waitOn("effect" + effect.getClass().getName());
+		waitOn("effect" + effect.getName());
 		effects.add(effect);
 	}
 
 	public static void waitOn(String event) {
+		System.out.println("Added " + event);
 		waitingOn.add(event);
 		suspended = true;
 	}
@@ -164,6 +165,7 @@ public class InGameState extends GameState {
 	}
 
 	public static void endWait(String event) {
+		System.out.println("removing " + event);
 		waitingOn.remove(event);
 		if(InGameState.waitingOn.size() == 0)
 			InGameState.suspended = false;	// Gotta unpause!
@@ -195,7 +197,7 @@ public class InGameState extends GameState {
 				Effect e = effects.get(i);
 				e.renderAndIterate(g2, map, entities);
 				if(!e.running()) {
-					endWait("effect" + e.getClass().getName());
+					endWait("effect" + e.getName());
 					effects.remove(i--); // and decrement i so we don't skip an effect
 				}
 			}

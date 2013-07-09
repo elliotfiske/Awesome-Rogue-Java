@@ -84,6 +84,65 @@ public class Enemy extends Character {
 		pathToHeroAndMove(mainChar.getX(), mainChar.getY(), map);
 	}
 
+	/**
+	 * Render the enemy to the screen.
+	 * 
+	 * @param g2 The Graphics2D handle it uses to draw itself.
+	 * @param camX Camera X offset
+	 * @param camY Camera Y offset
+	 */
+	public void draw(Graphics2D g2, int camX, int camY) {
+		g2.drawString(icon, ((x - camX)*12 + 2),
+				((y - camY)*12 + 10));	
+	}
+
+	/**
+	 * Enemies have hit points (unlike the player's "Awesome level.")
+	 * 
+	 * This takes them away.  It also checks if they're dead.
+	 * 
+	 * @param damage How much damage to do to the monster.
+	 */
+	public void getHit(int damage, Tile[][] map, Character[][] entities) {
+		health -= damage;
+		if(health <= 0) {
+			die();
+			entities[x][y] = null;
+
+			if(bounty != null) {
+				map[xBounty][yBounty] = bounty;
+			}
+
+			if(whichEnemy == WIZARD) {
+				//win
+			}
+
+			System.out.println("The " + name + " is slain!");
+
+		}
+	}
+	
+	public int getWeight() {
+		return weight;
+	}
+	
+	/**
+	 * Moves an enemy to the specified x and y coords.  Doesn't ask questions.  Gets the job done quick. $15.99 / hour.
+	 * @param x Where do we move the body
+	 * @param y WHERE DO WE MOVE THE BODY?
+	 */
+	private void moveEnemyTo(int x, int y) {
+		Character[][] entities = InGameState.getEntities();
+		
+		this.x = x;
+		this.y = y;
+		
+		initPos(x, y);
+		
+		entities[x][y] = null;
+		entities[this.x][this.y] = this;
+	}
+
 	//Fuzzy pathfinding = fun times for all!
 	/**
 	 * @param targetX
@@ -591,65 +650,5 @@ public class Enemy extends Character {
 
 		straightPoint.x += result.x;
 		straightPoint.y += result.y;
-	}
-
-	/**
-	 * Render the enemy to the screen.
-	 * 
-	 * @param g2 The Graphics2D handle it uses to draw itself.
-	 * @param camX Camera X offset
-	 * @param camY Camera Y offset
-	 */
-	public void draw(Graphics2D g2, int camX, int camY) {
-		g2.drawString(icon, ((x - camX)*12 + 2),
-				((y - camY)*12 + 10));	
-	}
-
-	/**
-	 * Enemies have hit points (unlike the player's "Awesome level.")
-	 * 
-	 * This takes them away.  It also checks if they're dead.
-	 * 
-	 * @param damage How much damage to do to the monster.
-	 */
-	public void getHit(int damage, Tile[][] map, Character[][] entities) {
-		health -= damage;
-		if(health <= 0) {
-			die();
-			entities[x][y] = null;
-
-			if(bounty != null) {
-				map[xBounty][yBounty] = bounty;
-			}
-
-			if(whichEnemy == WIZARD) {
-				//win
-			}
-
-			System.out.println("The " + name + " is slain!");
-
-		}
-	}
-	
-	public int getWeight() {
-		return weight;
-	}
-	
-	/**
-	 * Moves an enemy to the specified x and y coords.  Doesn't ask questions.  Gets the job done quick. $15.99 / hour.
-	 * @param x Where do we move the body
-	 * @param y WHERE DO WE MOVE THE BODY?
-	 */
-	private void moveEnemyTo(int x, int y) {
-		Character[][] entities = InGameState.getEntities();
-		
-		this.x = x;
-		this.y = y;
-		
-		initPos(x, y);
-		
-		entities[x][y] = null;
-		entities[this.x][this.y] = this;
-	}
-
+	}	
 }

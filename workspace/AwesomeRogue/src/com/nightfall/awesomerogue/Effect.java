@@ -4,10 +4,14 @@ import java.awt.Graphics2D;
 
 public abstract class Effect {
 	private boolean running;
+	private String name;
 	
-	public Effect() {
+	public Effect(String name) {
+		this.name = name;
 		running = true;
 	}
+	
+	public String getName() { return name; }
 	
 	public boolean running() { return running; }
 	public void setRunning(boolean running) { this.running = running; }

@@ -5,6 +5,10 @@ import java.awt.Graphics2D;
 
 public class HulkOff extends Effect {
 
+	public HulkOff() {
+		super("Hulk Transition OFF");
+	}
+
 	private int currAlpha;
 	public static final int MAX_ALPHA = HulkOut.MAX_ALPHA;
 	

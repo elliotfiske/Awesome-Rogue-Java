@@ -10,6 +10,10 @@ import java.awt.Graphics2D;
 
 public abstract class OngoingEffect extends Effect {
 
+	public OngoingEffect(String name) {
+		super(name);
+	}
+
 	private Effect intro;
 	private Effect outro;
 	

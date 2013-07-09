@@ -12,6 +12,7 @@ public class DrillDozerEffect extends Effect {
 	int[][] crackedTiles;
 	
 	public DrillDozerEffect(int x, int y, Point direction, Tile[][] map, Character[][] entities) {
+		super("Drill Dozer Drilling");
 		this.x = x;
 		this.y = y;
 		this.direction = direction;
