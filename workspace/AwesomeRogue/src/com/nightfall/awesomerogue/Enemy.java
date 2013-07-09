@@ -494,7 +494,7 @@ public class Enemy extends Character {
 				continue; //pretend it's a blocker.
 			}
 
-			if(!map[feeler.x + diffX][feeler.y + diffY].blocker && entities[feeler.x + diffX][feeler.y + diffY] == null) {
+			if(!map[feeler.x + diffX][feeler.y + diffY].blocker) {
 				//We did it!
 				//Grab the result of this function: the last-touched wall.
 				int wallDirection = getNumberedDirection(new Point(diffX, diffY));
@@ -524,6 +524,7 @@ public class Enemy extends Character {
 
 		//We're probably stuck in a crowd. Just chill.
 		System.out.println("The guy at " + x + ", " + y + "doesn't like you.  Zooming in now:");
+		
 		return new Point(0,0);
 	}
 

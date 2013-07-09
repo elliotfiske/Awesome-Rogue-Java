@@ -27,7 +27,7 @@ public class InGameState extends GameState {
 	//Enable to debug stuff
 	public static final boolean GODMODE_VISION = true;
 	public static final boolean GODMODE_DRAW_IDS = false;
-	public static final boolean GODMODE_WALKTHRUWALLS = false;
+	public static final boolean GODMODE_WALKTHRUWALLS = true;
 	public static final boolean GODMODE_CAN_FREEZE_ENEMIES = true;
 	private boolean areEnemiesFrozen = false;
 	public static final boolean EVERY_PASSIVE_UNLOCKED = true;
@@ -371,17 +371,19 @@ public class InGameState extends GameState {
 				//Move the main character
 				mainChar.move(p.x, p.y, map, entities);
 
-				//Move the camera appropriately TODO: move it even more appropriately (finish what you started boy)
+				//Move the camera appropriately
 				if(mainChar.getX() - CAMERA_X < INGAME_SCROLL_MINX) {
 					int cameraMoveDistance = INGAME_SCROLL_MINX - (mainChar.getX() - CAMERA_X);
 					moveCamera(-cameraMoveDistance, 0);
 				}
 				else if(mainChar.getX() - CAMERA_X > INGAME_SCROLL_MAXX) {
-					moveCamera(1, 0);
+					int cameraMoveDistance = INGAME_SCROLL_MAXX - (mainChar.getX() - CAMERA_X);
+					moveCamera(cameraMoveDistance, 0);
 				}
 
 				if(mainChar.getY() - CAMERA_Y < INGAME_SCROLL_MINY) {
-					moveCamera(0, -1);
+					int cameraMoveDistance = INGAME_SCROLL_MINY - (mainChar.getY() - CAMERA_Y);
+					moveCamera(0, -cameraMoveDistance);
 				}
 				else if(mainChar.getY() - CAMERA_Y > INGAME_SCROLL_MAXY) {
 					int cameraMoveDistance = mainChar.getY() - CAMERA_Y - INGAME_SCROLL_MAXY;
@@ -461,7 +463,7 @@ public class InGameState extends GameState {
 			map = new Tile[80][70];
 			levelGen.makeLevel(map, LevelGenerator.CAVE, 80, 70, 2);
 
-			mainChar.initPos(21, 58);
+			mainChar.initPos(53, 60);
 			
 			//give the main character a map he's lost
 			mainChar.giveMap(map);
