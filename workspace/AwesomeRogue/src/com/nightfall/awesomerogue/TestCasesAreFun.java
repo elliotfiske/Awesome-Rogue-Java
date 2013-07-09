@@ -40,8 +40,10 @@ public class TestCasesAreFun {
 
 	public static void main(String[] args) {
 
+		Enemy e = new Enemy(0, 0, Enemy.RAT);
+		System.out.println("classy: " + e.toString());
 		//testEnemyStraightLine();
-		testEnemyWallFollow();
+		//testEnemyWallFollow();
 		//		generateGrids();
 	}
 

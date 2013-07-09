@@ -126,21 +126,23 @@ public class Enemy extends Character {
 		return weight;
 	}
 	
+	public void die() {
+		super.die();
+		InGameState.removeEnemy(this);
+	}
+	
 	/**
 	 * Moves an enemy to the specified x and y coords.  Doesn't ask questions.  Gets the job done quick. $15.99 / hour.
 	 * @param x Where do we move the body
 	 * @param y WHERE DO WE MOVE THE BODY?
 	 */
 	private void moveEnemyTo(int x, int y) {
-		Character[][] entities = InGameState.getEntities();
+		Character[][] entities = InGameState.getEntities();		
+		entities[this.x][this.y] = null;
+		entities[x][y] = this;
 		
 		this.x = x;
 		this.y = y;
-		
-		initPos(x, y);
-		
-		entities[x][y] = null;
-		entities[this.x][this.y] = this;
 	}
 
 	//Fuzzy pathfinding = fun times for all!

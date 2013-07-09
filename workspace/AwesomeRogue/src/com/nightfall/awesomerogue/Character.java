@@ -92,7 +92,9 @@ public class Character {
 	public void forceMarch(int dx, int dy, boolean inAir) {
 		forceMarch = true;
 		forceMarchTo = new Point(x + dx, y + dy);
-		InGameState.waitOn("forcemarch" + this.getName());
+		//Just in case, remove other forcemarches from this guy
+		InGameState.endAllWaits("forcemarch" + getName() + getID());
+		InGameState.waitOn("forcemarch" + getName() + getID());
 		System.out.println("Force march from " + x + ", " + y + " to " + forceMarchTo.x + ", " + forceMarchTo.y);
 		
 		if(inAir) altitude ++;
@@ -132,11 +134,11 @@ public class Character {
 				}
 				
 				if(this instanceof Enemy) {
-					System.out.println("The " + this.getName() + " slams into a wall!");
+					System.out.println("The " + getName() + " slams into a wall!");
 				}
 
 				altitude = 0;
-				InGameState.endWait("forcemarch" + this.getName());
+				InGameState.endWait("forcemarch" + getName() + getID());
 				forceMarch = false;
 				System.out.println("Line 136?");
 			}
@@ -164,7 +166,7 @@ public class Character {
 			//Have we arrived at our destination?
 			if(forceMarchTo.x == x && forceMarchTo.y == y) {
 				//Feel free to move about the cabin
-				InGameState.endWait("forcemarch" + this.getName());
+				InGameState.endWait("forcemarch" + getName() + getID());
 				forceMarch = false;
 				altitude = 0;
 				System.out.println("line 163?");
@@ -280,5 +282,13 @@ public class Character {
 		dy = (int) Math.signum((double) dy);
 		
 		c.forceMarch(dx * distance, dy * distance);
+	}
+	
+	/**
+	 * Uses the last 3 characters of the default toString() to make a unique id.
+	 * @return A sweet, sweet unique ID
+	 */
+	public String getID() {
+		return toString().substring(toString().length() - 3);
 	}
 }

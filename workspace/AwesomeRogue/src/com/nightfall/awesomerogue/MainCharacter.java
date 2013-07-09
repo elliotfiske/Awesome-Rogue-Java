@@ -238,6 +238,8 @@ public class MainCharacter extends Character {
 			//GAINS
 			weight = 100;
 			
+			Character[][] entities = InGameState.getEntities();
+			
 			//knock down any walls around you
 			boolean blewStuffUp = false;
 			for(int dx = -1; dx <= 1; dx++) {
@@ -245,6 +247,10 @@ public class MainCharacter extends Character {
 					if(map[getX() + dx][getY() + dy].type == Tile.WALL) {
 						map[getX() + dx][getY() + dy] = new Tile(Tile.FLOOR, getX() + dx, getY() + dy);
 						blewStuffUp = true;
+					}
+					
+					if(entities[getX() + dx][getY() + dy] != null) {
+						knockAway(entities[getX() + dx][getY() + dy], 5);
 					}
 				}
 			}

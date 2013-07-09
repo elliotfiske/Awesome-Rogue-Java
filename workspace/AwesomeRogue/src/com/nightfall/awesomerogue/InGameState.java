@@ -66,7 +66,7 @@ public class InGameState extends GameState {
 	private boolean introLevel;
 
 	public static ArrayList<Character> enemyList;
-	private ArrayList<Character> enemies;
+	private static ArrayList<Character> enemies;
 	private static Character[][] entities;
 
 	private MetaGameState metaGame;
@@ -653,5 +653,13 @@ public class InGameState extends GameState {
 	 */
 	public static Character[][] getEntities() {
 		return entities;
+	}
+	
+	/**
+	 * Enemies weren't dying properly.  How rude.
+	 * @param e The enemy to remove
+	 */
+	public static void removeEnemy(Enemy e) {
+		enemies.remove(e);
 	}
 }
