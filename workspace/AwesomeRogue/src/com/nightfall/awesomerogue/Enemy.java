@@ -90,7 +90,16 @@ public class Enemy extends Character {
 	}
 
 	public void takeTurn(MainCharacter mainChar, Tile[][] map) {
-		pathToHeroAndMove(mainChar.getX(), mainChar.getY(), map);
+		if(whichEnemy == RAT) {
+			//Rats move randumbly
+			if(Math.random() < 0.3) {
+				moveRandomly(map);
+			} else {
+				pathToHeroAndMove(mainChar.getX(), mainChar.getY(), map);
+			}
+		} else {
+			pathToHeroAndMove(mainChar.getX(), mainChar.getY(), map);
+		}
 	}
 
 	/**
@@ -155,6 +164,28 @@ public class Enemy extends Character {
 		this.y = y;
 	}
 
+	/**
+	 * Move randomly. Rats occasionally do this, and maybe we'll have a "confused" status!
+	 * @param map I'm the map, I'm the map, I'm the map, I'm the map, I'M THE MAP
+	 */
+	private void moveRandomly(Tile[][] map) {
+		int randDirection = (int) Math.floor(Math.random() * 8);
+		Point randPoint = getPointDirection(randDirection);
+		int numTries = 0;
+		
+		while(map[x + randPoint.x][y + randPoint.y].blocker && numTries < 9) {
+			randDirection = (int) Math.floor(Math.random() * 8);
+			randPoint = getPointDirection(randDirection);
+			
+			numTries++;
+		}
+		
+		if(numTries == 9) {
+			moveEnemyTo(x + randPoint.x, y + randPoint.y);
+		}
+		
+	}
+	
 	//Fuzzy pathfinding = fun times for all!
 	/**
 	 * @param targetX
@@ -188,7 +219,7 @@ public class Enemy extends Character {
 		if(chanceOfMoving < Math.random()) {
 			return;
 		}
-		
+
 		//DEAL WITH OBSTACLES HERE
 
 		/** Save the FIRST list of tiles we get.  This is because the enemy is looking to address the FIRST obstacle in his way,
@@ -205,7 +236,7 @@ public class Enemy extends Character {
 			} else {
 				prevTile = straightTiles.get(whichTile - 1);
 			}
-			
+
 			//Go through until we run into sexy trouble (blocker) or another enemy.
 			//Also make sure that the tile PREVIOUS to this one is NOT a blocker (so we don't do two blockers in a row).
 			if((t.blocker && !prevTile.blocker)) {
@@ -217,7 +248,7 @@ public class Enemy extends Character {
 				ArrayList<Point> rightPath = new ArrayList<Point>();
 				leftPath.add(new Point(leftFeeler.x, leftFeeler.y));
 				rightPath.add(new Point(rightFeeler.x, rightFeeler.y));
-				
+
 				//Get started on feelin' things out.
 				//Right:
 				lastWallRight = getDirection(rightFeeler, new Point(t.x, t.y), true, map);
@@ -225,8 +256,8 @@ public class Enemy extends Character {
 				//Left:
 				lastWallLeft = getDirection(leftFeeler, new Point(t.x, t.y), false, map);
 
-				
-				
+
+
 				Point lastRightFeeler = new Point(rightFeeler.x, rightFeeler.y);
 				Point lastLeftFeeler = new Point(leftFeeler.x, leftFeeler.y);
 
@@ -343,7 +374,7 @@ public class Enemy extends Character {
 
 		//See if we can attack the player
 		Character[][] entities = InGameState.getEntities();
-		
+
 		if(entities[x + proposedDX][y + proposedDY] instanceof MainCharacter) {
 			System.out.println("The rat scratches you!");
 		} else {
@@ -523,7 +554,7 @@ public class Enemy extends Character {
 
 		//We're probably stuck in a crowd. Just chill.
 		System.out.println("The guy at " + x + ", " + y + "doesn't like you.  Zooming in now:");
-		
+
 		return new Point(0,0);
 	}
 

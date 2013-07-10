@@ -377,12 +377,10 @@ public class InGameState extends GameState {
 				if(mainChar.getX() - CAMERA_X < INGAME_SCROLL_MINX) {
 					int cameraMoveDistance = INGAME_SCROLL_MINX - (mainChar.getX() - CAMERA_X);
 					moveCamera(-cameraMoveDistance, 0);
-					System.out.println("hm?");
 				}
 				else if(mainChar.getX() - CAMERA_X > INGAME_SCROLL_MAXX) {
 					int cameraMoveDistance = mainChar.getX() - CAMERA_X - INGAME_SCROLL_MAXX;
 					moveCamera(cameraMoveDistance, 0);
-					System.out.println("what?");
 				}
 
 				if(mainChar.getY() - CAMERA_Y < INGAME_SCROLL_MINY) {
@@ -395,8 +393,6 @@ public class InGameState extends GameState {
 				}
 
 				//TODO: Weapons and usable stuff goes here.
-
-				//Move the Drill Dozer!
 
 
 				//TODO: Have the enemies take a turn here. 
