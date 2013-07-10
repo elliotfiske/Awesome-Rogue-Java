@@ -89,8 +89,8 @@ public class Enemy extends Character {
 		//sanity check here.
 	}
 
-	public void takeTurn(MainCharacter mainChar, Tile[][] map, Character[][] entities) {
-		pathToHeroAndMove(mainChar.getX(), mainChar.getY(), map, entities);
+	public void takeTurn(MainCharacter mainChar, Tile[][] map) {
+		pathToHeroAndMove(mainChar.getX(), mainChar.getY(), map);
 	}
 
 	/**
@@ -161,7 +161,7 @@ public class Enemy extends Character {
 	 * @param targetY
 	 * @param map
 	 */
-	public void pathToHeroAndMove(int targetX, int targetY, Tile[][] map, Character[][] entities) {
+	public void pathToHeroAndMove(int targetX, int targetY, Tile[][] map) {
 		//Try to path straight from the monster to the hero.
 
 		//Coordinates of the line that walks to the player.
@@ -176,7 +176,7 @@ public class Enemy extends Character {
 
 			straightTiles.add(new Tile( map[straightPoint.x][straightPoint.y].type , 0, straightPoint.x, straightPoint.y));
 
-			if(map[straightPoint.x][straightPoint.y].blocker || entities[straightPoint.x][straightPoint.y] != null) {
+			if(map[straightPoint.x][straightPoint.y].blocker) {
 				//map[straightPoint.x][straightPoint.y].illustrate(Color.red);//TODO
 			} else {
 				//map[straightPoint.x][straightPoint.y].illustrate(Color.yellow);// TODO
@@ -205,13 +205,10 @@ public class Enemy extends Character {
 			} else {
 				prevTile = straightTiles.get(whichTile - 1);
 			}
-
-			Character charOnTile = entities[t.x][t.y];
-			Character charOnPrevTile = entities[prevTile.x][prevTile.y];
 			
 			//Go through until we run into sexy trouble (blocker) or another enemy.
 			//Also make sure that the tile PREVIOUS to this one is NOT a blocker (so we don't do two blockers in a row).
-			if((t.blocker && !prevTile.blocker) || (charOnTile != null && charOnPrevTile == null)) {
+			if((t.blocker && !prevTile.blocker)) {
 				//OH NO! Blocker found.  Send out "feelers" to go along right and left walls.
 				//Start feelers at the square on the straight-line path right BEFORE the wall.
 				Point rightFeeler = new Point(prevTile.x, prevTile.y);
@@ -223,10 +220,10 @@ public class Enemy extends Character {
 				
 				//Get started on feelin' things out.
 				//Right:
-				lastWallRight = getDirection(rightFeeler, new Point(t.x, t.y), true, map, entities);
+				lastWallRight = getDirection(rightFeeler, new Point(t.x, t.y), true, map);
 
 				//Left:
-				lastWallLeft = getDirection(leftFeeler, new Point(t.x, t.y), false, map, entities);
+				lastWallLeft = getDirection(leftFeeler, new Point(t.x, t.y), false, map);
 
 				
 				
@@ -243,12 +240,12 @@ public class Enemy extends Character {
 				while(numTiles < 100) {
 					//follow right wall
 
-					lastWallRight = getDirection(rightFeeler, lastWallRight, true, map, entities);
+					lastWallRight = getDirection(rightFeeler, lastWallRight, true, map);
 
 					//map[rightFeeler.x][rightFeeler.y].illustrate(Color.blue); //TODO
 
 					//follow left wall
-					lastWallLeft = getDirection(leftFeeler, lastWallLeft, false, map, entities);
+					lastWallLeft = getDirection(leftFeeler, lastWallLeft, false, map);
 
 					//map[leftFeeler.x][leftFeeler.y].illustrate(Color.cyan);
 
@@ -345,6 +342,8 @@ public class Enemy extends Character {
 		}
 
 		//See if we can attack the player
+		Character[][] entities = InGameState.getEntities();
+		
 		if(entities[x + proposedDX][y + proposedDY] instanceof MainCharacter) {
 			System.out.println("The rat scratches you!");
 		} else {
@@ -438,7 +437,7 @@ public class Enemy extends Character {
 	 * @param map The array of Tiles.
 	 * @return The last WALL the feeler touched. This is important to the wall-following algorithm.
 	 */
-	public Point getDirection(Point feeler, Point lastWall, boolean goingRight, Tile[][] map, Character[][] entities) {
+	public Point getDirection(Point feeler, Point lastWall, boolean goingRight, Tile[][] map) {
 		/*
 		 * The algorithm starts by looking at the direction between the feeler and its last-touched wall:
 		 *  _

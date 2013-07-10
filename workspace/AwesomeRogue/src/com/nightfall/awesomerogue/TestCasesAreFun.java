@@ -67,15 +67,15 @@ public class TestCasesAreFun {
 
 		Point leftFeeler = new Point(3,1);
 		Point lastWall = new Point(3,0);
-		lastWall = e.getDirection(leftFeeler, lastWall, false, map, null);
+		//lastWall = e.getDirection(leftFeeler, lastWall, false, map, null);
 		pass &= assertEquals(new Point(2,1), leftFeeler);
 		pass &= assertEquals(new Point(2,0), lastWall);
 
-		lastWall = e.getDirection(leftFeeler, lastWall, false, map, null);
+		//lastWall = e.getDirection(leftFeeler, lastWall, false, map, null);
 		pass &= assertEquals(new Point(1,1), leftFeeler);
 		pass &= assertEquals(new Point(1,0), lastWall);
 
-		lastWall = e.getDirection(leftFeeler, lastWall, false, map, null);
+		//lastWall = e.getDirection(leftFeeler, lastWall, false, map, null);
 		pass &= assertEquals(new Point(1,2), leftFeeler);
 		pass &= assertEquals(new Point(0,2), lastWall);
 

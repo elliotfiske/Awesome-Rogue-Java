@@ -372,13 +372,17 @@ public class InGameState extends GameState {
 				mainChar.move(p.x, p.y, map, entities);
 
 				//Move the camera appropriately
+				System.out.println("You are " + (mainChar.getX() - CAMERA_X) + ", " + (mainChar.getY() - CAMERA_Y) + " from the camera.");
+				
 				if(mainChar.getX() - CAMERA_X < INGAME_SCROLL_MINX) {
 					int cameraMoveDistance = INGAME_SCROLL_MINX - (mainChar.getX() - CAMERA_X);
 					moveCamera(-cameraMoveDistance, 0);
+					System.out.println("hm?");
 				}
 				else if(mainChar.getX() - CAMERA_X > INGAME_SCROLL_MAXX) {
-					int cameraMoveDistance = INGAME_SCROLL_MAXX - (mainChar.getX() - CAMERA_X);
+					int cameraMoveDistance = mainChar.getX() - CAMERA_X - INGAME_SCROLL_MAXX;
 					moveCamera(cameraMoveDistance, 0);
+					System.out.println("what?");
 				}
 
 				if(mainChar.getY() - CAMERA_Y < INGAME_SCROLL_MINY) {
