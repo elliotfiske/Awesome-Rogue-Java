@@ -98,6 +98,7 @@ public class Enemy extends Character {
 				pathToHeroAndMove(mainChar.getX(), mainChar.getY(), map);
 			}
 		} else {
+			System.out.println("Getting here?");
 			pathToHeroAndMove(mainChar.getX(), mainChar.getY(), map);
 		}
 	}

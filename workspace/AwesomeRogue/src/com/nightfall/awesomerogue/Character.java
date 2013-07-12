@@ -175,10 +175,7 @@ public class Character {
 			
 			//I guess we have no choice left but to move :P
 			if(forceMarch) {
-				entities[x][y] = null;
-				entities[proposedX][proposedY] = this;
-				x = proposedX;
-				y = proposedY;
+				moveTo(proposedX, proposedY, entities);
 				System.out.println("line 171?");
 			}
 			
@@ -289,4 +286,21 @@ public class Character {
 	public String getID() {
 		return toString().substring(toString().length() - 3);
 	}
+	
+	/**
+	 * Handles the whole "entities array" thing for us, but doesn't check walls or anything.
+	 * @param newX X location to move to
+	 * @param newY Y location to move to NOTE: absolute, not relative
+	 */
+	public void moveTo(int newX, int newY) {
+		moveTo(newX, newY, InGameState.getEntities());
+	}
+	
+	public void moveTo(int newX, int newY, Character[][] entities) {
+		entities[x][y] = null;
+		entities[newX][newY] = this;
+		x = newX;
+		y = newY;
+	}
+
 }

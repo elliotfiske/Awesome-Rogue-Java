@@ -274,4 +274,9 @@ public class MainCharacter extends Character {
 	public int getWeight() {
 		return weight;
 	}
+	
+	public void moveTo(int newX, int newY, Character[][] entities) {
+		super.moveTo(newX, newY, entities);
+		currentGameState.updateCamera();
+	}
 }

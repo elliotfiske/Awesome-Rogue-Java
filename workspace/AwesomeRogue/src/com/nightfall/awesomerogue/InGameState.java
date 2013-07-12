@@ -301,10 +301,19 @@ public class InGameState extends GameState {
 	 * @param dy How much to move the camera by (y)
 	 */
 	public void moveCamera(int dx, int dy) {
-		if(CAMERA_X + dx >= 0 && CAMERA_X + dx + INGAME_WINDOW_WIDTH <= map.length) {
+		if(CAMERA_X + dx < 0) {
+			CAMERA_X = 0;
+		} else if(CAMERA_X + dx + INGAME_WINDOW_WIDTH > map.length) {                                                             
+			CAMERA_X = map.length - INGAME_WINDOW_WIDTH;
+		} else {
 			CAMERA_X += dx;
 		}
-		if(CAMERA_Y + dy >= 0 && CAMERA_Y + dy + INGAME_WINDOW_HEIGHT <= map[0].length) {
+		
+		if(CAMERA_Y + dy < 0) {
+			CAMERA_Y = 0;
+		} else if(CAMERA_Y + dy + INGAME_WINDOW_HEIGHT > map[0].length) {                                                             
+			CAMERA_Y = map[0].length - INGAME_WINDOW_HEIGHT;
+		} else {
 			CAMERA_Y += dy;
 		}
 	}
@@ -370,27 +379,8 @@ public class InGameState extends GameState {
 			else {
 				//Move the main character
 				mainChar.move(p.x, p.y, map, entities);
-
-				//Move the camera appropriately
-				System.out.println("You are " + (mainChar.getX() - CAMERA_X) + ", " + (mainChar.getY() - CAMERA_Y) + " from the camera.");
 				
-				if(mainChar.getX() - CAMERA_X < INGAME_SCROLL_MINX) {
-					int cameraMoveDistance = INGAME_SCROLL_MINX - (mainChar.getX() - CAMERA_X);
-					moveCamera(-cameraMoveDistance, 0);
-				}
-				else if(mainChar.getX() - CAMERA_X > INGAME_SCROLL_MAXX) {
-					int cameraMoveDistance = mainChar.getX() - CAMERA_X - INGAME_SCROLL_MAXX;
-					moveCamera(cameraMoveDistance, 0);
-				}
-
-				if(mainChar.getY() - CAMERA_Y < INGAME_SCROLL_MINY) {
-					int cameraMoveDistance = INGAME_SCROLL_MINY - (mainChar.getY() - CAMERA_Y);
-					moveCamera(0, -cameraMoveDistance);
-				}
-				else if(mainChar.getY() - CAMERA_Y > INGAME_SCROLL_MAXY) {
-					int cameraMoveDistance = mainChar.getY() - CAMERA_Y - INGAME_SCROLL_MAXY;
-					moveCamera(0, cameraMoveDistance);
-				}
+				updateCamera();
 
 				//TODO: Weapons and usable stuff goes here.
 
@@ -434,6 +424,29 @@ public class InGameState extends GameState {
 			else if(waiting.equals("C")) {
 				mainChar.activateSkill(2, p);
 			}
+		}
+	}
+
+	/**
+	 * Update the camera.  Used for teleporting or force marching
+	 */
+	public void updateCamera() {
+		if(mainChar.getX() - CAMERA_X < INGAME_SCROLL_MINX) {
+			int cameraMoveDistance = INGAME_SCROLL_MINX - (mainChar.getX() - CAMERA_X);
+			moveCamera(-cameraMoveDistance, 0);
+		}
+		else if(mainChar.getX() - CAMERA_X > INGAME_SCROLL_MAXX) {
+			int cameraMoveDistance = mainChar.getX() - CAMERA_X - INGAME_SCROLL_MAXX;
+			moveCamera(cameraMoveDistance, 0);
+		}
+
+		if(mainChar.getY() - CAMERA_Y < INGAME_SCROLL_MINY) {
+			int cameraMoveDistance = INGAME_SCROLL_MINY - (mainChar.getY() - CAMERA_Y);
+			moveCamera(0, -cameraMoveDistance);
+		}
+		else if(mainChar.getY() - CAMERA_Y > INGAME_SCROLL_MAXY) {
+			int cameraMoveDistance = mainChar.getY() - CAMERA_Y - INGAME_SCROLL_MAXY;
+			moveCamera(0, cameraMoveDistance);
 		}
 	}
 
