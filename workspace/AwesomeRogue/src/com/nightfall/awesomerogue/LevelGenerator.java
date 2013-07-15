@@ -314,6 +314,9 @@ public class LevelGenerator {
 		if(difficulty == 1) {
 			Enemy bob = new Enemy(25, 10, Enemy.RAT);
 			InGameState.enemyList.add(bob);
+			
+			Enemy joe = new Enemy(10, 25, Enemy.MUSHROOM);
+			InGameState.enemyList.add(joe);
 		}
 		
 		if(difficulty == 2) {

@@ -485,7 +485,7 @@ public class InGameState extends GameState {
 			map = new Tile[80][70];
 			levelGen.makeLevel(map, LevelGenerator.CAVE, 80, 70, 2);
 
-			mainChar.initPos(53, 60);
+			mainChar.initPos(10, 10);
 			
 			//give the main character a map he's lost
 			mainChar.giveMap(map);

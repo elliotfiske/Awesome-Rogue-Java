@@ -173,7 +173,7 @@ public class Enemy extends Character {
 		Point randPoint = getPointDirection(randDirection);
 		int numTries = 0;
 		
-		while(map[x + randPoint.x][y + randPoint.y].blocker && numTries < 9) {
+		while(map[x + randPoint.x][y + randPoint.y].isBlocker() && numTries < 9) {
 			randDirection = (int) Math.floor(Math.random() * 8);
 			randPoint = getPointDirection(randDirection);
 			
@@ -193,6 +193,9 @@ public class Enemy extends Character {
 	 * @param map
 	 */
 	public void pathToHeroAndMove(int targetX, int targetY, Tile[][] map) {
+		//Grab a handle to the entities array
+		Character[][] entities = InGameState.getEntities();
+		
 		//Try to path straight from the monster to the hero.
 
 		//Coordinates of the line that walks to the player.
@@ -200,6 +203,8 @@ public class Enemy extends Character {
 
 		/** List of tiles straight from the monster to the player. */
 		ArrayList<Tile> straightTiles = new ArrayList<Tile>();
+		
+		boolean blocked = false;
 
 		while(!(straightPoint.x == targetX && straightPoint.y == targetY)) {
 			//Calculate which direction it would be smart to go in order to walk to the player.
@@ -207,7 +212,8 @@ public class Enemy extends Character {
 
 			straightTiles.add(new Tile( map[straightPoint.x][straightPoint.y].type , 0, straightPoint.x, straightPoint.y));
 
-			if(map[straightPoint.x][straightPoint.y].blocker) {
+			if(map[straightPoint.x][straightPoint.y].isBlocker()) {
+				blocked = true;
 				//map[straightPoint.x][straightPoint.y].illustrate(Color.red);//TODO
 			} else {
 				//map[straightPoint.x][straightPoint.y].illustrate(Color.yellow);// TODO
@@ -219,6 +225,9 @@ public class Enemy extends Character {
 		if(chanceOfMoving < Math.random()) {
 			return;
 		}
+		
+		//Swarming mechanics
+		
 
 		//DEAL WITH OBSTACLES HERE
 
@@ -239,7 +248,7 @@ public class Enemy extends Character {
 
 			//Go through until we run into sexy trouble (blocker) or another enemy.
 			//Also make sure that the tile PREVIOUS to this one is NOT a blocker (so we don't do two blockers in a row).
-			if((t.blocker && !prevTile.blocker)) {
+			if((t.isBlocker() && !prevTile.blocker)) {
 				//OH NO! Blocker found.  Send out "feelers" to go along right and left walls.
 				//Start feelers at the square on the straight-line path right BEFORE the wall.
 				Point rightFeeler = new Point(prevTile.x, prevTile.y);
@@ -344,7 +353,7 @@ public class Enemy extends Character {
 					walkStraight(finalPath, pointToCheck, 3);
 					finalPathPoints.add(new Point(finalPath.x, finalPath.y));
 					//map[finalPath.x][finalPath.y].illustrate(Color.black); //TODO
-					if(map[finalPath.x][finalPath.y].blocker) {
+					if(map[finalPath.x][finalPath.y].isBlocker()) {
 						//map[finalPath.x][finalPath.y].illustrate(Color.red); //TODO
 						//Outta luck.  Try the next one!
 						weDidIt = false;
@@ -374,9 +383,6 @@ public class Enemy extends Character {
 			proposedDY = straightTiles.get(0).y - y;
 			//map[x + proposedDX][y + proposedDY].illustrate(Color.ORANGE);
 		}
-
-		//See if we can attack the player
-		Character[][] entities = InGameState.getEntities();
 
 		if(entities[x + proposedDX][y + proposedDY] instanceof MainCharacter) {
 			System.out.println("The rat scratches you!");
@@ -527,7 +533,7 @@ public class Enemy extends Character {
 				continue; //pretend it's a blocker.
 			}
 
-			if(!map[feeler.x + diffX][feeler.y + diffY].blocker) {
+			if(!map[feeler.x + diffX][feeler.y + diffY].isBlocker()) {
 				//We did it!
 				//Grab the result of this function: the last-touched wall.
 				int wallDirection = getNumberedDirection(new Point(diffX, diffY));
