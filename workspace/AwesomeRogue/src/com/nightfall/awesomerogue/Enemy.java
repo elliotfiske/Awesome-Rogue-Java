@@ -206,6 +206,7 @@ public class Enemy extends Character {
 		
 		boolean blocked = false;
 
+		
 		while(!(straightPoint.x == targetX && straightPoint.y == targetY)) {
 			//Calculate which direction it would be smart to go in order to walk to the player.
 			walkStraight(straightPoint, new Point(targetX, targetY), 3);
@@ -226,7 +227,7 @@ public class Enemy extends Character {
 			return;
 		}
 		
-		//Swarming mechanics
+		//TODO: Swarming mechanics
 		
 
 		//DEAL WITH OBSTACLES HERE
@@ -265,7 +266,9 @@ public class Enemy extends Character {
 				//Left:
 				lastWallLeft = getDirection(leftFeeler, new Point(t.x, t.y), false, map);
 
-
+				if(lastWallRight.equals(new Point(0,0)) || lastWallLeft.equals(new Point(0,0))) {
+					return;
+				}
 
 				Point lastRightFeeler = new Point(rightFeeler.x, rightFeeler.y);
 				Point lastLeftFeeler = new Point(leftFeeler.x, leftFeeler.y);
@@ -287,6 +290,10 @@ public class Enemy extends Character {
 					//follow left wall
 					lastWallLeft = getDirection(leftFeeler, lastWallLeft, false, map);
 
+					if(lastWallRight.equals(new Point(0,0)) || lastWallLeft.equals(new Point(0,0))) {
+						return;
+					}
+					
 					//map[leftFeeler.x][leftFeeler.y].illustrate(Color.cyan);
 
 					leftPath.add(new Point(leftFeeler.x, leftFeeler.y));
@@ -306,6 +313,7 @@ public class Enemy extends Character {
 						if(firstCorrectPath == null) {
 							firstCorrectPath = leftPath;
 						}
+						System.out.println("found path.. numtiles = " + numTiles);
 						break;
 					}
 
@@ -319,7 +327,8 @@ public class Enemy extends Character {
 				
 				if(numTiles >= 999) {
 					//No path found, I guess.
-					return;
+					System.out.println("Despair! " + numTiles);
+					break;
 				}
 			}
 		}
