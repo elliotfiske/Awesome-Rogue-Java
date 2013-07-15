@@ -98,7 +98,6 @@ public class Enemy extends Character {
 				pathToHeroAndMove(mainChar.getX(), mainChar.getY(), map);
 			}
 		} else {
-			System.out.println("Getting here?");
 			pathToHeroAndMove(mainChar.getX(), mainChar.getY(), map);
 		}
 	}
@@ -269,7 +268,7 @@ public class Enemy extends Character {
 				//map[leftFeeler.x][leftFeeler.y].illustrate(Color.cyan);
 
 				int numTiles = 0;
-				while(numTiles < 100) {
+				while(numTiles < 1000) {
 					//follow right wall
 
 					lastWallRight = getDirection(rightFeeler, lastWallRight, true, map);
@@ -307,6 +306,11 @@ public class Enemy extends Character {
 					lastLeftFeeler = new Point(leftFeeler.x, leftFeeler.y);
 
 					numTiles++;
+				}
+				
+				if(numTiles >= 999) {
+					//No path found, I guess.
+					return;
 				}
 			}
 		}
@@ -352,10 +356,8 @@ public class Enemy extends Character {
 				if(weDidIt) {
 					proposedDX = firstStep.x - x;
 					proposedDY = firstStep.y - y;
-					int wut = 0;
 					for(Point p : finalPathPoints) {
 						//map[p.x][p.y].illustrate(Color.green); //TODO
-						//System.out.println("wut" + wut);
 					}
 					//map[firstStep.x][firstStep.y].illustrate(Color.ORANGE); //TODO
 					break;

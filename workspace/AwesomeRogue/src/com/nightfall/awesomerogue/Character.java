@@ -253,10 +253,6 @@ public class Character {
 		return dead;
 	}
 	
-	public void takeTurn(MainCharacter mainChar, Tile[][] map, Character[][] entities) {
-		
-	}
-	
 	/**
 	 * How heavy you are.  Important for collisions.
 	 */

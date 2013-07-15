@@ -25,7 +25,7 @@ public class InGameState extends GameState {
 	public static final int TILE_SIZE = 12;
 
 	//Enable to debug stuff
-	public static final boolean GODMODE_VISION = true;
+	public static final boolean GODMODE_VISION = false;
 	public static final boolean GODMODE_DRAW_IDS = false;
 	public static final boolean GODMODE_WALKTHRUWALLS = true;
 	public static final boolean GODMODE_CAN_FREEZE_ENEMIES = true;
@@ -335,7 +335,11 @@ public class InGameState extends GameState {
 				System.out.println("WE ARE NOT NOT NOT!");
 			}
 		}
-
+		
+		if(waitingOn.contains("smartmove")) {
+			
+		}
+		
 		//Parse the direction from the given KeyPress
 		Point p = getDirection(e);
 
@@ -362,6 +366,13 @@ public class InGameState extends GameState {
 		}
 
 		if(!suspended) {
+
+			//Smartmove
+			if(e.getKeyCode() == KeyEvent.VK_NUMPAD5) {
+				endAllWaits("smartmove");
+				waitOn("smartmove");
+			}
+			
 			if(p.x == 0 && p.y == 0) {
 				if(e.getKeyCode() == KeyEvent.VK_SPACE) {
 					InGameState.waitOn("attack");
@@ -375,8 +386,7 @@ public class InGameState extends GameState {
 				else if(e.getKeyCode() == KeyEvent.VK_C) {
 					mainChar.prepareSkill(2);
 				}
-			}
-			else {
+			} else {
 				//Move the main character
 				mainChar.move(p.x, p.y, map, entities);
 				
@@ -391,11 +401,10 @@ public class InGameState extends GameState {
 					if(enemy.dead()) {
 						enemies.remove(enemy);
 						entities[enemy.getX()][enemy.getY()] = null;
-						i -- ;
-					}
-					else {
+						i--;
+					} else {
 						if(!areEnemiesFrozen) {
-							enemy.takeTurn(mainChar, map, entities);
+							((Enemy) enemy).takeTurn(mainChar, map);
 						}
 					}
 				}
