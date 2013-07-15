@@ -21,6 +21,7 @@ public class Grenade extends Character {
 		if(timer <= 0) {
 			die();
 			InGameState.waitOn(new Explosion(getX(), getY()));
+			System.out.println("x and y of grenade: " + getX() + ", " + getY());
 		}
 	}
 	

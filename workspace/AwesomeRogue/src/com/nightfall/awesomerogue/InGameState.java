@@ -66,8 +66,9 @@ public class InGameState extends GameState {
 
 	private boolean introLevel;
 
-	public static ArrayList<Character> enemyList;
-	private static ArrayList<Character> enemies;
+	public static ArrayList<Enemy> enemyList;
+	private static ArrayList<Enemy> enemies;
+	private static ArrayList<Character> pets;
 	private static Character[][] entities;
 
 	private MetaGameState metaGame;
@@ -109,8 +110,10 @@ public class InGameState extends GameState {
 
 		levelGen = new LevelGenerator();
 
-		enemies = new ArrayList<Character>();
-		enemyList = new ArrayList<Character>();
+		enemies = new ArrayList<Enemy>();
+		enemyList = new ArrayList<Enemy>();
+		
+		pets = new ArrayList<Character>();
 
 		mapImg = new BufferedImage(INGAME_WINDOW_WIDTH*TILE_SIZE, INGAME_WINDOW_HEIGHT*TILE_SIZE, BufferedImage.TYPE_INT_ARGB);
 		mapImg_t = new BufferedImage(INGAME_WINDOW_WIDTH*TILE_SIZE, INGAME_WINDOW_HEIGHT*TILE_SIZE, BufferedImage.TYPE_INT_ARGB);
@@ -133,8 +136,14 @@ public class InGameState extends GameState {
 		if(suspended) {
 			String waiting = waitingOn.get(waitingOn.size()-1);
 			mainChar.update(map, entities);
-			for(int i = 0; i < enemies.size(); i++) {
-				Character e = enemies.get(i);
+			
+			//update amigas
+			for(Character pet : pets) {
+				pet.update(map, entities);
+			}
+			
+			//update ENamigas
+			for(Enemy e : enemies) {
 				e.update(map, entities);
 			}
 			calculateLighting();
@@ -277,7 +286,7 @@ public class InGameState extends GameState {
 
 		//Draw the enemies.
 		for(int i = 0; i < enemies.size(); i++) {
-			Character e = enemies.get(i);
+			Enemy e = enemies.get(i);
 			if(e.dead()) {
 				enemies.remove(i--);
 				continue;
@@ -288,6 +297,19 @@ public class InGameState extends GameState {
 				g2.setColor(Color.red);
 				g2.drawString("?", (e.getX()-CAMERA_X)*TILE_SIZE, (e.getY()-CAMERA_Y)*TILE_SIZE + TILE_SIZE );
 			}
+		}
+		
+		//Draw the pets
+		for(int i = 0; i < pets.size(); i++) {
+			Character p = pets.get(i);
+			if(p.dead()) {
+				//BURY IT
+				pets.remove(i--);
+				continue;
+			}
+			
+			//Gonna make it so that you can see through pet's eyes maybe?
+			p.draw(g2, CAMERA_X, CAMERA_Y);
 		}
 
 		Graphics2D g = (Graphics2D) mapImg.getGraphics();
@@ -413,6 +435,12 @@ public class InGameState extends GameState {
 				for(int i = 0; i < ongoingEffects.size(); i++) {
 					OngoingEffect oe = ongoingEffects.get(i);
 					oe.turnIterate(map, entities);
+				}
+				
+				//Move pets!
+				for(int i = 0; i < pets.size(); i++) {
+					Character pet = pets.get(i);
+					pet.takeTurn(mainChar, map);
 				}
 
 				calculateLighting();
@@ -638,8 +666,8 @@ public class InGameState extends GameState {
 		return result;
 	}
 
-	public void addCharacter(Character character) {
-		enemies.add(character);
+	public void addPet(Character character) {
+		pets.add(character);
 	}
 
 	/**

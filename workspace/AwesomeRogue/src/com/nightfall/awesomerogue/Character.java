@@ -69,8 +69,12 @@ public class Character {
 	public int getX() { return x; }
 	public int getY() { return y; }
 	
+	public boolean isForceMarching() { return forceMarch; }
+	
 	public void setCurrentWeapon(Weapon weapon) { currentWeapon = weapon; }
 	public Weapon getCurrentWeapon() { return currentWeapon; }
+	
+	public void takeTurn(MainCharacter mainChar, Tile[][] map) { }
 	
 	// Set the weapon to attack in a certain direction.
 	// This does not do any damage inherently, in case
@@ -87,18 +91,12 @@ public class Character {
 	}
 
 	public void forceMarch(int dx, int dy) {
-		forceMarch(dx, dy, false);
-	}
-	
-	public void forceMarch(int dx, int dy, boolean inAir) {
 		forceMarch = true;
 		forceMarchTo = new Point(x + dx, y + dy);
 		//Just in case, remove other forcemarches from this guy
 		InGameState.endAllWaits("forcemarch" + getName() + getID());
 		InGameState.waitOn("forcemarch" + getName() + getID());
 		System.out.println("Force march from " + x + ", " + y + " to " + forceMarchTo.x + ", " + forceMarchTo.y);
-		
-		if(inAir) altitude ++;
 	}
 	
 	public void update(Tile[][] map, Character[][] entities) {
@@ -153,6 +151,9 @@ public class Character {
 				//If they're huge, they won't get knocked back as far.  Will never go below 1, though.
 				int newSpeed = (int) (speed - Math.floor((double) hisWeight / (double) myWeight));
 				if(newSpeed < 1) { newSpeed = 1; }
+				
+				//yolo
+				if(this instanceof MainCharacter) { newSpeed = 5; }
 				
 				//Now we gotta recalculate our target points.
 				//First, reverse engineer the direction.

@@ -82,7 +82,7 @@ public class LevelGenerator {
 	 * @param currState A handle to the InGameState so we can access Tiles :/
 	 * @param difficulty How hard do I want it?
 	 */
-	public static Tile[][] makeLevel(int type, int width, int height, int difficulty, ArrayList<Character> enemies) {
+	public static Tile[][] makeLevel(int type, int width, int height, int difficulty, ArrayList<Enemy> enemies) {
 		switch(type) {
 		case CAVE:
 			//return makeCaves(width, height, difficulty);
@@ -359,7 +359,7 @@ public class LevelGenerator {
 
 	}
 
-	public static Tile[][] makeIntro(int width, int height, ArrayList<Character> enemies) {
+	public static Tile[][] makeIntro(int width, int height, ArrayList<Enemy> enemies) {
 		int CENTER = 17;
 		int ROOM_MIN = CENTER-5;
 		int ROOM_MAX = CENTER+5;

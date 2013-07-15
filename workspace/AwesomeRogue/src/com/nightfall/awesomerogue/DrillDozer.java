@@ -32,8 +32,29 @@ public class DrillDozer extends Character {
 					"back into your pocket.");
 		}
 	}
+
 	
+	//If you falcon punch your drill dozer it carves a path even faster which is Awesome
+	@Override
+	public void forceMarch(int dx, int dy) {
+		super.forceMarch(dx, dy);
+		System.out.println("The drill dozer flies through the air, frantically carving a path through the stone!");
+	}
+
+	@Override
+	public void update(Tile[][] map, Character[][] entities) {
+		super.update(map, entities);
+		if(isForceMarching()) {
+			InGameState.waitOn(new DrillDozerEffect(getX(), getY(), direction, map, InGameState.getEntities()));
+		}
+	}
+
 	public String getName() {
 		return "Drill Dozer";
 	}
+	
+	public int getWeight() {
+		return 1;
+	}
+	
 }

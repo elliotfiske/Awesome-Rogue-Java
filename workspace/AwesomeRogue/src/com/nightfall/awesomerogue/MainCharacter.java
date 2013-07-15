@@ -15,7 +15,7 @@ public class MainCharacter extends Character {
 	private int numSkills;
 	
 	/** You've really let yourself go, main character.*/
-	private int weight = 20;
+	private int weight = 50;
 
 	private InGameState currentGameState;
 	private Active actives; //Our handle to the actives.
@@ -43,7 +43,7 @@ public class MainCharacter extends Character {
 		actives = new Active(this);
 		
 		skills[0] = Active.FALCON_PUNCH;
-		skills[1] = Active.HULK_SERUM;
+		skills[1] = Active.GRENADE_LAUNCHER;
 		skills[2] = Active.DRILL_DOZER;
 	}
 	
