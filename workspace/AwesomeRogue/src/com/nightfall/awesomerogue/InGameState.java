@@ -358,6 +358,12 @@ public class InGameState extends GameState {
 			}
 		}
 		
+		//I need to fix this, this could cause some really stupid behavior.
+		//First off, have the enemies take a turn if they deserve it.
+		if(waitingOn.contains("enemy move") && waitingOn.size() == 1) {
+			enemyTurn();
+		}
+		
 		//Smartmove if we're waiting on smartmove and JUST smartmove.
 		if(waitingOn.contains("smartmove") && waitingOn.size() == 1) {
 			
@@ -390,6 +396,8 @@ public class InGameState extends GameState {
 
 		if(!suspended) {
 
+			
+			
 			//Smartmove
 			if(e.getKeyCode() == KeyEvent.VK_NUMPAD5) {
 				endAllWaits("smartmove");
@@ -418,19 +426,8 @@ public class InGameState extends GameState {
 				//TODO: Weapons and usable stuff goes here.
 
 
-				//TODO: Have the enemies take a turn here. 
-				for(int i = 0; i < enemies.size(); i ++) {
-					Character enemy = enemies.get(i);
-					if(enemy.dead()) {
-						enemies.remove(enemy);
-						entities[enemy.getX()][enemy.getY()] = null;
-						i--;
-					} else {
-						if(!areEnemiesFrozen) {
-							((Enemy) enemy).takeTurn(mainChar, map);
-						}
-					}
-				}
+				//Enemy time!
+				enemyTurn();
 				
 				//Iterate the iteratable effects here (the dead ones are removed in render() )
 				for(int i = 0; i < ongoingEffects.size(); i++) {
@@ -452,17 +449,49 @@ public class InGameState extends GameState {
 			if(waiting.equals("attack")) {
 				mainChar.attack(p);
 				endWait("attack");
+				queueEnemyTurn();
 			}
 			if(waiting.equals("Z")) {
 				mainChar.activateSkill(0, p);
+				enemyTurn();
 			}
 			else if(waiting.equals("X")) {
 				mainChar.activateSkill(1, p);
+				enemyTurn();
 			}
 			else if(waiting.equals("C")) {
 				mainChar.activateSkill(2, p);
+				enemyTurn();
 			}
 		}
+	}
+
+	/**
+	 *  This makes it so that the order of operations is shoot -> bullet finishes -> enemies attack
+	 *  
+	 *  This way, enemies don't get to take a turn right as you shoot and dodge your bullets, which is
+	 *  annoying.
+	 */
+	private void queueEnemyTurn() {
+		waitOn("enemy turn");
+	}
+	
+	/** All the enemies take a turn */
+	private void enemyTurn() {
+		for(int i = 0; i < enemies.size(); i ++) {
+			Character enemy = enemies.get(i);
+			if(enemy.dead()) {
+				enemies.remove(enemy);
+				entities[enemy.getX()][enemy.getY()] = null;
+				i--;
+			} else {
+				if(!areEnemiesFrozen) {
+					((Enemy) enemy).takeTurn(mainChar, map);
+				}
+			}
+		}
+		
+		endAllWaits("enemy turn");
 	}
 
 	/**
