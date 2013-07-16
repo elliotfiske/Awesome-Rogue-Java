@@ -27,12 +27,18 @@ public class Enemy extends Character {
 
 	private int xBounty, yBounty;
 	private Tile bounty;
+	
+	/** smartMove stops if a enemy has been seen that WAS NOT seen before. If smartSeen is true
+	 * then the enemy has been visible since smartMove began. */
+	public boolean smartSeen;
 
 	public Enemy /* number one */ (int x, int y, int whichEnemy) {
 		super(x, y, enemyIcons[whichEnemy]);
 
 		this.whichEnemy = whichEnemy;
 
+		smartSeen = false;
+		
 		switch(whichEnemy) {
 		case ANGRY_MUSHROOM:
 			health = 15;
@@ -62,7 +68,7 @@ public class Enemy extends Character {
 			health = 40;
 			name = "skeleton";
 			weight = 10;
-			speed = 5;
+			speed = 4;
 			break;
 		case WIZARD:
 			health = 50;
@@ -205,7 +211,6 @@ public class Enemy extends Character {
 		ArrayList<Tile> straightTiles = new ArrayList<Tile>();
 		
 		boolean blocked = false;
-
 		
 		while(!(straightPoint.x == targetX && straightPoint.y == targetY)) {
 			//Calculate which direction it would be smart to go in order to walk to the player.
@@ -313,7 +318,6 @@ public class Enemy extends Character {
 						if(firstCorrectPath == null) {
 							firstCorrectPath = leftPath;
 						}
-						System.out.println("found path.. numtiles = " + numTiles);
 						break;
 					}
 
@@ -327,7 +331,6 @@ public class Enemy extends Character {
 				
 				if(numTiles >= 999) {
 					//No path found, I guess.
-					System.out.println("Despair! " + numTiles);
 					break;
 				}
 			}
@@ -395,6 +398,8 @@ public class Enemy extends Character {
 
 		if(entities[x + proposedDX][y + proposedDY] instanceof MainCharacter) {
 			System.out.println("The rat scratches you!");
+		} else if(map[x + proposedDX][y + proposedDY].isBlocker()) {
+			//We pathed into a wall.  Oh well.  Don't move!
 		} else {
 
 			moveEnemyTo(x + proposedDX, y + proposedDY);

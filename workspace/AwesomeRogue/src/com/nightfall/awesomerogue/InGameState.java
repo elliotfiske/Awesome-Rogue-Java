@@ -358,7 +358,8 @@ public class InGameState extends GameState {
 			}
 		}
 		
-		if(waitingOn.contains("smartmove")) {
+		//Smartmove if we're waiting on smartmove and JUST smartmove.
+		if(waitingOn.contains("smartmove") && waitingOn.size() == 1) {
 			
 		}
 		
