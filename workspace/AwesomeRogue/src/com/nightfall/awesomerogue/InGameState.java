@@ -44,7 +44,7 @@ public class InGameState extends GameState {
 	public static int CAMERA_Y = 0;
 
 
-	public Tile[][] map;
+	public static Tile[][] map;
 	int mapWidth = 0;
 	int mapHeight = 0;
 
@@ -75,6 +75,7 @@ public class InGameState extends GameState {
 	private static ArrayList<Character> pets;
 	private static Character[][] entities;
 	
+	public int prevHealth;
 	private ArrayList<FloatyText> texts;
 	/** Lets us see how wide a string actually is rendered */
 	Font defaultFont;
@@ -88,6 +89,7 @@ public class InGameState extends GameState {
 		this.metaGame = metaGame;
 		mainChar = character;
 		mainChar.setLevel(this);
+		prevHealth = mainChar.getHealth();
 
 		tileImages = metaGame.getTileImages();
 
@@ -210,6 +212,9 @@ public class InGameState extends GameState {
 		for(int i = 0; i < texts.size(); i++) {
 			FloatyText ft = texts.get(i);
 			ft.update();
+			
+			
+			
 			if(ft.alpha <= 0) {
 				texts.remove(ft);
 				i--;
@@ -524,6 +529,11 @@ public class InGameState extends GameState {
 		
 		//Make sure the game renders the new enemy position
 		calculateLighting();
+		
+		//We calculate how much health the player lost this turn, since the main source of health lost is enemies.
+		int lostHealth = prevHealth - mainChar.getHealth();
+		hitText(mainChar.x * TILE_SIZE, mainChar.y * TILE_SIZE, lostHealth);
+		prevHealth = mainChar.getHealth();
 	}
 
 	/**
@@ -737,7 +747,7 @@ public class InGameState extends GameState {
 	 * @param x X coord of the tile to grab.
 	 * @param y Y coord of the tile to grab.
 	 */
-	public Tile tileAt(int x, int y) {
+	public static Tile tileAt(int x, int y) {
 		if(x < 0) {
 			System.out.println("X is negative! (" + x + ") Adjusting to 0.");
 			x = 0;
@@ -783,6 +793,12 @@ public class InGameState extends GameState {
 		texts.add(text);
 	}
 	
+	/** Floating text saying how much you got hurt. */
+	public void hitText(int x, int y, int amount) {
+		FloatyText text = new FloatyText(x, y, "-" + amount + " Health!", Color.red);
+		texts.add(text);
+	}
+	
 	private class FloatyText {
 		float x, y;
 		String message;
@@ -798,7 +814,7 @@ public class InGameState extends GameState {
 		}
 		
 		public void draw(Graphics2D g2) {
-			Color color = new Color(this.color.getRed(), this.color.getBlue(), this.color.getGreen(), alpha);
+			Color color = new Color(this.color.getRed(), this.color.getGreen(), this.color.getBlue(), alpha);
 			g2.setColor(color);
 			g2.drawString(message, x, y);
 		}

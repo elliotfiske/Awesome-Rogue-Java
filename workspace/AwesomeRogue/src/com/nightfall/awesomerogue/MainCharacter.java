@@ -10,6 +10,7 @@ public class MainCharacter extends Character {
 	public static final int VISIONRANGE = 35;
 
 	private int awesome;
+	private int health;
 	/** Array containing a list of the actives you've gotten so far */
 	private int[] skills;
 	private int numSkills;
@@ -34,6 +35,7 @@ public class MainCharacter extends Character {
 	public MainCharacter(int x, int y, Tile[][] map) {
 		super(x, y, "@");
 		awesome = 100;
+		health = 200;
 		setCurrentWeapon(new Pistol());
 		skills = new int[4];
 		passives = new boolean[Passive.NUM_PASSIVES];
@@ -280,6 +282,14 @@ public class MainCharacter extends Character {
 		currentGameState.updateCamera();
 	}
 	
+	public int getHealth() {
+		return health;
+	}
+	
+	public void setHealth(int health) {
+		this.health = health;
+	}
+	
 	public void addAwesome(int awesome) {
 		this.awesome += awesome;
 		currentGameState.awesomeText(x * InGameState.TILE_SIZE - 20, y * InGameState.TILE_SIZE, awesome);
@@ -287,6 +297,8 @@ public class MainCharacter extends Character {
 
 	public void getHit(int damage, Tile[][] map, Character[][] entities) {
 		System.out.println("YOUCH you take " + damage + " damage!");
+		currentGameState.hitText(x * InGameState.TILE_SIZE - 20, y * InGameState.TILE_SIZE, damage);
+		health -= damage;
 	}
 	
 	

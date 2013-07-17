@@ -398,6 +398,7 @@ public class Enemy extends Character {
 
 		if(entities[x + proposedDX][y + proposedDY] instanceof MainCharacter) {
 			System.out.println("The rat scratches you!");
+			entities[x+proposedDX][y+proposedDY].getHit(5, null, null);
 		} else if(map[x + proposedDX][y + proposedDY].isBlocker()) {
 			//We pathed into a wall.  Oh well.  Don't move!
 		} else {
