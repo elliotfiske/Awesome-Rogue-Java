@@ -279,4 +279,18 @@ public class MainCharacter extends Character {
 		super.moveTo(newX, newY, entities);
 		currentGameState.updateCamera();
 	}
+	
+	public void addAwesome(int awesome) {
+		this.awesome += awesome;
+		currentGameState.awesomeText(x * InGameState.TILE_SIZE - 20, y * InGameState.TILE_SIZE, awesome);
+	}
+
+	public void getHit(int damage, Tile[][] map, Character[][] entities) {
+		System.out.println("YOUCH you take " + damage + " damage!");
+	}
+	
+	
 }
+
+
+

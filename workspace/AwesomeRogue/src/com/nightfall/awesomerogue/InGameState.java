@@ -1,6 +1,9 @@
 package com.nightfall.awesomerogue;
 
 import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
@@ -60,6 +63,7 @@ public class InGameState extends GameState {
 	private static ArrayList<Effect> effects;
 	private static ArrayList<OngoingEffect> ongoingEffects;
 	public static boolean suspended = false; //we could just check if waitingOn.size() == 0, but this is faster
+	public boolean takeEnemyTurn = false;
 
 	private BufferedImage[] tileImages;
 	private BufferedImage[] layovers;
@@ -70,6 +74,11 @@ public class InGameState extends GameState {
 	private static ArrayList<Enemy> enemies;
 	private static ArrayList<Character> pets;
 	private static Character[][] entities;
+	
+	private ArrayList<FloatyText> texts;
+	/** Lets us see how wide a string actually is rendered */
+	Font defaultFont;
+	FontMetrics fontMetrics;
 
 	private MetaGameState metaGame;
 
@@ -114,6 +123,11 @@ public class InGameState extends GameState {
 		enemyList = new ArrayList<Enemy>();
 		
 		pets = new ArrayList<Character>();
+		
+		texts = new ArrayList<FloatyText>();
+		
+		defaultFont = new Font("Helvetica", Font.PLAIN, 12);
+		//fontMetrics = new Graphics.getFontMetrics(defaultFont);         
 
 		mapImg = new BufferedImage(INGAME_WINDOW_WIDTH*TILE_SIZE, INGAME_WINDOW_HEIGHT*TILE_SIZE, BufferedImage.TYPE_INT_ARGB);
 		mapImg_t = new BufferedImage(INGAME_WINDOW_WIDTH*TILE_SIZE, INGAME_WINDOW_HEIGHT*TILE_SIZE, BufferedImage.TYPE_INT_ARGB);
@@ -133,6 +147,7 @@ public class InGameState extends GameState {
 	}
 
 	public void update() {
+		
 		if(suspended) {
 			String waiting = waitingOn.get(waitingOn.size()-1);
 			mainChar.update(map, entities);
@@ -147,6 +162,12 @@ public class InGameState extends GameState {
 				e.update(map, entities);
 			}
 			calculateLighting();
+		} else {
+			//Have the enemies take a turn if they deserve it.
+			if(takeEnemyTurn) {
+				enemyTurn();
+				takeEnemyTurn = false;
+			}
 		}
 	}
 
@@ -162,7 +183,7 @@ public class InGameState extends GameState {
 	}
 
 	public static void waitOn(String event) {
-		System.out.println("Added " + event);
+//		System.out.println("Added " + event);
 		waitingOn.add(event);
 		suspended = true;
 	}
@@ -174,7 +195,7 @@ public class InGameState extends GameState {
 	}
 
 	public static void endWait(String event) {
-		System.out.println("removing " + event);
+//		System.out.println("removing " + event);
 		waitingOn.remove(event);
 		if(InGameState.waitingOn.size() == 0)
 			InGameState.suspended = false;	// Gotta unpause!
@@ -185,6 +206,17 @@ public class InGameState extends GameState {
 	}
 
 	public void render(Graphics2D g2) {
+		//Update the floatytexts
+		for(int i = 0; i < texts.size(); i++) {
+			FloatyText ft = texts.get(i);
+			ft.update();
+			if(ft.alpha <= 0) {
+				texts.remove(ft);
+				i--;
+			}
+			draw();
+		}
+		
 		imgSFX.drawResizedImage(g2, guiBG, 0, 0, GamePanel.PWIDTH, GamePanel.PHEIGHT);
 		g2.drawImage(mapImg, INGAME_WINDOW_OFFSET_X, INGAME_WINDOW_OFFSET_Y, null);
 
@@ -312,6 +344,11 @@ public class InGameState extends GameState {
 			p.draw(g2, CAMERA_X, CAMERA_Y);
 		}
 
+		//draw floaty texts :3
+		for(FloatyText ft : texts) {
+			ft.draw(g2);
+		}
+		
 		Graphics2D g = (Graphics2D) mapImg.getGraphics();
 		g.drawImage(mapImg_t,  0,  0,  null);
 	}
@@ -358,15 +395,9 @@ public class InGameState extends GameState {
 			}
 		}
 		
-		//I need to fix this, this could cause some really stupid behavior.
-		//First off, have the enemies take a turn if they deserve it.
-		if(waitingOn.contains("enemy move") && waitingOn.size() == 1) {
-			enemyTurn();
-		}
-		
-		//Smartmove if we're waiting on smartmove and JUST smartmove.
-		if(waitingOn.contains("smartmove") && waitingOn.size() == 1) {
-			
+		//Smartmove if we're waiting on smartmove and it's at the top of the stack
+		if(waitingOn.size() > 0 && waitingOn.get(0) == "smartmove") {
+			endWait("smartmove");
 		}
 		
 		//Parse the direction from the given KeyPress
@@ -395,8 +426,6 @@ public class InGameState extends GameState {
 		}
 
 		if(!suspended) {
-
-			
 			
 			//Smartmove
 			if(e.getKeyCode() == KeyEvent.VK_NUMPAD5) {
@@ -427,7 +456,7 @@ public class InGameState extends GameState {
 
 
 				//Enemy time!
-				enemyTurn();
+				queueEnemyTurn();
 				
 				//Iterate the iteratable effects here (the dead ones are removed in render() )
 				for(int i = 0; i < ongoingEffects.size(); i++) {
@@ -454,6 +483,7 @@ public class InGameState extends GameState {
 			if(waiting.equals("Z")) {
 				mainChar.activateSkill(0, p);
 				enemyTurn();
+				mainChar.addAwesome(10);
 			}
 			else if(waiting.equals("X")) {
 				mainChar.activateSkill(1, p);
@@ -473,11 +503,12 @@ public class InGameState extends GameState {
 	 *  annoying.
 	 */
 	private void queueEnemyTurn() {
-		waitOn("enemy turn");
+		takeEnemyTurn = true;
 	}
 	
 	/** All the enemies take a turn */
 	private void enemyTurn() {
+		
 		for(int i = 0; i < enemies.size(); i ++) {
 			Character enemy = enemies.get(i);
 			if(enemy.dead()) {
@@ -491,7 +522,8 @@ public class InGameState extends GameState {
 			}
 		}
 		
-		endAllWaits("enemy turn");
+		//Make sure the game renders the new enemy position
+		calculateLighting();
 	}
 
 	/**
@@ -743,5 +775,37 @@ public class InGameState extends GameState {
 	 */
 	public static void removeEnemy(Enemy e) {
 		enemies.remove(e);
+	}
+
+	/** Creates some floating text showing you how much awesome you just got */
+	public void awesomeText(int x, int y, int amount) {
+		FloatyText text = new FloatyText(x, y, "+" + amount + " Awesome!", Color.blue);
+		texts.add(text);
+	}
+	
+	private class FloatyText {
+		float x, y;
+		String message;
+		Color color;
+		int alpha;
+		
+		public FloatyText(int x, int y, String message, Color color) {
+			this.x = x;
+			this.y = y;
+			this.message = message;
+			this.color = color;
+			alpha = 255;
+		}
+		
+		public void draw(Graphics2D g2) {
+			Color color = new Color(this.color.getRed(), this.color.getBlue(), this.color.getGreen(), alpha);
+			g2.setColor(color);
+			g2.drawString(message, x, y);
+		}
+		
+		public void update() {
+			alpha-=4;
+			y -= 0.05;
+		}
 	}
 }
