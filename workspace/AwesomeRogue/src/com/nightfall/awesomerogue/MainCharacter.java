@@ -297,8 +297,9 @@ public class MainCharacter extends Character {
 
 	public void getHit(int damage, Tile[][] map, Character[][] entities) {
 		System.out.println("YOUCH you take " + damage + " damage!");
-		currentGameState.hitText(x * InGameState.TILE_SIZE - 20, y * InGameState.TILE_SIZE, damage);
+		//Floatytext handled in InGameState
 		health -= damage;
+		InGameState.addEvent("hurt" + damage);
 	}
 	
 	

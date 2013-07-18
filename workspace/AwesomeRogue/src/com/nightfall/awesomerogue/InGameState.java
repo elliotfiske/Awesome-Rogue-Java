@@ -81,6 +81,9 @@ public class InGameState extends GameState {
 	Font defaultFont;
 	FontMetrics fontMetrics;
 
+	private static ArrayList<FloatyText> pastEvents;
+	private static String currentEvent;
+	
 	private MetaGameState metaGame;
 
 	public InGameState(GamePanel gameCanvas, int levelType, MetaGameState metaGame, MainCharacter character) throws IOException {
@@ -127,6 +130,7 @@ public class InGameState extends GameState {
 		pets = new ArrayList<Character>();
 		
 		texts = new ArrayList<FloatyText>();
+		pastEvents = new ArrayList<FloatyText>();
 		
 		defaultFont = new Font("Helvetica", Font.PLAIN, 12);
 		//fontMetrics = new Graphics.getFontMetrics(defaultFont);         
@@ -487,16 +491,16 @@ public class InGameState extends GameState {
 			}
 			if(waiting.equals("Z")) {
 				mainChar.activateSkill(0, p);
-				enemyTurn();
+				queueEnemyTurn();
 				mainChar.addAwesome(10);
 			}
 			else if(waiting.equals("X")) {
 				mainChar.activateSkill(1, p);
-				enemyTurn();
+				queueEnemyTurn();
 			}
 			else if(waiting.equals("C")) {
 				mainChar.activateSkill(2, p);
-				enemyTurn();
+				queueEnemyTurn();
 			}
 		}
 	}
@@ -527,15 +531,26 @@ public class InGameState extends GameState {
 			}
 		}
 		
-		//Make sure the game renders the new enemy position
+		beginNewTurn();
+		
+	}
+
+	/** Called at the start of every turn. */
+	public void beginNewTurn() {
 		calculateLighting();
 		
-		//We calculate how much health the player lost this turn, since the main source of health lost is enemies.
+		//Calculate how much health the player lost this turn, display with FloatyText
 		int lostHealth = prevHealth - mainChar.getHealth();
 		hitText(mainChar.x * TILE_SIZE, mainChar.y * TILE_SIZE, lostHealth);
 		prevHealth = mainChar.getHealth();
+		
+		//Add the latest event to the event stack and wipe currentEvent
+		pastEvents.add(new FloatyText(0, 0, currentEvent, Color.BLACK));
+		System.out.println(currentEvent);
+		currentEvent = "";
+		System.out.println(pastEvents.size());
 	}
-
+	
 	/**
 	 * Update the camera.  Used for teleporting or force marching
 	 */
@@ -795,8 +810,10 @@ public class InGameState extends GameState {
 	
 	/** Floating text saying how much you got hurt. */
 	public void hitText(int x, int y, int amount) {
-		FloatyText text = new FloatyText(x, y, "-" + amount + " Health!", Color.red);
-		texts.add(text);
+		if(amount > 0) {
+			FloatyText text = new FloatyText(x, y, "-" + amount + " Health!", Color.red);
+			texts.add(text);
+		}
 	}
 	
 	private class FloatyText {
@@ -823,5 +840,15 @@ public class InGameState extends GameState {
 			alpha-=4;
 			y -= 0.05;
 		}
+	}
+
+	/** Wall -> floor at destroyX, destroyY */
+	public static void demolish(int destroyX, int destroyY) {
+		map[destroyX][destroyY] = new Tile(Tile.FLOOR, destroyX, destroyY);
+		addEvent("dm" + destroyX + "x" + destroyY);
+	}
+	
+	public static void addEvent(String event) {
+		currentEvent += event + ";";
 	}
 }

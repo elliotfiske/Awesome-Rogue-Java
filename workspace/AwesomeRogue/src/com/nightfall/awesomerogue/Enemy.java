@@ -144,6 +144,7 @@ public class Enemy extends Character {
 
 			System.out.println("The " + name + " is slain!");
 
+			InGameState.addEvent("killed" + getName() + "at" + x + "x" + y);
 		}
 	}
 
@@ -157,20 +158,6 @@ public class Enemy extends Character {
 	}
 
 	/**
-	 * Moves an enemy to the specified x and y coords.  Doesn't ask questions.  Gets the job done quick. $15.99 / hour.
-	 * @param x Where do we move the body
-	 * @param y WHERE DO WE MOVE THE BODY?
-	 */
-	private void moveEnemyTo(int x, int y) {
-		Character[][] entities = InGameState.getEntities();		
-		entities[this.x][this.y] = null;
-		entities[x][y] = this;
-
-		this.x = x;
-		this.y = y;
-	}
-
-	/**
 	 * Move randomly. Rats occasionally do this, and maybe we'll have a "confused" status!
 	 * @param map I'm the map, I'm the map, I'm the map, I'm the map, I'M THE MAP
 	 */
@@ -179,17 +166,16 @@ public class Enemy extends Character {
 		Point randPoint = getPointDirection(randDirection);
 		int numTries = 0;
 		
-		while(map[x + randPoint.x][y + randPoint.y].isBlocker() && numTries < 9) {
+		while(map[x + randPoint.x][y + randPoint.y].isBlocker() && numTries < 12) {
 			randDirection = (int) Math.floor(Math.random() * 8);
 			randPoint = getPointDirection(randDirection);
 			
 			numTries++;
 		}
 		
-		if(numTries == 9) {
-			moveEnemyTo(x + randPoint.x, y + randPoint.y);
+		if(numTries < 12) {
+			moveTo(x + randPoint.x, y + randPoint.y);
 		}
-		
 	}
 	
 	//Fuzzy pathfinding = fun times for all!
@@ -390,6 +376,11 @@ public class Enemy extends Character {
 
 			}
 		} else {
+			//potential problem if the rat is inside of me
+			if(straightTiles.size() == 0) {
+				throw new PANICEVERYTHINGISBROKENERROR("THE " + getName() + " IS INSIDE ME! INSIIIIIIDE ME!!!");
+			}
+			
 			//There must have been no obstacles.  Follow the straight path.
 			proposedDX = straightTiles.get(0).x - x;
 			proposedDY = straightTiles.get(0).y - y;
@@ -403,7 +394,7 @@ public class Enemy extends Character {
 			//We pathed into a wall.  Oh well.  Don't move!
 		} else {
 
-			moveEnemyTo(x + proposedDX, y + proposedDY);
+			moveTo(x + proposedDX, y + proposedDY);
 
 			//System.out.println("Entity changed? Entity[x][y]: " + entities[x][y].getClass().getName() + " at " + x + ", " + y); TODO
 		}
