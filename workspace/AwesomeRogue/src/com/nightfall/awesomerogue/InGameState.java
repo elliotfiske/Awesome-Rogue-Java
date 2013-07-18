@@ -81,7 +81,7 @@ public class InGameState extends GameState {
 	Font defaultFont;
 	FontMetrics fontMetrics;
 
-	private static ArrayList<FloatyText> pastEvents;
+	private static ArrayList<String> pastEvents;
 	private static String currentEvent;
 	
 	private MetaGameState metaGame;
@@ -130,7 +130,7 @@ public class InGameState extends GameState {
 		pets = new ArrayList<Character>();
 		
 		texts = new ArrayList<FloatyText>();
-		pastEvents = new ArrayList<FloatyText>();
+		pastEvents = new ArrayList<String>();
 		
 		defaultFont = new Font("Helvetica", Font.PLAIN, 12);
 		//fontMetrics = new Graphics.getFontMetrics(defaultFont);         
@@ -545,7 +545,7 @@ public class InGameState extends GameState {
 		prevHealth = mainChar.getHealth();
 		
 		//Add the latest event to the event stack and wipe currentEvent
-		pastEvents.add(new FloatyText(0, 0, currentEvent, Color.BLACK));
+		pastEvents.add(currentEvent);
 		System.out.println(currentEvent);
 		currentEvent = "";
 		System.out.println(pastEvents.size());
@@ -850,5 +850,27 @@ public class InGameState extends GameState {
 	
 	public static void addEvent(String event) {
 		currentEvent += event + ";";
+	}
+	
+	public static void undoLastEvent() {
+		//Bring up the last event that happened
+		String eventToUndo = pastEvents.get(pastEvents.size() - 1);
+		
+		String[] stuffThatHappened = eventToUndo.split(";");
+		
+		//go through and do the opposite of each happening
+		for(int i = stuffThatHappened.length - 1; i >= 0; i--) {
+			if(stuffThatHappened[i].startsWith("hurt")) {
+				//TODO: heal
+			}
+			
+			if(stuffThatHappened[i].startsWith("move")) {
+				//Grab the name
+				int fromIndex = stuffThatHappened[i].indexOf("from");
+				String name = stuffThatHappened[i].substring(4, fromIndex);
+				
+				//TODO: movin' movin' movin'
+			}
+		}
 	}
 }

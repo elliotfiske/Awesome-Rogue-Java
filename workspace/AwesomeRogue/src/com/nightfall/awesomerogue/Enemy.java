@@ -79,6 +79,8 @@ public class Enemy extends Character {
 			break;
 		}
 
+		super.character = name;
+		
 		icon = enemyIcons[whichEnemy];
 
 		setCurrentWeapon(new EnemyWeapon(whichEnemy));
@@ -130,6 +132,8 @@ public class Enemy extends Character {
 	 */
 	public void getHit(int damage, Tile[][] map, Character[][] entities) {
 		health -= damage;
+		InGameState.addEvent("hurt"+getName() + "at" + x + "x" + y);
+		
 		if(health <= 0) {
 			die();
 			entities[x][y] = null;
