@@ -214,6 +214,7 @@ public class InGameState extends GameState {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	public void draw() {
 		Graphics2D g2 = (Graphics2D) mapImg_t.getGraphics();
 		//draw the GUI elements
@@ -451,25 +452,21 @@ public class InGameState extends GameState {
 	}
 
 	private void initLevel(int levelNum) {
+		LevelInfo thisInfo = new LevelInfo(levelNum, 1);
+		map = thisInfo.getMap();
+		enemies = thisInfo.getEnemies();
+		mainChar.initPos(thisInfo.getStartPos());
+		
+		/*
 		if(levelNum == 0) {
-			map = LevelGenerator.makeLevel(LevelGenerator.INTRO, 38, 35, 1, enemies);
+			map = LevelGenerator.makeLevel(LevelInfo.INTRO, 38, 35, 1, enemies);
 
 			mainChar.initPos(17, 5);
 		}
 		else if(levelNum == 2) {
-			map = new Tile[60][40];
-			for(int i = 0; i < map.length; i ++) {
-				for(int j = 0; j < map[0].length; j ++) {
-					map[i][j] = new Tile(Tile.FLOOR, i, j);
-					if(i == 0 || i == 5 || j == 0 || j == 5 || i == map.length-1 || j == map[0].length-1) {
-						map[i][j] = new Tile(Tile.WALL, i, j);
-					}
-				}
-			}
+			map = LevelGenerator.makeLevel(LevelGenerator.ROOMS, 80, 60, 1, enemies);
 
-			map[10][4] = new Tile(Tile.FLOOR, 10, 4);
-			map[5][4] = new Tile(Tile.FLOOR, 5, 4);
-			map[15][5] = new Tile(Tile.FLOOR, 15, 5);
+			mainChar.initPos(40, 30);
 		}
 		else if(levelNum == 3) {
 			//Generate a sweet new Caves level.
@@ -483,7 +480,7 @@ public class InGameState extends GameState {
 
 			enemies = enemyList;
 		}
-
+*/
 		calculateLighting();
 
 		// Fill entity array!

@@ -35,6 +35,11 @@ public class Character {
 		this.y = y;
 	}
 	
+	public void initPos(Point p) {
+		this.x = p.x;
+		this.y = p.y;
+	}
+	
 	public void move(int dx, int dy, Tile[][] map, Character[][] entities) {
 		int targetX = x + dx;
 		int targetY = y + dy;
