@@ -74,8 +74,12 @@ public class Character {
 	public int getX() { return x; }
 	public int getY() { return y; }
 	
+	public boolean isForceMarching() { return forceMarch; }
+	
 	public void setCurrentWeapon(Weapon weapon) { currentWeapon = weapon; }
 	public Weapon getCurrentWeapon() { return currentWeapon; }
+	
+	public void takeTurn(MainCharacter mainChar, Tile[][] map) { }
 	
 	// Set the weapon to attack in a certain direction.
 	// This does not do any damage inherently, in case
@@ -92,18 +96,11 @@ public class Character {
 	}
 
 	public void forceMarch(int dx, int dy) {
-		forceMarch(dx, dy, false);
-	}
-	
-	public void forceMarch(int dx, int dy, boolean inAir) {
 		forceMarch = true;
 		forceMarchTo = new Point(x + dx, y + dy);
 		//Just in case, remove other forcemarches from this guy
 		InGameState.endAllWaits("forcemarch" + getName() + getID());
 		InGameState.waitOn("forcemarch" + getName() + getID());
-		System.out.println("Force march from " + x + ", " + y + " to " + forceMarchTo.x + ", " + forceMarchTo.y);
-		
-		if(inAir) altitude ++;
 	}
 	
 	public void update(Tile[][] map, Character[][] entities) {
@@ -146,27 +143,36 @@ public class Character {
 				altitude = 0;
 				InGameState.endWait("forcemarch" + getName() + getID());
 				forceMarch = false;
-				System.out.println("Line 136?");
+				
 			}
 			
 			if(entities[proposedX][proposedY] != null && forceMarch && entities[proposedX][proposedY] != this) {
 				//We just slammed into somebody.  LOOKS LIKE THEY'RE COMIN' ALONG FOR THE RIDE
-				//Consider their weight, though.  Inelastic collision!
-				int myWeight = getWeight();
-				int hisWeight = entities[proposedX][proposedY].getWeight();
-				
-				//If they're huge, they won't get knocked back as far.  Will never go below 1, though.
-				int newSpeed = (int) (speed - Math.floor((double) hisWeight / (double) myWeight));
-				if(newSpeed < 1) { newSpeed = 1; }
-				
-				//Now we gotta recalculate our target points.
-				//First, reverse engineer the direction.
-				Point direction = new Point((int) Math.signum(forceMarchTo.x - x), (int) Math.signum(forceMarchTo.y - y));
-				//Now, move the guy we ran into to this new target! (direction * speed)
-				entities[proposedX][proposedY].forceMarch(direction.x * newSpeed, direction.y * newSpeed);
-				//Meanwhile, adjust our target to one behind the other guy's.
-				forceMarch(direction.x * (newSpeed-1), direction.y * (newSpeed-1));
-				System.out.println("line 155? Other guy: " + entities[proposedX][proposedY].getName());
+				//First make sure it is actually possible to force march them (i.e. they're not being sandwiched by a wall)
+				if(!entities[proposedX][proposedY].canForceMarch(new Point(proposedX - x, proposedY - y))) {
+					InGameState.endWait("forcemarch" + getName() + getID());
+					forceMarch = false;
+					System.out.println("sandwich'd!!");
+				} else {
+					//Consider their weight.  Inelastic collision!
+					int myWeight = getWeight();
+					int hisWeight = entities[proposedX][proposedY].getWeight();
+					
+					//If they're huge, they won't get knocked back as far.  Will never go below 1, though.
+					int newSpeed = (int) (speed - Math.floor((double) hisWeight / (double) myWeight));
+					if(newSpeed < 1) { newSpeed = 1; }
+					
+					//nolo
+					//if(this instanceof MainCharacter) { newSpeed = 5; }
+					
+					//Now we gotta recalculate our target points.
+					//First, reverse engineer the direction.
+					Point direction = new Point((int) Math.signum(forceMarchTo.x - x), (int) Math.signum(forceMarchTo.y - y));
+					//Now, move the guy we ran into to this new target! (direction * speed)
+					entities[proposedX][proposedY].forceMarch(direction.x * newSpeed, direction.y * newSpeed);
+					//Meanwhile, adjust our target to one behind the other guy's.
+					forceMarch(direction.x * (newSpeed-1), direction.y * (newSpeed-1));
+				}
 			}
 			
 			//Have we arrived at our destination?
@@ -175,13 +181,11 @@ public class Character {
 				InGameState.endWait("forcemarch" + getName() + getID());
 				forceMarch = false;
 				altitude = 0;
-				System.out.println("line 163?");
 			}
 			
 			//I guess we have no choice left but to move :P
 			if(forceMarch) {
 				moveTo(proposedX, proposedY, entities);
-				System.out.println("line 171?");
 			}
 			
 			/*if((!map[targetX][targetY].blocker && entities[targetX][targetY] == null) ||
@@ -223,6 +227,23 @@ public class Character {
 	}
 	
 	/**
+	 * Tests if a character will immediately slam into a wall if they force march in the point direction
+	 * @param direction dx and dy to check
+	 * @return tru o fals
+	 */
+	public boolean canForceMarch(Point direction) {
+		if(InGameState.tileAt(x + direction.x, y + direction.y).blocker) {
+			return false;
+		}
+		
+		if(InGameState.getEntities()[x + direction.x][y + direction.y] != null) {
+			return InGameState.getEntities()[x + direction.x][y + direction.y].canForceMarch(direction);
+		}
+		
+		return true;
+	}
+	
+	/**
 	 * Draw the Character to the screen.
 	 * 
 	 * @param g2 The Graphics2D context that will be used to draw.
@@ -256,10 +277,6 @@ public class Character {
 
 	public boolean dead() {
 		return dead;
-	}
-	
-	public void takeTurn(MainCharacter mainChar, Tile[][] map, Character[][] entities) {
-		
 	}
 	
 	/**
@@ -302,6 +319,8 @@ public class Character {
 	}
 	
 	public void moveTo(int newX, int newY, Character[][] entities) {
+		InGameState.addEvent("move" + getName() + "from" + x + "x" + y + "to" + newX + "x" + newY);
+		
 		entities[x][y] = null;
 		entities[newX][newY] = this;
 		x = newX;

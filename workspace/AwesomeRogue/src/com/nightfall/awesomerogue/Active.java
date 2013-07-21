@@ -69,7 +69,7 @@ public class Active {
 	}
 	
 	private void grenadeLauncher(Point target) {
-		mainChar.getLevel().addCharacter(new Grenade(mainChar.getX(), mainChar.getY(), target));
+		mainChar.getLevel().addPet(new Grenade(mainChar.getX(), mainChar.getY(), target));
 	}
 	
 	private void prepDrillDozer() {
@@ -77,7 +77,7 @@ public class Active {
 	}
 	
 	private void drillDozer(Point target) {
-		mainChar.getLevel().addCharacter(new DrillDozer(mainChar.getX(), mainChar.getY(), target));
+		mainChar.getLevel().addPet(new DrillDozer(mainChar.getX(), mainChar.getY(), target));
 	}
 	
 	private void prepHulkSerum() {

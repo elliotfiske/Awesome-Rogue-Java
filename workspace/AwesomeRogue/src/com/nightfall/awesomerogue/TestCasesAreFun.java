@@ -5,6 +5,7 @@
 package com.nightfall.awesomerogue;
 
 import java.awt.Point;
+import java.util.ArrayList;
 
 public class TestCasesAreFun {
 
@@ -42,6 +43,19 @@ public class TestCasesAreFun {
 
 		Enemy e = new Enemy(0, 0, Enemy.RAT);
 		System.out.println("classy: " + e.toString());
+		
+		//How the heck does java memory even work???
+		ArrayList<String> whatever = new ArrayList<String>();
+		String whocares = "WEOJFAWOEJFAWIOJFLKXCNVLANDLFKEAJNMRIFOAJERIGJAMERFOJMA:FDMVKADNFVKLAMCKLSAMDKLFMAJWERKFJMAERMF:AFMD:VADFMV:";
+		
+		for(int i = 0; i < 1000000; i++) {
+			whatever.add(whocares);
+			System.out.println("WHATEVER WHATEVER I DO WHAT I WANT");
+		}
+		
+		while(true) {
+			System.out.println("we're done here people");
+		}
 		//testEnemyStraightLine();
 		//testEnemyWallFollow();
 		//		generateGrids();

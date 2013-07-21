@@ -98,9 +98,7 @@ public class Weapon {
 				y = targetY;
 			}
 			else {
-				System.out.println("Hit something!");
 				if(entities[targetX][targetY] != null) {
-					System.out.println("It's an enemy!");
 					entities[targetX][targetY].getHit(damage, map, entities);
 				}
 				drawing = false;

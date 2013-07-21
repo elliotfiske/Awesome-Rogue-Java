@@ -10,12 +10,13 @@ public class MainCharacter extends Character {
 	public static final int VISIONRANGE = 35;
 
 	private int awesome;
+	private int health;
 	/** Array containing a list of the actives you've gotten so far */
 	private int[] skills;
 	private int numSkills;
 	
 	/** You've really let yourself go, main character.*/
-	private int weight = 20;
+	private int weight = 50;
 
 	private InGameState currentGameState;
 	private Active actives; //Our handle to the actives.
@@ -34,6 +35,7 @@ public class MainCharacter extends Character {
 	public MainCharacter(int x, int y, Tile[][] map) {
 		super(x, y, "@");
 		awesome = 100;
+		health = 200;
 		setCurrentWeapon(new Pistol());
 		skills = new int[4];
 		passives = new boolean[Passive.NUM_PASSIVES];
@@ -43,7 +45,7 @@ public class MainCharacter extends Character {
 		actives = new Active(this);
 		
 		skills[0] = Active.FALCON_PUNCH;
-		skills[1] = Active.HULK_SERUM;
+		skills[1] = Active.GRENADE_LAUNCHER;
 		skills[2] = Active.DRILL_DOZER;
 	}
 	
@@ -279,4 +281,27 @@ public class MainCharacter extends Character {
 		super.moveTo(newX, newY, entities);
 		currentGameState.updateCamera();
 	}
+	
+	public int getHealth() {
+		return health;
+	}
+	
+	public void setHealth(int health) {
+		this.health = health;
+	}
+	
+	public void addAwesome(int awesome) {
+		this.awesome += awesome;
+		currentGameState.awesomeText(x * InGameState.TILE_SIZE - 20, y * InGameState.TILE_SIZE, awesome);
+	}
+
+	public void getHit(int damage, Tile[][] map, Character[][] entities) {
+		System.out.println("YOUCH you take " + damage + " damage!");
+		//Floatytext handled in InGameState
+		health -= damage;
+		InGameState.addEvent("hurt" + getName() + "at" + x + "x" + y);
+	}
 }
+
+
+
