@@ -351,8 +351,7 @@ public class LevelInfo {
 						}
 						
 						Enemy newEnemy = new Enemy(monsterX, monsterY, type);
-						InGameState.enemyList.add(newEnemy);
-						
+						enemies.add(newEnemy);
 					}
 				
 				}

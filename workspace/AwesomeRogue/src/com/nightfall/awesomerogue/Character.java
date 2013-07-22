@@ -45,11 +45,8 @@ public class Character {
 		int targetY = y + dy;
 		
 		if(!map[targetX][targetY].blocker && entities[targetX][targetY] == null) {
-			entities[x][y] = null;
-			x = targetX;
-			y = targetY;
+			moveTo(targetX, targetY);
 			room = map[x][y].room;
-			entities[targetX][targetY] = this;
 		}
 		else if(entities[targetX][targetY] == null) {
 			// Do action for the tile you tried to walk to.

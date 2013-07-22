@@ -28,7 +28,7 @@ public class InGameState extends GameState {
 	public static final int TILE_SIZE = 12;
 
 	//Enable to debug stuff
-	public static final boolean GODMODE_VISION = false;
+	public static final boolean GODMODE_VISION = true;
 	public static final boolean GODMODE_DRAW_IDS = false;
 	public static final boolean GODMODE_WALKTHRUWALLS = false;
 	public static final boolean GODMODE_CAN_FREEZE_ENEMIES = true;
@@ -82,7 +82,7 @@ public class InGameState extends GameState {
 	FontMetrics fontMetrics;
 
 	private static ArrayList<String> pastEvents;
-	private static String currentEvent;
+	private static String currentEvent = "";
 	
 	private MetaGameState metaGame;
 
@@ -576,7 +576,8 @@ public class InGameState extends GameState {
 	}
 
 	private void initLevel(int levelNum) {
-		LevelInfo thisInfo = new LevelInfo(levelNum, 1);
+		//LevelInfo thisInfo = new LevelInfo(levelNum, 1);
+		LevelInfo thisInfo = new LevelInfo(LevelInfo.CAVE, 2);
 		map = thisInfo.getMap();
 		enemies = thisInfo.getEnemies();
 		mainChar.initPos(thisInfo.getStartPos());
@@ -849,7 +850,7 @@ public class InGameState extends GameState {
 		currentEvent += event + ";";
 	}
 	
-	public static void undoLastEvent() {
+	public void undoLastEvent() {
 		//Bring up the last event that happened
 		String eventToUndo = pastEvents.get(pastEvents.size() - 1);
 		
@@ -857,17 +858,34 @@ public class InGameState extends GameState {
 		
 		//go through and do the opposite of each happening
 		for(int i = stuffThatHappened.length - 1; i >= 0; i--) {
-			if(stuffThatHappened[i].startsWith("hurt")) {
+			String latestEvent = stuffThatHappened[i];
+			
+			if(latestEvent.startsWith("hurt")) {
 				//TODO: heal
 			}
 			
-			if(stuffThatHappened[i].startsWith("move")) {
+			if(latestEvent.startsWith("move")) {
 				//Grab the name
-				int fromIndex = stuffThatHappened[i].indexOf("from");
-				String name = stuffThatHappened[i].substring(4, fromIndex);
+				int fromIndex = latestEvent.indexOf("from");
+				String name = latestEvent.substring(4, fromIndex);
 				
-				//TODO: movin' movin' movin'
+				int xIndex = latestEvent.indexOf("x", fromIndex);
+				int toIndex = latestEvent.indexOf("to", xIndex);
+				
+				int fromX = Integer.parseInt(latestEvent.substring(fromIndex + 4, xIndex));
+				int fromY = Integer.parseInt(latestEvent.substring(xIndex + 1, toIndex));
+				
+		        int nextXIndex = latestEvent.indexOf("x", xIndex + 1);
+		        
+		        System.out.println("nextXIndex: " + nextXIndex + " toIndex: " + toIndex);
+		        
+		        int toX = Integer.parseInt(latestEvent.substring(toIndex + 2, nextXIndex));
+		        int toY = Integer.parseInt(latestEvent.substring(nextXIndex + 1));
+		        
+		        System.out.println("To coords: " + toX + ", " + toY);
 			}
 		}
+
+		updateCamera();
 	}
 }
