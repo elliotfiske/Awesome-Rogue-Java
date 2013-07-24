@@ -23,8 +23,12 @@ public class DrillDozer extends Character {
 		//  xx           x   
 		//  7x    v      x<   etc.
    		//       xxx     x
-		InGameState.waitOn(new DrillDozerEffect(getX(), getY(), direction, map, InGameState.getEntities()));
 		
+		if(InGameState.tileAt(getX() + direction.x, getY() + direction.y).type == Tile.IMPASSABLE) {
+			System.out.println("Your drill dozer clinks ineffectively against the bedrock.");
+		}
+		
+		InGameState.waitOn(new DrillDozerEffect(getX(), getY(), direction, map, InGameState.getEntities()));
 		
 		if(lifespan <= 0) {
 			die();
@@ -38,7 +42,7 @@ public class DrillDozer extends Character {
 	@Override
 	public void forceMarch(int dx, int dy) {
 		super.forceMarch(dx, dy);
-		System.out.println("The drill dozer flies through the air, frantically carving a path through the stone!");
+		System.out.println("Your drill dozer flies through the air, frantically carving a path through the stone!");
 	}
 
 	@Override

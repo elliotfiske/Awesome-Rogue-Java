@@ -151,6 +151,19 @@ public class Enemy extends Character {
 			InGameState.addEvent("killed" + getName() + "at" + x + "x" + y);
 		}
 	}
+	
+	/**
+	 * Heals an enemy. I'd like to implement some kind of enemy-healer, because
+	 * those guys are so wonderfully annoying and it's super satisfying to
+	 * mash their heads into the ground.
+	 * 
+	 * @param health How much healing?
+	 */
+	public void getHealed(int healing) {
+		this.health += healing;
+		
+		InGameState.healText(x, y, healing, true);
+	}
 
 	public int getWeight() {
 		return weight;

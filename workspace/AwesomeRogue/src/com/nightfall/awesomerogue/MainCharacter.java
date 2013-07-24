@@ -292,7 +292,7 @@ public class MainCharacter extends Character {
 	
 	public void addAwesome(int awesome) {
 		this.awesome += awesome;
-		currentGameState.awesomeText(x * InGameState.TILE_SIZE - 20, y * InGameState.TILE_SIZE, awesome);
+		currentGameState.awesomeText(x , y , awesome);
 	}
 
 	public void getHit(int damage, Tile[][] map, Character[][] entities) {
@@ -300,6 +300,11 @@ public class MainCharacter extends Character {
 		//Floatytext handled in InGameState
 		health -= damage;
 		InGameState.addEvent("hurt" + getName() + "at" + x + "x" + y);
+	}
+	
+	public void getHealed(int amount) {
+		health += amount;
+		
 	}
 }
 

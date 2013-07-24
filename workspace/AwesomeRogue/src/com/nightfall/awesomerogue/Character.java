@@ -266,6 +266,11 @@ public class Character {
 		System.out.println("I took "+damage+" damage but I don't know how to handle it");
 	}
 	
+	public void getHealed(int amount) {
+		System.out.println("I got healed by " + amount + " but I don't know how to handle the POWEr");
+	}
+	
+	
 	public void die() { 
 		dead = true; 
 		Character[][] entities = InGameState.getEntities();

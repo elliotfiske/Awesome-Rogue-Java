@@ -322,7 +322,7 @@ public class LevelInfo {
 		//Plop down some enemies based on the difficulty.
 		if(difficulty == 1) {
 			Enemy bob = new Enemy(25, 10, Enemy.RAT);
-			InGameState.enemyList.add(bob);
+			enemies.add(bob);
 		}
 		
 		if(difficulty == 2) {

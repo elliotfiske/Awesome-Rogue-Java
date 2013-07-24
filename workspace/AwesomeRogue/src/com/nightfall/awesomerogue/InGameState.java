@@ -76,13 +76,13 @@ public class InGameState extends GameState {
 	private static Character[][] entities;
 	
 	public int prevHealth;
-	private ArrayList<FloatyText> texts;
+	private static ArrayList<FloatyText> texts;
 	/** Lets us see how wide a string actually is rendered */
 	Font defaultFont;
 	FontMetrics fontMetrics;
 
-	private static ArrayList<String> pastEvents;
-	private static String currentEvent = "";
+	private static ArrayList<Turn> pastTurns;
+	private static Turn currentTurn;
 	
 	private MetaGameState metaGame;
 
@@ -130,7 +130,8 @@ public class InGameState extends GameState {
 		pets = new ArrayList<Character>();
 		
 		texts = new ArrayList<FloatyText>();
-		pastEvents = new ArrayList<String>();
+		pastTurns = new ArrayList<Turn>();
+		currentTurn = new Turn();
 		
 		defaultFont = new Font("Helvetica", Font.PLAIN, 12);
 		//fontMetrics = new Graphics.getFontMetrics(defaultFont);         
@@ -434,6 +435,13 @@ public class InGameState extends GameState {
 				enemies.get(i).forceMarch(randDirectionP.x * 5, randDirectionP.y * 5);
 			}
 		}
+		
+		if(e.getKeyCode() == KeyEvent.VK_E) {
+			for(int i = 0; i < enemies.size(); i++) {
+				Character en = enemies.get(i);
+				((Enemy) en).getHealed(100);
+			}
+		}
 
 		if(!suspended) {
 			
@@ -542,14 +550,13 @@ public class InGameState extends GameState {
 		
 		//Calculate how much health the player lost this turn, display with FloatyText
 		int lostHealth = prevHealth - mainChar.getHealth();
-		hitText(mainChar.x * TILE_SIZE, mainChar.y * TILE_SIZE, lostHealth);
+		hitText(mainChar.x, mainChar.y, lostHealth);
 		prevHealth = mainChar.getHealth();
 		
 		//Add the latest event to the event stack and wipe currentEvent
-		pastEvents.add(currentEvent);
-		System.out.println(currentEvent);
-		currentEvent = "";
-		System.out.println(pastEvents.size());
+		pastTurns.add(currentTurn);
+		System.out.println(currentTurn);
+		currentTurn = new Turn();
 	}
 	
 	/**
@@ -577,7 +584,7 @@ public class InGameState extends GameState {
 
 	private void initLevel(int levelNum) {
 		//LevelInfo thisInfo = new LevelInfo(levelNum, 1);
-		LevelInfo thisInfo = new LevelInfo(LevelInfo.CAVE, 2);
+		LevelInfo thisInfo = new LevelInfo(LevelInfo.CAVE, 1);
 		map = thisInfo.getMap();
 		enemies = thisInfo.getEnemies();
 		mainChar.initPos(thisInfo.getStartPos());
@@ -814,15 +821,37 @@ public class InGameState extends GameState {
 		}
 	}
 	
-	private class FloatyText {
+	/** Floaty text saying how much was healed.  If it's an enemy make the message
+	 * a nasty shade of vomit-green, otherwise a nice healthy green. */
+	public static void healText(int x, int y, int amount, boolean isEnemy) {
+		Color healGreen = Color.green;
+		
+		if(isEnemy) {
+			healGreen = new Color(136, 164, 0); //ew
+		}
+		
+		if(amount > 0) {
+			FloatyText text = new FloatyText(x, y, "+" + amount + " Health!", healGreen);
+			texts.add(text);
+		}
+	}
+	
+	private static class FloatyText {
 		float x, y;
 		String message;
 		Color color;
 		int alpha;
 		
+		/**
+		 * Make a new floaty text
+		 * @param x TILE X
+		 * @param y TILE Y
+		 * @param message Text to display
+		 * @param color Color to display the text to display
+		 */
 		public FloatyText(int x, int y, String message, Color color) {
-			this.x = x;
-			this.y = y;
+			this.x = x * TILE_SIZE;
+			this.y = y * TILE_SIZE;
 			this.message = message;
 			this.color = color;
 			alpha = 255;
@@ -831,7 +860,7 @@ public class InGameState extends GameState {
 		public void draw(Graphics2D g2) {
 			Color color = new Color(this.color.getRed(), this.color.getGreen(), this.color.getBlue(), alpha);
 			g2.setColor(color);
-			g2.drawString(message, x, y);
+			g2.drawString(message, x - CAMERA_X * TILE_SIZE, y - CAMERA_Y * TILE_SIZE);
 		}
 		
 		public void update() {
@@ -843,11 +872,11 @@ public class InGameState extends GameState {
 	/** Wall -> floor at destroyX, destroyY */
 	public static void demolish(int destroyX, int destroyY) {
 		map[destroyX][destroyY] = new Tile(Tile.FLOOR, destroyX, destroyY);
-		addEvent("dm" + destroyX + "x" + destroyY);
+		addEvent(new Event.MapChange(new Tile(Tile.FLOOR, destroyX, destroyY), new Tile(Tile.WALL, destroyX, destroyY)));
 	}
 	
-	public static void addEvent(String event) {
-		currentEvent += event + ";";
+	public static void addEvent(Event event) {
+		
 	}
 	
 	public void undoLastEvent() {
@@ -870,7 +899,7 @@ public class InGameState extends GameState {
 				String name = latestEvent.substring(4, fromIndex);
 				
 				int xIndex = latestEvent.indexOf("x", fromIndex);
-				int toIndex = latestEvent.indexOf("to", xIndex);
+				int toIndex = latestEvent.indexOf("to", xIndex); 
 				
 				int fromX = Integer.parseInt(latestEvent.substring(fromIndex + 4, xIndex));
 				int fromY = Integer.parseInt(latestEvent.substring(xIndex + 1, toIndex));
