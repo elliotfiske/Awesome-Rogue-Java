@@ -68,6 +68,26 @@ public class Event {
 		}
 	}
 	
+	public static class Murder extends Event implements Undoable { //isn't it nice to know Murder is undoable?
+		Character victim;
+		int healthBefore;
+		
+		public Murder(Character victim, int healthBefore) {
+			this.victim = victim;
+			this.healthBefore = healthBefore;
+		}
+		
+		public void undo() {
+			if(victim instanceof Enemy) {
+				Enemy revivedEnemy = (Enemy) victim;
+				victim.getHealed(healthBefore);
+				//InGameState.
+			} else {
+				System.out.println("unmurdering pet I guess?");
+			}
+		}
+	}
+	
 	private interface Undoable {
 		public void undo();
 	}

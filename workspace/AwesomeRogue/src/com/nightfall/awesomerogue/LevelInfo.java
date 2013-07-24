@@ -26,7 +26,7 @@ public class LevelInfo {
 	private static final int CAVE_ITERATIONS = 8;
 	
 	private Tile[][] map;
-	private ArrayList<Character> enemies;
+	private ArrayList<Enemy> enemies;
 	private Point startPos;
 
 	/**
@@ -37,7 +37,7 @@ public class LevelInfo {
 	public LevelInfo(int type, int difficulty) {
 		int width, height;
 		
-		enemies = new ArrayList<Character>();
+		enemies = new ArrayList<Enemy>();
 		switch(type) {
 		case CAVE:
 			width = 80;
@@ -80,7 +80,7 @@ public class LevelInfo {
 		this.difficulty = difficulty;
 	}
 	
-	public LevelInfo(Tile[][] map, ArrayList<Character> enemies) {
+	public LevelInfo(Tile[][] map, ArrayList<Enemy> enemies) {
 		this.map = map;
 		this.enemies = enemies;
 	}
@@ -89,7 +89,7 @@ public class LevelInfo {
 		return map;
 	}
 	
-	public ArrayList<Character> getEnemies() {
+	public ArrayList<Enemy> getEnemies() {
 		return enemies;
 	}
 	

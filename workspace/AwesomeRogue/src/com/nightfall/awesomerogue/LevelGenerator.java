@@ -316,10 +316,10 @@ public class LevelGenerator {
 		//Plop down some enemies based on the difficulty.
 		if(difficulty == 1) {
 			Enemy bob = new Enemy(25, 10, Enemy.RAT);
-			InGameState.enemyList.add(bob);
+			InGameState.enemies.add(bob);
 			
 			Enemy joe = new Enemy(10, 25, Enemy.MUSHROOM);
-			InGameState.enemyList.add(joe);
+			InGameState.enemies.add(joe);
 		}
 		
 		if(difficulty == 2) {
@@ -348,7 +348,7 @@ public class LevelGenerator {
 						}
 						
 						Enemy newEnemy = new Enemy(monsterX, monsterY, type);
-						InGameState.enemyList.add(newEnemy);
+						InGameState.enemies.add(newEnemy);
 						
 					}
 				
@@ -573,7 +573,7 @@ public class LevelGenerator {
 			}
 		}
 		
-		ArrayList<Character> enemies = new ArrayList<Character>();
+		ArrayList<Enemy> enemies = new ArrayList<Enemy>();
 		//Plop down some enemies based on the difficulty.
 		if(difficulty == 1) {
 			Enemy bob = new Enemy(25, 10, Enemy.RAT);

@@ -132,7 +132,7 @@ public class Enemy extends Character {
 	 */
 	public void getHit(int damage, Tile[][] map, Character[][] entities) {
 		health -= damage;
-		InGameState.addEvent("hurt"+getName() + "at" + x + "x" + y);
+		InGameState.addEvent(new Event.DamageTaken(this, damage));
 		
 		if(health <= 0) {
 			die();
@@ -148,7 +148,8 @@ public class Enemy extends Character {
 
 			System.out.println("The " + name + " is slain!");
 
-			InGameState.addEvent("killed" + getName() + "at" + x + "x" + y);
+			//TODO!
+			//InGameState.addEvent("killed" + getName() + "at" + x + "x" + y);
 		}
 	}
 	

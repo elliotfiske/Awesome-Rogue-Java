@@ -26,4 +26,8 @@ public class Turn {
 		happenings.remove(result);
 		return result;
 	}
+	
+	public boolean isEmpty() {
+		return happenings.isEmpty();
+	}
 }

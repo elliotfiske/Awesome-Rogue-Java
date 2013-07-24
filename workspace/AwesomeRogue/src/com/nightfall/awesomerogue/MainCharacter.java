@@ -299,7 +299,7 @@ public class MainCharacter extends Character {
 		System.out.println("YOUCH you take " + damage + " damage!");
 		//Floatytext handled in InGameState
 		health -= damage;
-		InGameState.addEvent("hurt" + getName() + "at" + x + "x" + y);
+		InGameState.addEvent(new Event.DamageTaken(this, damage));
 	}
 	
 	public void getHealed(int amount) {

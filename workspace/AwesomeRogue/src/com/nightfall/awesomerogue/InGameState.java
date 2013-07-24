@@ -70,8 +70,7 @@ public class InGameState extends GameState {
 
 	private boolean introLevel;
 
-	public static ArrayList<Enemy> enemyList;
-	private static ArrayList<Character> enemies;
+	public static ArrayList<Enemy> enemies;
 	private static ArrayList<Character> pets;
 	private static Character[][] entities;
 	
@@ -124,8 +123,7 @@ public class InGameState extends GameState {
 
 		levelGen = new LevelGenerator();
 
-		enemies = new ArrayList<Character>();
-		enemyList = new ArrayList<Enemy>();
+		enemies = new ArrayList<Enemy>();
 		
 		pets = new ArrayList<Character>();
 		
@@ -555,7 +553,6 @@ public class InGameState extends GameState {
 		
 		//Add the latest event to the event stack and wipe currentEvent
 		pastTurns.add(currentTurn);
-		System.out.println(currentTurn);
 		currentTurn = new Turn();
 	}
 	
@@ -881,39 +878,10 @@ public class InGameState extends GameState {
 	
 	public void undoLastEvent() {
 		//Bring up the last event that happened
-		String eventToUndo = pastEvents.get(pastEvents.size() - 1);
+		Turn turnToUndo = pastTurns.get(pastTurns.size() - 1);
 		
-		String[] stuffThatHappened = eventToUndo.split(";");
+		//Go through the turn and undo each event that happened
 		
-		//go through and do the opposite of each happening
-		for(int i = stuffThatHappened.length - 1; i >= 0; i--) {
-			String latestEvent = stuffThatHappened[i];
-			
-			if(latestEvent.startsWith("hurt")) {
-				//TODO: heal
-			}
-			
-			if(latestEvent.startsWith("move")) {
-				//Grab the name
-				int fromIndex = latestEvent.indexOf("from");
-				String name = latestEvent.substring(4, fromIndex);
-				
-				int xIndex = latestEvent.indexOf("x", fromIndex);
-				int toIndex = latestEvent.indexOf("to", xIndex); 
-				
-				int fromX = Integer.parseInt(latestEvent.substring(fromIndex + 4, xIndex));
-				int fromY = Integer.parseInt(latestEvent.substring(xIndex + 1, toIndex));
-				
-		        int nextXIndex = latestEvent.indexOf("x", xIndex + 1);
-		        
-		        System.out.println("nextXIndex: " + nextXIndex + " toIndex: " + toIndex);
-		        
-		        int toX = Integer.parseInt(latestEvent.substring(toIndex + 2, nextXIndex));
-		        int toY = Integer.parseInt(latestEvent.substring(nextXIndex + 1));
-		        
-		        System.out.println("To coords: " + toX + ", " + toY);
-			}
-		}
 
 		updateCamera();
 	}

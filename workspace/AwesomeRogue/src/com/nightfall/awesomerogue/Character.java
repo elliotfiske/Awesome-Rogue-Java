@@ -321,7 +321,7 @@ public class Character {
 	}
 	
 	public void moveTo(int newX, int newY, Character[][] entities) {
-		InGameState.addEvent("move" + getName() + "from" + x + "x" + y + "to" + newX + "x" + newY);
+		InGameState.addEvent(new Event.Movement(this, x, y, newX, newY));
 		
 		entities[x][y] = null;
 		entities[newX][newY] = this;
