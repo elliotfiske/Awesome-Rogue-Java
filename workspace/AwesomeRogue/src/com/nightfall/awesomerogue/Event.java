@@ -5,7 +5,7 @@ package com.nightfall.awesomerogue;
  * 
  * Used for rewinding, could also be used for a "replay" feature in the future.
  */
-public class Event {
+public abstract class Event implements Undoable {
 	//Declaring a bunch of static inner classes might be terrible Java practice, but I like not having too many files :I
 
 	//Constants used by InGameState.addEvent()
@@ -16,7 +16,7 @@ public class Event {
 	 * Describes a movement FROM (oldX, oldY) to somewhere else.
 	 * 
 	 */
-	public static class Movement extends Event implements Undoable {
+	public static class Movement extends Event {
 		Character mover;
 		int oldX, oldY, newX, newY;
 		
@@ -29,11 +29,12 @@ public class Event {
 		}
 		
 		public void undo() {
+			System.out.println("undo called. moving to " + oldX + ", " + oldY);
 			mover.moveTo(oldX, oldY);
 		}
 	}
 	
-	public static class DamageTaken extends Event implements Undoable {
+	public static class DamageTaken extends Event {
 		Character victim;
 		int amount;
 		
@@ -54,7 +55,7 @@ public class Event {
 		}
 	}
 	
-	public static class MapChange extends Event implements Undoable {
+	public static class MapChange extends Event {
 		Tile oldTileState, newTileState;
 		
 		/** Remember to deep copy you java programmer you */
@@ -68,7 +69,7 @@ public class Event {
 		}
 	}
 	
-	public static class Murder extends Event implements Undoable { //isn't it nice to know Murder is undoable?
+	public static class Murder extends Event { //isn't it nice to know Murder is undoable?
 		Character victim;
 		int healthBefore;
 		
@@ -86,9 +87,5 @@ public class Event {
 				System.out.println("unmurdering pet I guess?");
 			}
 		}
-	}
-	
-	private interface Undoable {
-		public void undo();
 	}
 }

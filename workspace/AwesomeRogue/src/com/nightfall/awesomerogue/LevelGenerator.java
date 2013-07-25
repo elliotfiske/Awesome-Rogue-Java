@@ -15,7 +15,7 @@ public class LevelGenerator {
 	 */
 	private int difficulty;
 	
-	private static final int SEED = 20;
+	private static final int SEED = 15654;
 
 	//---------------------------CAVE GENERATION CONSTANTS--------------------------------//
 	/**

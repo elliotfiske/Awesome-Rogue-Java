@@ -44,7 +44,7 @@ public class LevelInfo {
 			height = 70;
 
 			makeCaves(width, height, difficulty);
-			startPos = new Point(53, 60);
+			startPos = new Point(10, 10);
 			break;
 		case ROOMS:
 			width = 80;

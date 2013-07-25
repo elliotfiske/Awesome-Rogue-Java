@@ -28,7 +28,7 @@ public class InGameState extends GameState {
 	public static final int TILE_SIZE = 12;
 
 	//Enable to debug stuff
-	public static final boolean GODMODE_VISION = true;
+	public static final boolean GODMODE_VISION = false;
 	public static final boolean GODMODE_DRAW_IDS = false;
 	public static final boolean GODMODE_WALKTHRUWALLS = false;
 	public static final boolean GODMODE_CAN_FREEZE_ENEMIES = true;
@@ -422,7 +422,7 @@ public class InGameState extends GameState {
 		if(e.getKeyCode() == KeyEvent.VK_F && GODMODE_CAN_FREEZE_ENEMIES) {
 			areEnemiesFrozen = !areEnemiesFrozen;
 		}
-
+		
 		if(e.getKeyCode() == KeyEvent.VK_T && GODMODE_EARTHQUAKE) {
 			for(int i = 0; i < enemies.size(); i++) {
 				//Choose random direction
@@ -447,6 +447,10 @@ public class InGameState extends GameState {
 			if(e.getKeyCode() == KeyEvent.VK_NUMPAD5) {
 				endAllWaits("smartmove");
 				waitOn("smartmove");
+			}
+			
+			if(e.getKeyCode() == KeyEvent.VK_R) {
+				undoLastTurn();
 			}
 			
 			if(p.x == 0 && p.y == 0) {
@@ -873,16 +877,20 @@ public class InGameState extends GameState {
 	}
 	
 	public static void addEvent(Event event) {
-		
+		currentTurn.addEvent(event);
 	}
 	
-	public void undoLastEvent() {
+	public void undoLastTurn() {
 		//Bring up the last event that happened
 		Turn turnToUndo = pastTurns.get(pastTurns.size() - 1);
 		
 		//Go through the turn and undo each event that happened
+		while(!turnToUndo.isEmpty()) {
+			System.out.println("undoing??");
+			Event lastEvent = turnToUndo.getLastEvent();
+			lastEvent.undo();
+		}
 		
-
 		updateCamera();
 	}
 }
