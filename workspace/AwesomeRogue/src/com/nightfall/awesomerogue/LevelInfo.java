@@ -12,7 +12,7 @@ public class LevelInfo {
 	public static final int CATACOMBS = 4;
 	public static final int RUINS = 5;
 	
-	private static final int SEED = 20;
+	private static final int SEED = 37;
 
 	//---------------------------CAVE GENERATION CONSTANTS--------------------------------//
 	/**

@@ -349,8 +349,8 @@ public class InGameState extends GameState {
 		}
 
 		//draw floaty texts :3
-		for(FloatyText ft : texts) {
-			ft.draw(g2);
+		for(int f = 0; f < texts.size(); f++) {
+			texts.get(f).draw(g2);
 		}
 		
 		Graphics2D g = (Graphics2D) mapImg.getGraphics();
