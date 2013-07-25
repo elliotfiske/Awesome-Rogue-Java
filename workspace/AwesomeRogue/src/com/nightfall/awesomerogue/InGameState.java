@@ -217,12 +217,6 @@ public class InGameState extends GameState {
 			FloatyText ft = texts.get(i);
 			ft.update();
 			
-			
-			
-			if(ft.alpha <= 0) {
-				texts.remove(ft);
-				i--;
-			}
 			draw();
 		}
 		
@@ -559,6 +553,13 @@ public class InGameState extends GameState {
 		//Add the latest event to the event stack and wipe currentEvent
 		pastTurns.add(currentTurn);
 		currentTurn = new Turn();
+		
+		//Wipe floatytexts that are past their prime
+		for(int i = texts.size() - 1; i >= 0; i--) {
+			if(texts.get(i).alpha <= 0) {
+				texts.remove(i);
+			}
+		}
 	}
 	
 	/**
@@ -867,6 +868,7 @@ public class InGameState extends GameState {
 		
 		public void update() {
 			alpha-=4;
+			if(alpha < 0) alpha = 0;
 			y -= 0.05;
 		}
 	}
