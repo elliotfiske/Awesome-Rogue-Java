@@ -29,7 +29,6 @@ public abstract class Event implements Undoable {
 		}
 		
 		public void undo() {
-			System.out.println("undo called. moving to " + oldX + ", " + oldY);
 			mover.moveTo(oldX, oldY);
 		}
 	}

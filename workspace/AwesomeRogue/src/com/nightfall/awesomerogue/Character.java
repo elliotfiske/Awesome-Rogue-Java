@@ -10,7 +10,7 @@ public class Character {
 	protected int x;
 	protected int y;
 	
-	private int room;
+	protected int room;
 	String character = "default character?!?";
 	
 	private int altitude;	// 0 is default, meaning it's on the ground
@@ -44,21 +44,9 @@ public class Character {
 		int targetX = x + dx;
 		int targetY = y + dy;
 		
-		if(!map[targetX][targetY].blocker && entities[targetX][targetY] == null) {
+		if(!InGameState.tileAt(targetX, targetY).isBlocker()) {
 			moveTo(targetX, targetY);
 			room = map[x][y].room;
-		}
-		else if(entities[targetX][targetY] == null) {
-			// Do action for the tile you tried to walk to.
-			// That way we can have impassible tiles that
-			// Can be interacted with.
-			// Only do action if there's no enemy there though.
-			map[targetX][targetY].doAction(this);
-		}
-		else if(entities[targetX][targetY] instanceof Enemy){
-			attack(new Point(dx, dy));
-		} else {
-			System.out.println("Your " + entities[targetX][targetY].getName() + " is in the way.");
 		}
 	}
 	

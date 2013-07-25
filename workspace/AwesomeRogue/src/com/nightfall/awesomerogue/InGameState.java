@@ -82,6 +82,7 @@ public class InGameState extends GameState {
 
 	private static ArrayList<Turn> pastTurns;
 	private static Turn currentTurn;
+	public static boolean REWINDING = false;
 	
 	private MetaGameState metaGame;
 
@@ -585,7 +586,7 @@ public class InGameState extends GameState {
 
 	private void initLevel(int levelNum) {
 		//LevelInfo thisInfo = new LevelInfo(levelNum, 1);
-		LevelInfo thisInfo = new LevelInfo(LevelInfo.CAVE, 1);
+		LevelInfo thisInfo = new LevelInfo(LevelInfo.CAVE, 2);
 		map = thisInfo.getMap();
 		enemies = thisInfo.getEnemies();
 		mainChar.initPos(thisInfo.getStartPos());
@@ -881,16 +882,29 @@ public class InGameState extends GameState {
 	}
 	
 	public void undoLastTurn() {
+		//If the level just started, tell the user that.
+		//(alternatively, add a secret feature that throws you back to the metagame?
+		//that way you could check out a level to see if it's to your liking then rewind
+		//and choose another one.
+		if(pastTurns.isEmpty()) {
+			System.out.println("Nothing to rewind!");
+			return;
+		}
+		
 		//Bring up the last event that happened
 		Turn turnToUndo = pastTurns.get(pastTurns.size() - 1);
+		pastTurns.remove(turnToUndo);
 		
 		//Go through the turn and undo each event that happened
+		//"REWINDING" makes sure that events that happen while rewinding aren't recorded
+		REWINDING = true;
 		while(!turnToUndo.isEmpty()) {
-			System.out.println("undoing??");
 			Event lastEvent = turnToUndo.getLastEvent();
 			lastEvent.undo();
 		}
+		REWINDING = false;
 		
+		calculateLighting();
 		updateCamera();
 	}
 }
