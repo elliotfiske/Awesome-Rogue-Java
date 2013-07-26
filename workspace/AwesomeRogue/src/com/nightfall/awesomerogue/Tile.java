@@ -5,6 +5,7 @@ import java.awt.Color;
 public class Tile { 	
 
 	//list of tile types
+	public static final int VOID = -1;
 	public static final int FLOOR = 0;
 	public static final int WALL = 1;
 	public static final int DOOR = 2;
