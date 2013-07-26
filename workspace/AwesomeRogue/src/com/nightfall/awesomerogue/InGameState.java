@@ -28,9 +28,9 @@ public class InGameState extends GameState {
 	public static final int TILE_SIZE = 12;
 
 	//Enable to debug stuff
-	public static final boolean GODMODE_VISION = false;
+	public static final boolean GODMODE_VISION = true;
 	public static final boolean GODMODE_DRAW_IDS = false;
-	public static final boolean GODMODE_WALKTHRUWALLS = false;
+	public static final boolean GODMODE_WALKTHRUWALLS = true;
 	public static final boolean GODMODE_CAN_FREEZE_ENEMIES = true;
 	private boolean areEnemiesFrozen = false;
 	public static final boolean EVERY_PASSIVE_UNLOCKED = true;
@@ -270,6 +270,8 @@ public class InGameState extends GameState {
 		// Draw the tiles of the map.
 		for(int i = CAMERA_X; i < CAMERA_X + INGAME_WINDOW_WIDTH && i < map.length; i++) {
 			for(int j = CAMERA_Y; j < CAMERA_Y + INGAME_WINDOW_HEIGHT && j < map[0].length; j++) {
+				// Don't draw the void!!
+				if(map[i][j].type == Tile.VOID) continue; 
 				if(map[i][j].visible || GODMODE_VISION) { //TODO: Switch back from god-mode vision
 
 					//Draw the tile image (its type should correspond to the index in tileImages[] that
