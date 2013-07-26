@@ -84,10 +84,13 @@ public class DrillDozerEffect extends Effect {
 		return false;
 	}
 
-	@Override
 	public void render(Graphics2D g2) {
 		// TODO Auto-generated method stub
 
+	}
+
+	public void reverse() {
+		
 	}
 
 }
