@@ -69,7 +69,9 @@ public class Active {
 	}
 	
 	private void grenadeLauncher(Point target) {
-		mainChar.getLevel().addPet(new Grenade(mainChar.getX(), mainChar.getY(), target));
+		Grenade nade = new Grenade(mainChar.getX(), mainChar.getY(), target);
+		mainChar.getLevel().addPet(nade);
+		InGameState.addEvent(new Event.Spawn(nade));
 	}
 	
 	private void prepDrillDozer() {
@@ -77,7 +79,9 @@ public class Active {
 	}
 	
 	private void drillDozer(Point target) {
-		mainChar.getLevel().addPet(new DrillDozer(mainChar.getX(), mainChar.getY(), target));
+		DrillDozer dozer = new DrillDozer(mainChar.getX(), mainChar.getY(), target);
+		mainChar.getLevel().addPet(dozer);
+		InGameState.addEvent(new Event.Spawn(dozer));
 	}
 	
 	private void prepHulkSerum() {

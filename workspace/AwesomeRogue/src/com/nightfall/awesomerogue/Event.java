@@ -81,10 +81,45 @@ public abstract class Event implements Undoable {
 			if(victim instanceof Enemy) {
 				Enemy revivedEnemy = (Enemy) victim;
 				victim.getHealed(healthBefore);
-				//InGameState.
+				InGameState.enemies.add(revivedEnemy);
 			} else {
-				System.out.println("unmurdering pet I guess?");
+				victim.getHealed(healthBefore);
+				InGameState.pets.add(victim);
 			}
+		}
+	}
+	
+	/**** Called when a new monster/pet is created */
+	public static class Spawn extends Event {
+		Character baby;
+		
+		public Spawn(Character baby) {
+			this.baby = baby;
+		}
+		
+		/** Slaughter. */
+		public void undo() {
+			if(baby instanceof Enemy) {
+				InGameState.enemies.remove((Enemy) baby);
+			} else {
+				InGameState.pets.remove(baby);
+			}
+		}
+	}
+	
+	/**** Calls "reverse()" on effects when they come up in the queue.  Gonna have to make a reverse of all the effects I think.
+	 * WHOOO */
+	public static class EffectEvent extends Event {
+
+		Effect effect;
+		
+		public EffectEvent(Effect effect) {
+			this.effect = effect;
+		}
+		
+		public void undo() {
+			InGameState.waitOn(effect);
+			effect.reverse();
 		}
 	}
 }
