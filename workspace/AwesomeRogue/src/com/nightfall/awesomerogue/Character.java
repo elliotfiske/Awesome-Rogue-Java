@@ -10,7 +10,7 @@ public class Character {
 	protected int x;
 	protected int y;
 	
-	private int room;
+	protected int room;
 	String character = "default character?!?";
 	
 	private int altitude;	// 0 is default, meaning it's on the ground
@@ -44,24 +44,9 @@ public class Character {
 		int targetX = x + dx;
 		int targetY = y + dy;
 		
-		if(!map[targetX][targetY].blocker && entities[targetX][targetY] == null) {
-			entities[x][y] = null;
-			x = targetX;
-			y = targetY;
+		if(!InGameState.tileAt(targetX, targetY).isBlocker()) {
+			moveTo(targetX, targetY);
 			room = map[x][y].room;
-			entities[targetX][targetY] = this;
-		}
-		else if(entities[targetX][targetY] == null) {
-			// Do action for the tile you tried to walk to.
-			// That way we can have impassible tiles that
-			// Can be interacted with.
-			// Only do action if there's no enemy there though.
-			map[targetX][targetY].doAction(this);
-		}
-		else if(entities[targetX][targetY] instanceof Enemy){
-			attack(new Point(dx, dy));
-		} else {
-			System.out.println("Your " + entities[targetX][targetY].getName() + " is in the way.");
 		}
 	}
 	
@@ -269,6 +254,11 @@ public class Character {
 		System.out.println("I took "+damage+" damage but I don't know how to handle it");
 	}
 	
+	public void getHealed(int amount) {
+		System.out.println("I got healed by " + amount + " but I don't know how to handle the POWEr");
+	}
+	
+	
 	public void die() { 
 		dead = true; 
 		Character[][] entities = InGameState.getEntities();
@@ -319,7 +309,7 @@ public class Character {
 	}
 	
 	public void moveTo(int newX, int newY, Character[][] entities) {
-		InGameState.addEvent("move" + getName() + "from" + x + "x" + y + "to" + newX + "x" + newY);
+		InGameState.addEvent(new Event.Movement(this, x, y, newX, newY));
 		
 		entities[x][y] = null;
 		entities[newX][newY] = this;

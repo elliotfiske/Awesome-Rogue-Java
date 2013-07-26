@@ -182,7 +182,25 @@ public class MainCharacter extends Character {
 			}
 			
 		} else {
-			super.move(dx, dy, map, entities);
+			int targetX = x + dx;
+			int targetY = y + dy;
+			
+			if(!map[targetX][targetY].blocker && entities[targetX][targetY] == null) {
+				moveTo(targetX, targetY);
+				room = map[x][y].room;
+			}
+			else if(entities[targetX][targetY] == null) {
+				// Do action for the tile you tried to walk to.
+				// That way we can have impassable tiles that
+				// Can be interacted with.
+				// Only do action if there's no enemy there though.
+				map[targetX][targetY].doAction(this);
+			}
+			else if(entities[targetX][targetY] instanceof Enemy){
+				attack(new Point(dx, dy));
+			} else {
+				System.out.println("Your " + entities[targetX][targetY].getName() + " is in the way.");
+			}
 		}
 	}
 
@@ -292,14 +310,20 @@ public class MainCharacter extends Character {
 	
 	public void addAwesome(int awesome) {
 		this.awesome += awesome;
-		currentGameState.awesomeText(x * InGameState.TILE_SIZE - 20, y * InGameState.TILE_SIZE, awesome);
+		currentGameState.awesomeText(x , y , awesome);
 	}
 
 	public void getHit(int damage, Tile[][] map, Character[][] entities) {
 		System.out.println("YOUCH you take " + damage + " damage!");
 		//Floatytext handled in InGameState
 		health -= damage;
-		InGameState.addEvent("hurt" + getName() + "at" + x + "x" + y);
+		InGameState.addEvent(new Event.DamageTaken(this, damage));
+	}
+	
+	public void getHealed(int amount) {
+		health += amount;
+		
+		InGameState.healText(x, y, amount, false);
 	}
 }
 
