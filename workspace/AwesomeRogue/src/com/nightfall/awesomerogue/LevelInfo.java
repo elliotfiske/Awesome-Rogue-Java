@@ -1,6 +1,7 @@
 package com.nightfall.awesomerogue;
 
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -46,12 +47,12 @@ public class LevelInfo {
 			makeCaves(width, height, difficulty);
 			startPos = new Point(10, 10);
 			break;
-		case ROOMS:
-			width = 80;
+		case RUINS:
+			width = 70;
 			height = 60;
 
 			makeRooms(width, height, difficulty);
-			startPos = new Point(40, 30);
+			startPos = new Point(35, 30);
 			break;
 		case INTRO:
 			width = 38;
@@ -67,7 +68,7 @@ public class LevelInfo {
 			makeCatacombs(width, height, difficulty);
 			startPos = new Point(17, 5);
 			break;
-		case RUINS:
+		case ROOMS:
 			width = 80;
 			height = 60;
 
@@ -363,8 +364,6 @@ public class LevelInfo {
 	private void makeRooms(int width, int height, int difficulty) {
 		//Create blank map
 		map = new Tile[width][height];
-
-		ArrayList<Point> roomCenters = new ArrayList<Point>();
 		
 		// Create whole level (all walls)
 		for(int i = 0; i < width; i ++) {
@@ -377,123 +376,137 @@ public class LevelInfo {
 				}
 			}
 		}
-		
-		// Make a really long snaking corridor first
-		// Rooms will be added at corners
-		
-		
-		// Four options:
-		//      |  *
-		//  *-> |  v
-		// -----|-----
-		//  ^   |
-		//  *   | <-*
-		// Starting direction is either 1, 2, 4, 8 (N, E, S, W) 
-		int direction = (int) Math.pow(2, Math.floor(Math.random()*4));
-		
-		Point cursor = new Point(0, 0);
-		switch(direction) {
-		case N:
-			cursor = new Point((int) (Math.random()*width/2), (int) (Math.random()*height/2) + height/2);
-			break;
-		case E:
-			cursor = new Point((int) (Math.random()*width/2), (int) (Math.random()*height/2));
-			break;
-		case S:
-			cursor = new Point((int) (Math.random()*width/2)+width/2, (int) (Math.random()*height/2));
-			break;
-		case W:
-			cursor = new Point((int) (Math.random()*width/2)+width/2, (int) (Math.random()*height/2)+height/2);
-			break;
-		}
-		roomCenters.add(cursor.getLocation());
-		startPos = cursor.getLocation();
-		
-		for(int roomNum = 0; roomNum < 10; roomNum ++) {
-			// Add 10 to compensate for room sizes
-			int pipelen = (int) (Math.random() * 20 + 20);
-			switch(direction) {
-			case N:
-				if(cursor.y - pipelen < 0) pipelen = cursor.y;
-				// Treate pipelen as a countdown, but move the cursor itself
-				while(pipelen -- > 0) {
-					map[cursor.x][cursor.y] = new Tile(Tile.FLOOR, cursor.x, cursor.y);
-					cursor.y --;
-				}
-				break;
-			case E:
-				if(cursor.x + pipelen > map.length - 1) pipelen = (map.length - 1) - cursor.x;
-				// Treate pipelen as a countdown, but move the cursor itself
-				while(pipelen -- > 0) {
-					map[cursor.x][cursor.y] = new Tile(Tile.FLOOR, cursor.x, cursor.y);
-					cursor.x ++;
-				}
-				break;
-			case S:
-				if(cursor.y + pipelen > map[0].length - 1) pipelen = (map[0].length - 1) - cursor.y;
-				// Treate pipelen as a countdown, but move the cursor itself
-				while(pipelen -- > 0) {
-					map[cursor.x][cursor.y] = new Tile(Tile.FLOOR, cursor.x, cursor.y);
-					cursor.y ++;
-				}
-				break;
-			case W:
-				if(cursor.x - pipelen < 0) pipelen = cursor.x;
-				// Treate pipelen as a countdown, but move the cursor itself
-				while(pipelen -- > 0) {
-					map[cursor.x][cursor.y] = new Tile(Tile.FLOOR, cursor.x, cursor.y);
-					cursor.x --;
-				}
-				break;
-			}
 
-			if(Math.random() > 0.5)
-				direction *= 2;
-			else
-				direction /= 2;
-			if(direction > W) direction = N;
-			if(direction < N) direction = W;
+		ArrayList<Rectangle> roomDimensions = new ArrayList<Rectangle>();
+		
+		for(int i = 0; i < (int) Math.ceil(width * height / 200); i ++) {
+			int minx = (int) (Math.random() * width);
+			int miny = (int) (Math.random() * height);
+			int w = (int) (Math.random() * 8 + 6);
+			int h = (int) (Math.random() * 8 + 6);
+			Rectangle newRoom = new Rectangle(minx, miny, w, h);
+			
+			for(Rectangle room : roomDimensions) {
+				if(room.intersects(newRoom)) {
+					// Figure out how much we'd have to adjust y vs. x, and adjust the smaller one
+					int xo = 0, yo = 0;
+					
+					if(room.x + room.width > minx) {
+						xo = (room.x + room.width) - minx;
+					}
+					if(room.x < minx + w) {
+						xo = (minx + w) - room.x;
+					}
+					if(room.y + room.height > miny) {
+						yo = (room.y + room.height) - miny;
+					}
+					if(room.y < miny + h) {
+						yo = (miny + h) - room.y;
+					}
+					
+					// Now Actually adjust the room
+					if(Math.abs(xo) < Math.abs(yo) || (xo == yo && Math.random() > 0.5)) {
+						if(room.x + room.width > minx) {
+							minx = room.x + room.width;
+						}
+						if(room.x < minx + w) {
+							w = room.x - minx;
+						}
+					}
+					else {
+						if(room.y + room.height > miny) {
+							miny = room.y + room.height;
+						}
+						if(room.y < miny + h) {
+							h = room.y - miny;
+						}
+					}
+					
+					// Remake room!
+					newRoom = new Rectangle(minx, miny, w, h);
+				}
+			}
+			
+			// Make sure we're not out of bounds...
+			if(minx + w > width) {
+				w = width - minx;
+			}
+			if(minx < 0) {
+				minx = 0;
+			}
+			if(miny + h > height) {
+				h = height - miny;
+			}
+			if(miny < 0) {
+				miny = 0;
+			}
+			newRoom = new Rectangle(minx, miny, w, h);
+			
+			roomDimensions.add(newRoom);
+			makeRoom(newRoom.x, newRoom.y, newRoom.x + newRoom.width, newRoom.y + newRoom.height); 
 		}
-		roomCenters.add(cursor.getLocation());
+
+		// Create all the lovely corridors between them!
+		Rectangle room1 = roomDimensions.get(0);
+		for(int i = 1; i < roomDimensions.size(); i ++) {
+			int sx = (int) (Math.random() * room1.width) + room1.x;
+			int sy = (int) (Math.random() * room1.height) + room1.y;
+			
+			Rectangle room2 = roomDimensions.get(i);
+			int ex = (int) (Math.random() * room2.width) + room2.x;
+			int ey = (int) (Math.random() * room2.height) + room2.y;
+			
+			if(sx < 1) sx = 1;
+			if(sy < 1) sy = 1;
+			if(ex < 1) ex = 1;
+			if(ey < 1) ey = 1;
+
+			if(sx > width-2) sx = width-2;
+			if(sy > height-2) sy = height-2;
+			if(ex > width-2) ex = width-2;
+			if(ey > height-2) ey = height-2;
+
+			makeCorridor(sx, ex, sy, ey);
+		}
 		
 		// DOOOOOOOOOOOOOORS
 		// Check to see if any corridor spot touches 2 floor tiles
 		// non-linearly (aka corner or intersection, and if so
 		// create a room!
 		
-		for(int i = 0; i < map.length; i ++) {
-			for(int j = 0; j < map[0].length; j ++) {
-				if(map[i][j].type != Tile.FLOOR) continue;
-				// Adjactent horizontal and vertical floors
-				boolean horiz = false, vert = false;
-				
-				if((i > 0 && map[i-1][j].type == Tile.FLOOR) || (i < map.length-1 && map[i+1][j].type == Tile.FLOOR)) {
-					horiz = true;
-				}
-				if((j > 0 && map[i][j-1].type == Tile.FLOOR) || (j < map[0].length-1 && map[i][j+1].type == Tile.FLOOR)) {
-					vert = true;
-				}
-				
-				if(horiz && vert) {
-					roomCenters.add(new Point(i, j));
-				}
-			}
-		}
-		
-		// Now actually make the rooms
-		for(Point center : roomCenters) {
-			makeRoom(center.x - (int) (Math.random() * 4 + 4), center.y - (int) (Math.random() * 4 + 4),
-					center.x + (int) (Math.random() * 4 + 4), center.y + (int) (Math.random() * 4 + 4));
-		}
-		
-		// Spot checks! Sometimes we get long dead end corridors or walls
-		// Remove those here
-		// Also, do one more door run-through
-		for(int i = 0; i < map.length; i ++) {
-			for(int j = 0; j < map[0].length; j ++) {
-				if(map[i][j].type == Tile.WALL) checkForDoor(i, j);
-			}
-		}
+//		for(int i = 0; i < map.length; i ++) {
+//			for(int j = 0; j < map[0].length; j ++) {
+//				if(map[i][j].type != Tile.FLOOR) continue;
+//				// Adjactent horizontal and vertical floors
+//				boolean horiz = false, vert = false;
+//				
+//				if((i > 0 && map[i-1][j].type == Tile.FLOOR) || (i < map.length-1 && map[i+1][j].type == Tile.FLOOR)) {
+//					horiz = true;
+//				}
+//				if((j > 0 && map[i][j-1].type == Tile.FLOOR) || (j < map[0].length-1 && map[i][j+1].type == Tile.FLOOR)) {
+//					vert = true;
+//				}
+//				
+//				if(horiz && vert) {
+//					roomCenters.add(new Point(i, j));
+//				}
+//			}
+//		}
+//		
+//		// Now actually make the rooms
+//		for(Point center : roomCenters) {
+//			makeRoom(center.x - (int) (Math.random() * 4 + 4), center.y - (int) (Math.random() * 4 + 4),
+//					center.x + (int) (Math.random() * 4 + 4), center.y + (int) (Math.random() * 4 + 4));
+//		}
+//		
+//		// Spot checks! Sometimes we get long dead end corridors or walls
+//		// Remove those here
+//		// Also, do one more door run-through
+//		for(int i = 0; i < map.length; i ++) {
+//			for(int j = 0; j < map[0].length; j ++) {
+//				if(map[i][j].type == Tile.WALL) checkForDoor(i, j);
+//			}
+//		}
 	}
 	
 	/**
@@ -513,39 +526,6 @@ public class LevelInfo {
 		// Make the room
 		for(int i = minx; i <= maxx; i ++) {
 			for(int j = miny; j <= maxy; j ++) {
-//				if(i == minx || i == maxx-1 || j == miny || j == maxy - 1) {
-//					map[i][j] = new Tile(Tile.WALL, i, j);
-//				}
-//				else {
-				/*if((i == minx && i > 0 && !map[i-1][j].blocker) ||
-						(i == maxx && i < map.length-1 && !map[i+1][j].blocker) ||
-						(j == miny && j > 0 && !map[i][j-1].blocker) ||
-						(j == maxy && j < map[0].length-1 && !map[i][j+1].blocker)) {
-					int walls = 0;
-
-					// Check and make sure its next to some walls (otherwise we get a bunch of doors)
-					for(int di = -1; di <= 1; di ++) {
-						for(int dj = -1; dj <= 1; dj ++) {
-							// No doors on the edge of the map!!
-							if(i + di <= 0 || i + di >= map.length - 1) {
-								walls ++;
-								continue;
-							}
-							if(j + dj <= 0 || j + dj >= map[0].length - 1) {
-								walls ++;
-								continue;
-							}
-							
-							if(map[i+di][j+dj].type == Tile.WALL) {
-								walls ++;
-							}
-						}
-					}
-					
-					if(walls >= 4)
-						map[i][j] = new Tile(Tile.DOOR, i, j);
-				}
-				else */ 
 				if((i == minx && i > 0) || (i == maxx && i < map.length - 1) || 
 						(j == miny && j > 0) || (j == maxy && j < map[0].length - 1)) {
 					map[i][j] = new Tile(Tile.WALL, i, j);
@@ -553,33 +533,30 @@ public class LevelInfo {
 				else {
 					map[i][j] = new Tile(Tile.FLOOR, i, j);
 				}
-				
-//				}
-				
 			}
 		}
 		
 		// Now let's add doors!
-		if(miny > 0) {
-			for(int x = minx; x < maxx; x ++) {
-				checkForDoor(x, miny);
-			}
-		}
-		if(maxy < map[0].length-1) {
-			for(int x = minx; x < maxx; x ++) {
-				checkForDoor(x, maxy);
-			}
-		}
-		if(minx > 0) {
-			for(int y = miny; y < maxy; y ++) {
-				checkForDoor(minx, y);
-			}
-		}
-		if(maxx < map.length-1) {
-			for(int y = miny; y < maxy; y ++) {
-				checkForDoor(maxx, y);
-			}
-		}
+//		if(miny > 0) {
+//			for(int x = minx; x < maxx; x ++) {
+//				checkForDoor(x, miny);
+//			}
+//		}
+//		if(maxy < map[0].length-1) {
+//			for(int x = minx; x < maxx; x ++) {
+//				checkForDoor(x, maxy);
+//			}
+//		}
+//		if(minx > 0) {
+//			for(int y = miny; y < maxy; y ++) {
+//				checkForDoor(minx, y);
+//			}
+//		}
+//		if(maxx < map.length-1) {
+//			for(int y = miny; y < maxy; y ++) {
+//				checkForDoor(maxx, y);
+//			}
+//		}
 	}
 	
 	private void checkForDoor(int i, int j) {
@@ -659,7 +636,7 @@ public class LevelInfo {
 			int cy = (int) (Math.random() * (height - ROOMSIZE)) + ROOMSIZE / 2;
 			makeRuinRoom(cx - ROOMSIZE / 2, cy - ROOMSIZE / 2, cx + ROOMSIZE / 2, cy + ROOMSIZE / 2);
 			if(pastRoomX != -1) {
-				makeRuinCorridor(cx, pastRoomX, cy, pastRoomY);
+				makeCorridor(cx, pastRoomX, cy, pastRoomY);
 			}
 			pastRoomX = cx;
 			pastRoomY = cy;
@@ -725,7 +702,7 @@ public class LevelInfo {
 	 * @param cy1 - Center of first room (y)
 	 * @param cy2 - Center of second room (y)
 	 */
-	private void makeRuinCorridor(int cx1, int cx2, int cy1, int cy2) {
+	private void makeCorridor(int cx1, int cx2, int cy1, int cy2) {
 		if(cx1 > cx2) {
 			// Rrrrrrrrrrrandom!
 			// Determines whether it goes like
@@ -737,7 +714,8 @@ public class LevelInfo {
 			// |    |                     |    |_____________|
 			// |----|                     |----|
 			if(Math.random() >= 0.5) { 
-				//System.out.println("WE ARE A GO HOUSTON");
+				System.out.println("WE ARE A GO HOUSTON");
+				System.out.println("going from "+cy1+" to "+cy2);
 				//
 				//                 |----|
 				//                 |    |
@@ -761,7 +739,9 @@ public class LevelInfo {
 					cy2 = t;
 				}
 				
+				System.out.println("going from "+cy1+" to "+cy2);
 				for(int j = cy1; j < cy2; j ++) {
+					System.out.println("Flooring at "+cx1 + ", "+j);
 					if(map[cx1][j].blocker) {
 						map[cx1][j] = new Tile(Tile.FLOOR, cx1, j);
 						if(!map[cx1][j-1].blocker && !map[cx1][j+1].blocker && map[cx1-1][j].blocker && map[cx1+1][j].blocker) {

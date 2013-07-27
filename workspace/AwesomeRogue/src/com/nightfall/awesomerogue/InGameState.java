@@ -589,7 +589,7 @@ public class InGameState extends GameState {
 
 	private void initLevel(int levelNum) {
 		//LevelInfo thisInfo = new LevelInfo(levelNum, 1);
-		LevelInfo thisInfo = new LevelInfo(LevelInfo.CAVE, 2);
+		LevelInfo thisInfo = new LevelInfo(levelNum, 2);
 		map = thisInfo.getMap();
 		enemies = thisInfo.getEnemies();
 		mainChar.initPos(thisInfo.getStartPos());
