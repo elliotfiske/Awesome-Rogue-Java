@@ -19,4 +19,7 @@ public abstract class Effect {
 	// Extra params cause YOU NEVER KNOW WHAT WE GONNA COOK UP THIS TIME
 	public abstract void renderAndIterate(Graphics2D g2, Tile[][] map, Character[][] entities);
 	public abstract void render(Graphics2D g2);
+	
+	//REVERSE, REVERSE
+	public abstract void reverse();
 }

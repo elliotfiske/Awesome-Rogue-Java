@@ -45,8 +45,10 @@ public class OngoingHulkOut extends OngoingEffect {
 			setRunning(false);
 			mainChar.setHulking(false);
 		}
-		
 	}
 	
+	public void reverse() {
+		//Nothing changes for this guy at least.
+	}
 	
 }

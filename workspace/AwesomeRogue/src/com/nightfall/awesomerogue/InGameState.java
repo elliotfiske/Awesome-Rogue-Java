@@ -71,7 +71,7 @@ public class InGameState extends GameState {
 	private boolean introLevel;
 
 	public static ArrayList<Enemy> enemies;
-	private static ArrayList<Character> pets;
+	public static ArrayList<Character> pets;
 	private static Character[][] entities;
 	
 	public int prevHealth;
