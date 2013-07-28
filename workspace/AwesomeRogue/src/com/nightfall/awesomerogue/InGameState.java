@@ -384,9 +384,10 @@ public class InGameState extends GameState {
 	}
 
 	public void keyPress(KeyEvent e) {
-		//if(e.getKeyCode() == KeyEvent.VK_SPACE) {
-		//	clearLevel();
-		//}
+//		if(e.getKeyCode() == KeyEvent.VK_SPACE) {
+//			LevelInfo.MAX_FEATURES ++;
+//			initLevel(LevelInfo.ROOMS);
+//		}
 
 		//DEBUG: are we suspended?
 		if(e.getKeyCode() == KeyEvent.VK_S) {
