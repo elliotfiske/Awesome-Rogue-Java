@@ -158,18 +158,25 @@ public class Explosion extends Effect {
 	}
 	
 	public void reverse() {
+		System.out.println("reversing explosion!");
 		sizeIndex = 0;
 		
 		for(int i = 0; i < DISPERSION.length / 2; i++) {
 			int temp = DISPERSION[i];
 			DISPERSION[i] = DISPERSION[DISPERSION.length - i - 1];
-			DISPERSION[DISPERSION.length - i - 1] = DISPERSION[i];
+			DISPERSION[DISPERSION.length - i - 1] = temp;
 		}
 		
 		for(int i = 0; i < SIZES.length / 2; i++) {
 			int temp = SIZES[i];
-			DISPERSION[i] = SIZES[DISPERSION.length - i - 1];
-			DISPERSION[DISPERSION.length - i - 1] = DISPERSION[i];
+			SIZES[i] = SIZES[SIZES.length - i - 1];
+			SIZES[SIZES.length - i - 1] = temp;
 		}
+		
+		for(int i : SIZES) {
+			System.out.println("size: " + i);
+		}
+		
+		setRunning(true);
 	}
 }
