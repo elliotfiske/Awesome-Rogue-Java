@@ -2,7 +2,7 @@ package com.nightfall.awesomerogue;
 
 import java.awt.Point;
 
-public class Grenade extends Character {
+public class Grenade extends Pet {
 	private Point direction;
 	private int timer; 
 	
@@ -20,6 +20,7 @@ public class Grenade extends Character {
 		timer --;
 		if(timer <= 0) {
 			die();
+			InGameState.addEvent(new Event.Despawn(this));
 			InGameState.waitOn(new Explosion(getX(), getY()));
 			System.out.println("x and y of grenade: " + getX() + ", " + getY());
 		}
@@ -31,5 +32,13 @@ public class Grenade extends Character {
 	
 	public String getName() {
 		return "Grenade";
+	}
+	
+	public void undoTurn() {
+		timer++;
+		if(timer == 1) {
+			dead = false;
+			InGameState.addPet(this);
+		}
 	}
 }

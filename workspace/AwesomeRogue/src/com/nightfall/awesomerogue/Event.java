@@ -68,24 +68,34 @@ public abstract class Event implements Undoable {
 		}
 	}
 	
+	/**** JUST for enemies. Pets are murdered using Despawn. */
 	public static class Murder extends Event { //isn't it nice to know Murder is undoable?
-		Character victim;
+		Enemy victim;
 		int healthBefore;
 		
-		public Murder(Character victim, int healthBefore) {
+		public Murder(Enemy victim, int healthBefore) {
 			this.victim = victim;
 			this.healthBefore = healthBefore;
 		}
 		
 		public void undo() {
-			if(victim instanceof Enemy) {
-				Enemy revivedEnemy = (Enemy) victim;
-				victim.getHealed(healthBefore);
-				InGameState.enemies.add(revivedEnemy);
-			} else {
-				victim.getHealed(healthBefore);
-				InGameState.pets.add(victim);
-			}
+			Enemy revivedEnemy = new Enemy(victim.x, victim.y, victim.getType());
+			revivedEnemy.getHealed(healthBefore);
+			InGameState.enemies.add(revivedEnemy);
+		}
+	}
+	
+	/**** Called when a pet is removed. */
+	public static class Despawn extends Event {
+		Pet pet;
+		
+		public Despawn(Pet pet) {
+			this.pet = pet;
+		}
+		
+		/** Rebirth! */
+		public void undo() {
+			pet.undoTurn();
 		}
 	}
 	

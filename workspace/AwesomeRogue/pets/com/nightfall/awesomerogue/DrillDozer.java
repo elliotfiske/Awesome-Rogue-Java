@@ -2,7 +2,7 @@ package com.nightfall.awesomerogue;
 
 import java.awt.Point;
 
-public class DrillDozer extends Character {
+public class DrillDozer extends Pet {
 	private Point direction;
 	private int lifespan;
 	
@@ -31,12 +31,20 @@ public class DrillDozer extends Character {
 		InGameState.waitOn(new DrillDozerEffect(getX(), getY(), direction, map, InGameState.getEntities()));
 		
 		if(lifespan <= 0) {
+			InGameState.addEvent(new Event.Despawn(this));
 			die();
 			System.out.println("Your Drill Dozer shudders to a halt, and conveniently teleports itself " +
 					"back into your pocket.");
 		}
 	}
 
+	/**
+	 * Rewind a drill dozer turn. The map-changes are handled by InGameState, so no need to worry about 'em.
+	 */
+	public void undoTurn() {
+		lifespan++;
+		move(-direction.x, direction.y, InGameState.map, InGameState.getEntities());
+	}
 	
 	//If you falcon punch your drill dozer it carves a path even faster which is Awesome
 	@Override
@@ -60,5 +68,4 @@ public class DrillDozer extends Character {
 	public int getWeight() {
 		return 1;
 	}
-	
 }
