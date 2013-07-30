@@ -43,6 +43,10 @@ public class DrillDozer extends Pet {
 	 */
 	public void undoTurn() {
 		lifespan++;
+		if(lifespan == 1) { //come back from the dead
+			dead = false;
+			InGameState.addPet(this);
+		}
 		move(-direction.x, direction.y, InGameState.map, InGameState.getEntities());
 	}
 	
