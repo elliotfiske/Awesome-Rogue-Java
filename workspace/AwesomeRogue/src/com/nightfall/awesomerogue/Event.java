@@ -109,11 +109,11 @@ public abstract class Event implements Undoable {
 	
 	/**** Calls "reverse()" on effects when they come up in the queue.  Gonna have to make a reverse of all the effects I think.
 	 * WHOOO */
-	public static class EffectEvent extends Event {
+	public static class EffectHappened extends Event {
 
 		Effect effect;
 		
-		public EffectEvent(Effect effect) {
+		public EffectHappened(Effect effect) {
 			this.effect = effect;
 		}
 		

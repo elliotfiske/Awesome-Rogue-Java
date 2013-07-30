@@ -47,6 +47,7 @@ public class HulkOut extends Effect {
 	
 	public void reverse() {
 		reversing = true;
+		setRunning(true);
 	}
 	
 }

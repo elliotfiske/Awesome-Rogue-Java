@@ -186,6 +186,7 @@ public class InGameState extends GameState {
 	public static void waitOn(Effect effect) {
 		waitOn("effect" + effect.getName());
 		effects.add(effect);
+		addEvent(new Event.EffectHappened(effect));
 	}
 
 	public static void waitOn(String event) {

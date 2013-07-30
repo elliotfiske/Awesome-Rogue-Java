@@ -49,6 +49,7 @@ public class OngoingHulkOut extends OngoingEffect {
 	
 	public void reverse() {
 		//Nothing changes for this guy at least.
+		setRunning(true);
 	}
 	
 }
