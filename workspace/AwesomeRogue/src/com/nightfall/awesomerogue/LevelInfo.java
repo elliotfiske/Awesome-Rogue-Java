@@ -60,7 +60,6 @@ public class LevelInfo {
 			height = 60;
 
 			makeRooms(width, height, difficulty);
-			startPos = new Point(35, 30);
 			break;
 		case INTRO:
 			width = 38;
@@ -387,6 +386,7 @@ public class LevelInfo {
 		
 		Random numGen = new Random(SEED);
 		makeRoom(map.length/2, map[0].length/2, ROOMSW, ROOMSH, (int) Math.pow(2, numGen.nextInt(3)), numGen);
+		startPos = new Point(map.length/2+2, map[0].length/2+2);
 		
 		int currentFeatures = 1;
 		//then we sart the main loop
