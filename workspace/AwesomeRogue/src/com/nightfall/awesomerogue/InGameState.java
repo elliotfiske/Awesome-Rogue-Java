@@ -344,7 +344,7 @@ public class InGameState extends GameState {
 			if(p.dead()) {
 				//BURY IT
 				pets.remove(i--);
-				continue;
+				continue; //MOVE ON.
 			}
 			
 			//Gonna make it so that you can see through pet's eyes maybe?
@@ -765,8 +765,8 @@ public class InGameState extends GameState {
 		return result;
 	}
 
-	public void addPet(Character character) {
-		pets.add(character);
+	public static void addPet(Pet pet) {
+		pets.add(pet);
 	}
 
 	/**

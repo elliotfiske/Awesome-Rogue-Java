@@ -21,7 +21,7 @@ public class Character {
 	private Weapon currentWeapon;
 	private boolean drawingAttack;
 	
-	private boolean dead;
+	protected boolean dead;
 	
 	public Character(int x, int y, String character) {
 		initPos(x, y);

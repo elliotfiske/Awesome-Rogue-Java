@@ -91,6 +91,8 @@ public class Enemy extends Character {
 		yBounty = y;
 		bounty = bountyTile;
 	}
+	
+	public int getType() { return whichEnemy; }
 
 	public void move(int dx, int dy, Tile[][] map) {
 		initPos(dx, dy);
