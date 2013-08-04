@@ -12,6 +12,8 @@ public class Tile {
 	public static final int OPEN_DOOR = 3;
 	public static final int CHEST = 4;
 	public static final int IMPASSABLE = 5; //"bedrock" so to speak
+	public static final int CLOSED_PIT = 6;
+	public static final int OPEN_PIT = 7;
 
 	public boolean blocker = false;
 	public boolean visible = false, seen = false;
@@ -34,7 +36,7 @@ public class Tile {
 		switch(type) {
 		case WALL:
 		case DOOR:
-			//case CHEST:
+		case CHEST:
 		case IMPASSABLE:
 			blocker = true;
 			break;
@@ -73,6 +75,10 @@ public class Tile {
 					System.out.println("You dramatically open the chest and uncover a " + "item!");
 				}
 			}
+			break;
+		case CLOSED_PIT:
+			type = OPEN_PIT;
+			System.out.println("You fall in a hole!");
 			break;
 		}
 	}

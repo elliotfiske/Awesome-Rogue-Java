@@ -14,6 +14,7 @@ public class Enemy extends Character {
 	public static final int SKELETON = 4;
 	public static final int WIZARD = 5;
 	public static final int MUSHROOM = 6;
+	public static final int OGRE = 7;
 
 	public static final String[] enemyIcons = {"M", "r", "R", "Z", "S", "W", "m"};
 
@@ -62,7 +63,7 @@ public class Enemy extends Character {
 			health = 30;
 			name = "zombie";
 			weight = 30;
-			speed = 2;
+			speed = 3;
 			break;
 		case SKELETON:
 			health = 40;
@@ -76,6 +77,12 @@ public class Enemy extends Character {
 			//TODO: implement sweet wizard name maker
 			weight = 35;
 			speed = 5;
+			break;
+		case OGRE:
+			health = 20;
+			name = "ogre";
+			weight = 30;
+			speed = 2;
 			break;
 		}
 
@@ -194,7 +201,7 @@ public class Enemy extends Character {
 		}
 		
 		if(numTries < 12) {
-			moveTo(x + randPoint.x, y + randPoint.y);
+			moveTo(x + randPoint.x, y + randPoint.y, map);
 		}
 	}
 	
@@ -414,7 +421,7 @@ public class Enemy extends Character {
 			//We pathed into a wall.  Oh well.  Don't move!
 		} else {
 
-			moveTo(x + proposedDX, y + proposedDY);
+			moveTo(x + proposedDX, y + proposedDY, map);
 
 			//System.out.println("Entity changed? Entity[x][y]: " + entities[x][y].getClass().getName() + " at " + x + ", " + y); TODO
 		}
@@ -488,7 +495,7 @@ public class Enemy extends Character {
 		if(diffX == -1 && diffY == -1) { result = 7; }
 
 		if(result == -1) {
-			throw new PANICEVERYTHINGISBROKENERROR("DiffX and DiffY are wrong! They're " + diffX + ", " + diffY);
+			//throw new PANICEVERYTHINGISBROKENERROR("DiffX and DiffY are wrong! They're " + diffX + ", " + diffY);
 		}
 
 		return result;
@@ -536,6 +543,12 @@ public class Enemy extends Character {
 		diffY = lastWall.y - feeler.y;
 
 		int result = getNumberedDirection(new Point(diffX, diffY));
+		if(result == -1) {
+			//We're probably stuck in a crowd. Just chill.
+			System.out.println("The guy at " + x + ", " + y + "doesn't like you.  Zooming in now:");
+
+			return new Point(0,0);
+		}
 
 		//anti-infinity fail-safe
 		int numTries = 0;

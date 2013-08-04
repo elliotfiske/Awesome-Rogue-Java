@@ -45,7 +45,7 @@ public class Character {
 		int targetY = y + dy;
 		
 		if(!InGameState.tileAt(targetX, targetY).isBlocker()) {
-			moveTo(targetX, targetY);
+			moveTo(targetX, targetY, entities, map);
 			room = map[x][y].room;
 		}
 	}
@@ -170,44 +170,8 @@ public class Character {
 			
 			//I guess we have no choice left but to move :P
 			if(forceMarch) {
-				moveTo(proposedX, proposedY, entities);
+				moveTo(proposedX, proposedY, entities, map);
 			}
-			
-			/*if((!map[targetX][targetY].blocker && entities[targetX][targetY] == null) ||
-					entities[targetX][targetY].getAltitude() != altitude) {
-				entities[x][y] = null;
-				x = targetX;
-				y = targetY;
-				room = map[x][y].room;
-				entities[targetX][targetY] = this;
-			}
-			else {
-				if(map[x][targetY].blocker || entities[x][targetY] != null ||
-						entities[x][targetY].getAltitude() != altitude) {
-					targetY = y;
-					forceMarchTo.y = y;
-				}
-				if(map[targetX][y].blocker || entities[targetX][y] != null ||
-						entities[targetX][y].getAltitude() != altitude) {
-					targetX = x;
-					forceMarchTo.x = x;
-				}
-				// Try to move again
-				if(!map[targetX][targetY].blocker && entities[targetX][targetY] == null ||
-						entities[targetX][targetY].getAltitude() != altitude) {
-					entities[x][y] = null;
-					x = targetX;
-					y = targetY;
-					room = map[x][y].room;
-					entities[targetX][targetY] = this;
-				}
-			}
-			
-			if(x == forceMarchTo.x && y == forceMarchTo.y) {
-				InGameState.endWait("animation");
-				forceMarch = false;
-				if(altitude > 0) altitude --;
-			}*/
 		}
 	}
 	
@@ -304,17 +268,22 @@ public class Character {
 	 * @param newX X location to move to
 	 * @param newY Y location to move to NOTE: absolute, not relative
 	 */
-	public void moveTo(int newX, int newY) {
-		moveTo(newX, newY, InGameState.getEntities());
+	public void moveTo(int newX, int newY, Tile[][] map) {
+		moveTo(newX, newY, InGameState.getEntities(), map);
 	}
 	
-	public void moveTo(int newX, int newY, Character[][] entities) {
+	public void moveTo(int newX, int newY, Character[][] entities, Tile[][] map) {
 		InGameState.addEvent(new Event.Movement(this, x, y, newX, newY));
 		
 		entities[x][y] = null;
 		entities[newX][newY] = this;
 		x = newX;
 		y = newY;
+
+		if(map != null) {
+			room = map[x][y].room;
+			map[x][y].doAction(this);
+		}
 	}
 
 }
