@@ -29,7 +29,7 @@ public abstract class Event implements Undoable {
 		}
 		
 		public void undo() {
-			mover.moveTo(oldX, oldY);
+			mover.moveTo(oldX, oldY, null);
 		}
 	}
 	

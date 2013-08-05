@@ -182,8 +182,7 @@ public class MainCharacter extends Character {
 			int targetY = y + dy;
 			
 			if(!map[targetX][targetY].blocker && entities[targetX][targetY] == null) {
-				moveTo(targetX, targetY);
-				room = map[x][y].room;
+				moveTo(targetX, targetY, map);
 			}
 			else if(entities[targetX][targetY] == null) {
 				// Do action for the tile you tried to walk to.
@@ -289,8 +288,8 @@ public class MainCharacter extends Character {
 		return weight;
 	}
 	
-	public void moveTo(int newX, int newY, Character[][] entities) {
-		super.moveTo(newX, newY, entities);
+	public void moveTo(int newX, int newY, Character[][] entities, Tile[][] map) {
+		super.moveTo(newX, newY, entities, map);
 		currentGameState.updateCamera();
 	}
 	

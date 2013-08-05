@@ -45,7 +45,7 @@ public class Character {
 		int targetY = y + dy;
 		
 		if(!InGameState.tileAt(targetX, targetY).isBlocker()) {
-			moveTo(targetX, targetY);
+			moveTo(targetX, targetY, entities, map);
 			room = map[x][y].room;
 		}
 	}
@@ -186,17 +186,22 @@ public class Character {
 	 * @param newX X location to move to
 	 * @param newY Y location to move to NOTE: absolute, not relative
 	 */
-	public void moveTo(int newX, int newY) {
-		moveTo(newX, newY, InGameState.getEntities());
+	public void moveTo(int newX, int newY, Tile[][] map) {
+		moveTo(newX, newY, InGameState.getEntities(), map);
 	}
 	
-	public void moveTo(int newX, int newY, Character[][] entities) {
+	public void moveTo(int newX, int newY, Character[][] entities, Tile[][] map) {
 		InGameState.addEvent(new Event.Movement(this, x, y, newX, newY));
 		
 		entities[x][y] = null;
 		entities[newX][newY] = this;
 		x = newX;
 		y = newY;
+
+		if(map != null) {
+			room = map[x][y].room;
+			map[x][y].doAction(this);
+		}
 	}
 
 }

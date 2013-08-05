@@ -34,6 +34,19 @@ public class LevelInfo {
 	private static final int ROOMSH = 20;
 	public static int MAX_FEATURES = 20;
 	
+	/**
+	 * Room types
+	 */
+	public static final int ROOM_BOSS = -2;
+	public static final int ROOM_WEAPON = -1;
+	public static final int ROOM_EMPTY = 0;
+	public static final int ROOM_BASIC_ENEMY = 1;
+	public static final int ROOM_NORMAL_ENEMY = 2;
+	public static final int ROOM_ADVANCED_ENEMY = 3;
+	public static final int ROOM_TRAPS = 4;
+	
+	private int[] enemyTypes;
+	
 	private Tile[][] map;
 	private ArrayList<Enemy> enemies;
 	private Point startPos;
@@ -60,7 +73,6 @@ public class LevelInfo {
 			height = 60;
 
 			makeRooms(width, height, difficulty);
-			startPos = new Point(35, 30);
 			break;
 		case INTRO:
 			width = 38;
@@ -84,7 +96,6 @@ public class LevelInfo {
 			startPos = new Point(40, 30);
 			break;
 		}
-		System.out.println(type);
 		
 		this.difficulty = difficulty;
 	}
@@ -370,6 +381,8 @@ public class LevelInfo {
 	}
 	
 	private void makeRooms(int width, int height, int difficulty) {
+		enemyTypes = new int[] { Enemy.MUSHROOM, Enemy.RAT, Enemy.ANGRY_MUSHROOM };
+		
 		//Create blank map
 		map = new Tile[width][height];
 		
@@ -386,9 +399,11 @@ public class LevelInfo {
 		}
 		
 		Random numGen = new Random(SEED);
-		makeRoom(map.length/2, map[0].length/2, ROOMSW, ROOMSH, (int) Math.pow(2, numGen.nextInt(3)), numGen);
+		makeRoom(map.length/2, map[0].length/2, ROOMSW, ROOMSH, (int) Math.pow(2, numGen.nextInt(3)), ROOM_EMPTY, numGen);
+		startPos = new Point(map.length/2+2, map[0].length/2+2);
 		
 		int currentFeatures = 1;
+		boolean weaponRoom = false;
 		//then we sart the main loop
 		for (int countingTries = 0; countingTries < 1000; countingTries++){
 			// Quota Check
@@ -448,10 +463,15 @@ public class LevelInfo {
 				}
 			}
 			if (validTile > -1){
-				//choose what to build now at our newly found place, and at what direction
-				int feature = numGen.nextInt(100);
-				if (feature <= ROOM_CHANCE){ //a new room
-					if (makeRoom((newx+xmod), (newy+ymod), ROOMSW, ROOMSH, validTile, numGen)){
+				// BOSS ROOM!
+				if(currentFeatures == LevelInfo.MAX_FEATURES - 1) {
+					int roomType = ROOM_BOSS;
+					if(!weaponRoom && numGen.nextInt(MAX_FEATURES) < currentFeatures) {
+						// Compensate for being the last room
+						currentFeatures --;
+						roomType = ROOM_WEAPON;
+					}
+					if (makeRoom((newx+xmod), (newy+ymod), ROOMSW, ROOMSH, validTile, roomType, numGen)){
 						currentFeatures++; //add to our quota
  
 						//then we mark the wall opening with a door
@@ -459,15 +479,41 @@ public class LevelInfo {
  
 						//clean up infront of the door so we can reach it
 						map[newx][newy] = new Tile(Tile.FLOOR, newx+xmod, newy+ymod);
+						
+						if(roomType == ROOM_WEAPON) weaponRoom = true;
+					}
+				}
+				//choose what to build now at our newly found place, and at what direction
+				int feature = numGen.nextInt(100);
+				if (feature <= ROOM_CHANCE){ //a new room
+					int roomType = ROOM_EMPTY;
+					
+					// Random chance of currentFeatures/MAX_FEATURES ensures we get a weapon room eventually
+					if(!weaponRoom && numGen.nextInt(MAX_FEATURES - 1) < currentFeatures) {
+						// Compensate for being the last room
+						if(roomType == ROOM_BOSS) currentFeatures --;
+						roomType = ROOM_WEAPON;
+					}
+					else {
+						roomType = numGen.nextInt(5);
+					}
+					if (makeRoom((newx+xmod), (newy+ymod), ROOMSW, ROOMSH, validTile, roomType, numGen)){
+						currentFeatures++; //add to our quota
+ 
+						//then we mark the wall opening with a door
+						map[newx+xmod][newy+ymod] = new Tile(Tile.DOOR, newx, newy);
+ 
+						//clean up infront of the door so we can reach it
+						map[newx][newy] = new Tile(Tile.FLOOR, newx+xmod, newy+ymod);
+						
+						if(roomType == ROOM_WEAPON) weaponRoom = true;
 					}
 				}
 				else { //new corridor
-					System.out.println("Corridor: "+(newx+xmod)+", "+(newy+ymod));
 					if (makeCorridor((newx+xmod), (newy+ymod), ROOMSH, validTile, numGen)){
 						//same thing here, add to the quota and a door
 						currentFeatures++;
 
-						System.out.println("Door: "+newx+", "+newy);
 						map[newx][newy] = new Tile(Tile.DOOR, newx, newy);
 					}
 				}
@@ -488,7 +534,6 @@ public class LevelInfo {
 		case N:
 			if(x < 0 || x > map.length) return false;
 			else xtemp = x;
-			System.out.println("xtemp: "+xtemp);
 			
 			for(ytemp = y; ytemp > (y - len); ytemp --) {
 				if(ytemp < 0 || ytemp > map[0].length) return false;
@@ -574,13 +619,14 @@ public class LevelInfo {
 	 * @param maxx
 	 * @param maxy
 	 */
-	private boolean makeRoom(int x, int y, int xlength, int ylength, int direction, Random numGen) {
+	private boolean makeRoom(int x, int y, int xlength, int ylength, int direction, int roomType, Random numGen) {
 		int xlen = numGen.nextInt(xlength-6) + 6;
 		int ylen = numGen.nextInt(ylength-6) + 6;
 		
 		int dir = 0;
 		if(direction > 0 && direction <= 8) dir = direction;
-		System.out.println("Room direction: "+direction);
+		
+		Point topLeft = null, bottomRight = null;
 		
 		switch(dir) {
 		case N:
@@ -594,16 +640,8 @@ public class LevelInfo {
 			}
 			
 			// Build it!
-			for(int ytemp = y; ytemp > (y - ylen); ytemp --) {
-				for(int xtemp = (x - xlen/2);   xtemp < (x + (xlen+1)/2); xtemp ++) {
-					// Walls
-					if(xtemp == (x - xlen/2) || xtemp == x + (xlen-1)/2 ||
-					   ytemp == y			 || ytemp == y - ylen + 1)
-						map[xtemp][ytemp] = new Tile(Tile.WALL, xtemp, ytemp);
-					else
-						map[xtemp][ytemp] = new Tile(Tile.FLOOR, xtemp, ytemp);
-				}
-			}
+			topLeft = 		new Point(x - xlen/2, 	y - ylen + 1);
+			bottomRight = 	new Point(x + xlen+1/2, y + 1);
 			break;
 		case E:
 			// Check to make sure we're clear
@@ -616,16 +654,8 @@ public class LevelInfo {
 			}
 			
 			// Build it!
-			for(int ytemp = (y - ylen/2); ytemp < (y + (ylen+1)/2); ytemp ++) {
-				for(int xtemp = x; xtemp < (x + xlen); xtemp ++) {
-					// Walls
-					if(xtemp == x || xtemp == x + xlen-1 ||
-					   ytemp == y - ylen/2 || ytemp == y +(ylen-1)/2)
-						map[xtemp][ytemp] = new Tile(Tile.WALL, xtemp, ytemp);
-					else
-						map[xtemp][ytemp] = new Tile(Tile.FLOOR, xtemp, ytemp);
-				}
-			}
+			topLeft = 		new Point(x, 		y - ylen);
+			bottomRight = 	new Point(x + xlen, y + (ylen+1)/2);
 			break;
 		case S:
 			// Check to make sure we're clear
@@ -638,16 +668,8 @@ public class LevelInfo {
 			}
 			
 			// Build it!
-			for(int ytemp = y; ytemp < (y + ylen); ytemp ++) {
-				for(int xtemp = (x - xlen/2);   xtemp < (x + (xlen+1)/2); xtemp ++) {
-					// Walls
-					if(xtemp == (x - xlen/2) || xtemp == x + (xlen-1)/2 ||
-					   ytemp == y			 || ytemp == y + ylen - 1)
-						map[xtemp][ytemp] = new Tile(Tile.WALL, xtemp, ytemp);
-					else
-						map[xtemp][ytemp] = new Tile(Tile.FLOOR, xtemp, ytemp);
-				}
-			}
+			topLeft = 		new Point(x - xlen/2, 		y);
+			bottomRight = 	new Point(x + (xlen+1)/2, 	y + ylen);
 			break;
 		case W:
 			// Check to make sure we're clear
@@ -660,16 +682,66 @@ public class LevelInfo {
 			}
 			
 			// Build it!
-			for(int ytemp = (y - ylen/2); ytemp < (y + (ylen+1)/2); ytemp ++) {
-				for(int xtemp = x; xtemp > (x - xlen); xtemp --) {
-					// Walls
-					if(xtemp == x || xtemp == x - xlen+1 ||
-							ytemp == y - ylen/2 || ytemp == y +(ylen-1)/2)
-						map[xtemp][ytemp] = new Tile(Tile.WALL, xtemp, ytemp);
-					else
-						map[xtemp][ytemp] = new Tile(Tile.FLOOR, xtemp, ytemp);
+			topLeft = 		new Point(x - xlen + 1, y - ylen/2);
+			bottomRight = 	new Point(x + 1, 		y + (ylen+1)/2);
+			break;
+		}
+
+		if(topLeft != null) {
+			for(int i = topLeft.x; i < bottomRight.x; i ++) {
+				for(int j = topLeft.y; j < bottomRight.y; j ++) {
+					if(i == topLeft.x || i == bottomRight.x - 1 ||
+					   j == topLeft.y || j == bottomRight.y - 1) {
+						map[i][j] = new Tile(Tile.WALL, i, j);
+					}
+					else {
+						map[i][j] = new Tile(Tile.FLOOR, i, j);
+					}
 				}
 			}
+		}
+		
+		// Get just the interior for room designing
+		topLeft.x ++;
+		topLeft.y ++;
+		bottomRight.x --;
+		bottomRight.y --;
+		
+		int w = (bottomRight.x - topLeft.x);
+		int h = (bottomRight.y - topLeft.y);
+		
+		switch(roomType) {
+		case ROOM_WEAPON:
+			Point center = new Point(w / 2, h / 2);
+			map[center.x][center.y] = new Tile(Tile.CHEST, center.x, center.y);
+			break;
+		case ROOM_BOSS:
+			break;
+		case ROOM_BASIC_ENEMY:
+			for(int i = 0; i < 3; i ++) {
+				Enemy e = new Enemy(numGen.nextInt(w) + topLeft.x, numGen.nextInt(h) + topLeft.y, enemyTypes[0]);
+				enemies.add(e);
+			}
+			break;
+		case ROOM_NORMAL_ENEMY:
+			for(int i = 0; i < 3; i ++) {
+				Enemy e = new Enemy(numGen.nextInt(w) + topLeft.x, numGen.nextInt(h) + topLeft.y, enemyTypes[1]);
+				enemies.add(e);
+			}
+			break;
+		case ROOM_ADVANCED_ENEMY:
+			for(int i = 0; i < 3; i ++) {
+				Enemy e = new Enemy(numGen.nextInt(w) + topLeft.x, numGen.nextInt(h) + topLeft.y, enemyTypes[1]);
+				enemies.add(e);
+			}
+			break;
+		case ROOM_TRAPS:
+			for(int i = 0; i < 5; i ++) {
+				map[numGen.nextInt(w) + topLeft.x][numGen.nextInt(h) + topLeft.y] = new Tile(Tile.CLOSED_PIT, numGen.nextInt(w) + topLeft.x, numGen.nextInt(h) + topLeft.y);
+			}
+			break;
+		case ROOM_EMPTY:
+		default:
 			break;
 		}
 		
@@ -780,8 +852,6 @@ public class LevelInfo {
 			// |    |                     |    |_____________|
 			// |----|                     |----|
 			if(Math.random() >= 0.5) { 
-				System.out.println("WE ARE A GO HOUSTON");
-				System.out.println("going from "+cy1+" to "+cy2);
 				//
 				//                 |----|
 				//                 |    |
@@ -805,7 +875,6 @@ public class LevelInfo {
 					cy2 = t;
 				}
 				
-				System.out.println("going from "+cy1+" to "+cy2);
 				for(int j = cy1; j < cy2; j ++) {
 					System.out.println("Flooring at "+cx1 + ", "+j);
 					if(map[cx1][j].blocker) {
