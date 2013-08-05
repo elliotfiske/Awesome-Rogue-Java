@@ -86,14 +86,12 @@ public class Active {
 	
 	private void prepHulkSerum() {
 		InGameState.newOngoingEffect(new OngoingHulkOut(10, mainChar));
-		System.out.println("Your vision clouds with green as your body swells to grotesque proportions! (Continue...)");
-		InGameState.endWait("Z");
-		InGameState.endWait("X");
-		InGameState.endWait("C");
-		hulkOut();
+		System.out.println("Your vision clouds with green as your body swells to grotesque proportions!");
+
+		//Make sure we don't waitOn a non-directional skill!
+		mainChar.activateSkill(HULK_SERUM, null);
 	}
 	
 	public void hulkOut() {
-		//hm
 	}
 }

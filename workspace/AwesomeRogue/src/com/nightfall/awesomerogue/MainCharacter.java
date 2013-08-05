@@ -31,6 +31,9 @@ public class MainCharacter extends Character {
 	
 	/** HULK SMASH??!? */
 	private boolean isHulking;	
+	
+	/** Keeps track of the skill we're currently waiting on. */
+	private SkillUse skillInUse;
 
 	public MainCharacter(int x, int y, Tile[][] map) {
 		super(x, y, "@");
@@ -44,7 +47,7 @@ public class MainCharacter extends Character {
 		
 		actives = new Active(this);
 		
-		skills[0] = Active.FALCON_PUNCH;
+		skills[0] = Active.HULK_SERUM;
 		skills[1] = Active.GRENADE_LAUNCHER;
 		skills[2] = Active.DRILL_DOZER;
 	}
@@ -86,13 +89,16 @@ public class MainCharacter extends Character {
 			
 			switch(skill) {
 			case 0:
-				InGameState.waitOn("Z");
+				skillInUse = new SkillUse("Z");
+				InGameState.waitOn(skillInUse);
 				break;
 			case 1:
-				InGameState.waitOn("X");
+				skillInUse = new SkillUse("X");
+				InGameState.waitOn(skillInUse);
 				break;
 			case 2:
-				InGameState.waitOn("C");
+				skillInUse = new SkillUse("C");
+				InGameState.waitOn(skillInUse);
 				break;
 			}
 		} else {
@@ -108,17 +114,7 @@ public class MainCharacter extends Character {
 		
 		if(skills[skill] != Active.EMPTY_SLOT) {
 			actives.doActive(skills[skill], target);
-			switch(skill) {
-			case 0:
-				InGameState.endWait("Z");
-				break;
-			case 1:
-				InGameState.endWait("X");
-				break;
-			case 2:
-				InGameState.endWait("C");
-				break;
-			}
+			InGameState.endWait(skillInUse);
 		}
 	}
 
@@ -246,8 +242,6 @@ public class MainCharacter extends Character {
 		if(isHulking && !willBeHulking) {
 			//SHRIIINK
 			isHulking = false;
-			
-			
 			weight = 20;
 		}
 		
@@ -324,6 +318,10 @@ public class MainCharacter extends Character {
 		health += amount;
 		
 		InGameState.healText(x, y, amount, false);
+	}
+	
+	public String getName() {
+		return "Main Character";
 	}
 }
 

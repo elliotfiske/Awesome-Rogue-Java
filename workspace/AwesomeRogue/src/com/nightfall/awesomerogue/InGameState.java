@@ -59,11 +59,13 @@ public class InGameState extends GameState {
 	protected BufferedImage mapImg;
 	private BufferedImage mapImg_t;
 
-	public static ArrayList<String> waitingOn;
+	public static ArrayList<Effect> waitingOn;
 	private static ArrayList<Effect> effects;
 	private static ArrayList<OngoingEffect> ongoingEffects;
 	public static boolean suspended = false; //we could just check if waitingOn.size() == 0, but this is faster
 	public boolean takeEnemyTurn = false;
+	private boolean playerTurn = true;
+	private boolean resolvingEffects = false;
 
 	private BufferedImage[] tileImages;
 	private BufferedImage[] layovers;
@@ -119,7 +121,7 @@ public class InGameState extends GameState {
 
 		guiBG = ImageIO.read(new File("img/guiBG.png"));
 
-		waitingOn = new ArrayList<String>();
+		waitingOn = new ArrayList<Effect>();
 		suspended = false;
 
 		levelGen = new LevelGenerator();
@@ -153,9 +155,19 @@ public class InGameState extends GameState {
 	}
 
 	public void update() {
+		//Do a player turn first
+		playerTurn();
+		
+		//Resolve any effects that happened
+		resolveEffects();
+		
+		//Do an enemy turn now
+		enemyTurn();
+		
+		//Resolve any effects that happened
+		resolveEffects();
 		
 		if(suspended) {
-			String waiting = waitingOn.get(waitingOn.size()-1);
 			mainChar.update(map, entities);
 			
 			//update amigas
@@ -176,6 +188,17 @@ public class InGameState extends GameState {
 			}
 		}
 	}
+	
+	private void playerTurn() {
+		//Set player turn to true. Might do more stuff in here later, so I'm making a method for it.
+		playerTurn = true;
+	}
+	
+	private void resolveEffects() {
+		while(effects.size() > 0) {
+			
+		}
+	}
 
 	public static void newOngoingEffect(OngoingEffect oe) {
 		//Run the intro of the ongoing effect
@@ -184,26 +207,14 @@ public class InGameState extends GameState {
 	}
 	
 	public static void waitOn(Effect effect) {
-		waitOn("effect" + effect.getName());
-		effects.add(effect);
+		waitingOn.add(effect);
 		addEvent(new Event.EffectHappened(effect));
-	}
-
-	public static void waitOn(String event) {
-//		System.out.println("Added " + event);
-		waitingOn.add(event);
 		suspended = true;
 	}
 
-	public static void endAllWaits(String event) {	// Same as endWait but removes all instances of the wait
-		while(waitingOn.remove(event));
-		if(InGameState.waitingOn.size() == 0)
-			InGameState.suspended = false;	// Gotta unpause!
-	}
-
-	public static void endWait(String event) {
-//		System.out.println("removing " + event);
-		waitingOn.remove(event);
+	public static void endWait(Effect effect) {
+		System.out.println("removing " + effect.getName());
+		waitingOn.remove(effect);
 		if(InGameState.waitingOn.size() == 0)
 			InGameState.suspended = false;	// Gotta unpause!
 	}
@@ -213,7 +224,7 @@ public class InGameState extends GameState {
 	}
 
 	public void render(Graphics2D g2) {
-		//Update the floatytexts
+		//Update the floatytexts TODO: make it so that hundreds of floaytexts don't slow the game to a crawl
 		for(int i = 0; i < texts.size(); i++) {
 			FloatyText ft = texts.get(i);
 			ft.update();
@@ -223,38 +234,24 @@ public class InGameState extends GameState {
 		
 		imgSFX.drawResizedImage(g2, guiBG, 0, 0, GamePanel.PWIDTH, GamePanel.PHEIGHT);
 		g2.drawImage(mapImg, INGAME_WINDOW_OFFSET_X, INGAME_WINDOW_OFFSET_Y, null);
-
-		boolean effectHappening = false;
-		boolean effectOngoing = false;
 		
-		if(effects.size() > 0) {
-			effectHappening = true;
-		}
-		
-		if(ongoingEffects.size() > 0) {
-			effectOngoing = true;
-		}
-		
-		if(effectHappening) {
-			for(int i = 0; i < effects.size(); i++) {
-				Effect e = effects.get(i);
-				e.renderAndIterate(g2, map, entities);
-				if(!e.running()) {
-					endWait("effect" + e.getName());
-					effects.remove(i--); // and decrement i so we don't skip an effect
-				}
+		for(int i = 0; i < effects.size(); i++) {
+			System.out.println("effects?");
+			Effect e = effects.get(i);
+			e.renderAndIterate(g2, map, entities);
+			if(!e.running()) {
+				endWait(e);
+				effects.remove(i--); //Decrement i so we don't skip an effect
 			}
 		}
 		
-		if(effectOngoing) {
-			for(int i = 0; i < ongoingEffects.size(); i++) {
-				OngoingEffect e = ongoingEffects.get(i);
-				e.renderAndIterate(g2, map, entities);
-				if(!e.running()) {
-					//Run the outro of the ongoing effect and take it out
-					waitOn(e.getOutro());
-					ongoingEffects.remove(i--);
-				}
+		for(int i = 0; i < ongoingEffects.size(); i++) {
+			OngoingEffect e = ongoingEffects.get(i);
+			e.renderAndIterate(g2, map, entities);
+			if(!e.running()) {
+				//Run the outro of the ongoing effect and take it out
+				waitOn(e.getOutro());
+				ongoingEffects.remove(i--);
 			}
 		}
 	}
@@ -273,7 +270,7 @@ public class InGameState extends GameState {
 			for(int j = CAMERA_Y; j < CAMERA_Y + INGAME_WINDOW_HEIGHT && j < map[0].length; j++) {
 				// Don't draw the void!!
 				if(map[i][j].type == Tile.VOID) continue; 
-				if(map[i][j].visible || GODMODE_VISION) { //TODO: Switch back from god-mode vision
+				if(map[i][j].visible || GODMODE_VISION) {
 
 					//Draw the tile image (its type should correspond to the index in tileImages[] that
 					//represents it)
@@ -395,22 +392,65 @@ public class InGameState extends GameState {
 			System.out.print("Are we suspended? ");
 			if(suspended) {
 				System.out.println("WE SURE ARE! Dumping waitstack:");
-				for(String s : waitingOn) {
-					System.out.println(s);
+				for(Effect ef : waitingOn) {
+					System.out.println(ef.getName());
 				}
 			} else {
 				System.out.println("WE ARE NOT NOT NOT!");
 			}
 		}
 		
-		//Smartmove if we're waiting on smartmove and it's at the top of the stack
-		if(waitingOn.size() > 0 && waitingOn.get(0) == "smartmove") {
-			endWait("smartmove");
+		if(playerTurn) {
+			//Parse the direction from the given KeyPress
+			Point p = getDirection(e);if(e.getKeyCode() == KeyEvent.VK_R) {
+				undoLastTurn();
+			}
+			
+			if(p.x == 0 && p.y == 0) {
+				/*if(e.getKeyCode() == KeyEvent.VK_SPACE) {
+					InGameState.waitOn("attack"); //TODO: attacks -> an effect
+				}*/
+				if(e.getKeyCode() == KeyEvent.VK_Z) {
+					mainChar.prepareSkill(0);
+				}
+				else if(e.getKeyCode() == KeyEvent.VK_X) {
+					mainChar.prepareSkill(1);
+				}
+				else if(e.getKeyCode() == KeyEvent.VK_C) {
+					mainChar.prepareSkill(2);
+				}
+			} else {
+				//Move the main character
+				mainChar.move(p.x, p.y, map, entities);
+				
+				updateCamera();
+
+
+				//Enemy time!
+				queueEnemyTurn();
+				
+				//Iterate the iteratable effects here (the dead ones are removed in render() )
+				for(int i = 0; i < ongoingEffects.size(); i++) {
+					OngoingEffect oe = ongoingEffects.get(i);
+					oe.turnIterate(map, entities);
+				}
+				
+				//Move pets!
+				for(int i = 0; i < pets.size(); i++) {
+					Character pet = pets.get(i);
+					pet.takeTurn(mainChar, map);
+				}
+
+				calculateLighting();
+			}
 		}
 		
-		//Parse the direction from the given KeyPress
-		Point p = getDirection(e);
-
+		
+		//Smartmove if we're waiting on smartmove and it's at the top of the stack
+		/*if(waitingOn.size() > 0 && waitingOn.get(0) == "smartmove") {
+			endWait("smartmove");
+		}*/
+		
 		//Wipe tiles of their illustrations
 		for(int x = 0; x < map.length; x++) {
 			for(int y = 0; y < map[0].length; y++) {
@@ -443,74 +483,36 @@ public class InGameState extends GameState {
 		if(!suspended) {
 			
 			//Smartmove
-			if(e.getKeyCode() == KeyEvent.VK_NUMPAD5) {
+			/*if(e.getKeyCode() == KeyEvent.VK_NUMPAD5) {
 				endAllWaits("smartmove");
 				waitOn("smartmove");
-			}
+			}*/
 			
-			if(e.getKeyCode() == KeyEvent.VK_R) {
-				undoLastTurn();
-			}
 			
-			if(p.x == 0 && p.y == 0) {
-				if(e.getKeyCode() == KeyEvent.VK_SPACE) {
-					InGameState.waitOn("attack");
-				}
-				if(e.getKeyCode() == KeyEvent.VK_Z) {
-					mainChar.prepareSkill(0);
-				}
-				else if(e.getKeyCode() == KeyEvent.VK_X) {
-					mainChar.prepareSkill(1);
-				}
-				else if(e.getKeyCode() == KeyEvent.VK_C) {
-					mainChar.prepareSkill(2);
-				}
-			} else {
-				//Move the main character
-				mainChar.move(p.x, p.y, map, entities);
-				
-				updateCamera();
-
-				//TODO: Weapons and usable stuff goes here.
-
-
-				//Enemy time!
-				queueEnemyTurn();
-				
-				//Iterate the iteratable effects here (the dead ones are removed in render() )
-				for(int i = 0; i < ongoingEffects.size(); i++) {
-					OngoingEffect oe = ongoingEffects.get(i);
-					oe.turnIterate(map, entities);
-				}
-				
-				//Move pets!
-				for(int i = 0; i < pets.size(); i++) {
-					Character pet = pets.get(i);
-					pet.takeTurn(mainChar, map);
-				}
-
-				calculateLighting();
-			}
 		}
 		else {
-			String waiting = waitingOn.get(waitingOn.size()-1);
-			if(waiting.equals("attack")) {
+			Effect waiting = waitingOn.get(waitingOn.size()-1);
+			/*if(waiting.equals("attack")) {
 				mainChar.attack(p);
-				endWait("attack");
+				endWait("attack");   //I'm comin' for you next, attack-system.
 				queueEnemyTurn();
-			}
-			if(waiting.equals("Z")) {
-				mainChar.activateSkill(0, p);
-				queueEnemyTurn();
-				mainChar.addAwesome(10);
-			}
-			else if(waiting.equals("X")) {
-				mainChar.activateSkill(1, p);
-				queueEnemyTurn();
-			}
-			else if(waiting.equals("C")) {
-				mainChar.activateSkill(2, p);
-				queueEnemyTurn();
+			}*/
+			
+			if(waiting instanceof SkillUse) {
+				switch(((SkillUse) waiting).whichSkill) {
+				case "Z":
+					mainChar.activateSkill(0, p);
+					queueEnemyTurn();
+					break;
+				case "X":
+					mainChar.activateSkill(1, p);
+					queueEnemyTurn();
+					break;
+				case "C":
+					mainChar.activateSkill(2, p);
+					queueEnemyTurn();
+					break;
+				}
 			}
 		}
 	}

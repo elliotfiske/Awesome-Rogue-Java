@@ -73,7 +73,7 @@ public class Character {
 		
 		//if(enemy.getClass() == this.getClass()) return; // Friendly fire!
 		drawingAttack = true;
-		InGameState.waitOn("animation");
+		//InGameState.waitOn("animation"); //TODO: TURN ATTACKS INTO EFFECTS
 		
 		// Tell the weapon both where you are attacking from and what
 		// DIrection to attack in
@@ -84,130 +84,12 @@ public class Character {
 		forceMarch = true;
 		forceMarchTo = new Point(x + dx, y + dy);
 		//Just in case, remove other forcemarches from this guy
-		InGameState.endAllWaits("forcemarch" + getName() + getID());
-		InGameState.waitOn("forcemarch" + getName() + getID());
+		InGameState.waitOn(new ForceMarch(this, forceMarchTo));
 	}
 	
 	public void update(Tile[][] map, Character[][] entities) {
 		if(drawingAttack) {
 			currentWeapon.update(map, entities);
-		}
-		
-		if(forceMarch) {
-			int proposedX = x;
-			int proposedY = y;
-			
-			/** Rough estimate of speed based on how far they're gonna go */
-			int speed = Math.abs(forceMarchTo.x - x) + Math.abs(forceMarchTo.y - y);
-			
-			// Calculate how far we want to move!
-			if(forceMarchTo.x < x) {
-				proposedX --;
-			}
-			else if(forceMarchTo.x > x) {
-				proposedX ++;
-			}
-			
-			if(forceMarchTo.y < y) {
-				proposedY --;
-			}
-			else if(forceMarchTo.y > y) {
-				proposedY ++;
-			}
-			
-			if(map[proposedX][proposedY].blocker) {
-				//you hit a wall ouuuch
-				if(this instanceof MainCharacter) {
-					System.out.println("You slam into a wall!");
-				}
-				
-				if(this instanceof Enemy) {
-					System.out.println("The " + getName() + " slams into a wall!");
-				}
-
-				altitude = 0;
-				InGameState.endWait("forcemarch" + getName() + getID());
-				forceMarch = false;
-				
-			}
-			
-			if(entities[proposedX][proposedY] != null && forceMarch && entities[proposedX][proposedY] != this) {
-				//We just slammed into somebody.  LOOKS LIKE THEY'RE COMIN' ALONG FOR THE RIDE
-				//First make sure it is actually possible to force march them (i.e. they're not being sandwiched by a wall)
-				if(!entities[proposedX][proposedY].canForceMarch(new Point(proposedX - x, proposedY - y))) {
-					InGameState.endWait("forcemarch" + getName() + getID());
-					forceMarch = false;
-					System.out.println("sandwich'd!!");
-				} else {
-					//Consider their weight.  Inelastic collision!
-					int myWeight = getWeight();
-					int hisWeight = entities[proposedX][proposedY].getWeight();
-					
-					//If they're huge, they won't get knocked back as far.  Will never go below 1, though.
-					int newSpeed = (int) (speed - Math.floor((double) hisWeight / (double) myWeight));
-					if(newSpeed < 1) { newSpeed = 1; }
-					
-					//nolo
-					//if(this instanceof MainCharacter) { newSpeed = 5; }
-					
-					//Now we gotta recalculate our target points.
-					//First, reverse engineer the direction.
-					Point direction = new Point((int) Math.signum(forceMarchTo.x - x), (int) Math.signum(forceMarchTo.y - y));
-					//Now, move the guy we ran into to this new target! (direction * speed)
-					entities[proposedX][proposedY].forceMarch(direction.x * newSpeed, direction.y * newSpeed);
-					//Meanwhile, adjust our target to one behind the other guy's.
-					forceMarch(direction.x * (newSpeed-1), direction.y * (newSpeed-1));
-				}
-			}
-			
-			//Have we arrived at our destination?
-			if(forceMarchTo.x == x && forceMarchTo.y == y) {
-				//Feel free to move about the cabin
-				InGameState.endWait("forcemarch" + getName() + getID());
-				forceMarch = false;
-				altitude = 0;
-			}
-			
-			//I guess we have no choice left but to move :P
-			if(forceMarch) {
-				moveTo(proposedX, proposedY, entities);
-			}
-			
-			/*if((!map[targetX][targetY].blocker && entities[targetX][targetY] == null) ||
-					entities[targetX][targetY].getAltitude() != altitude) {
-				entities[x][y] = null;
-				x = targetX;
-				y = targetY;
-				room = map[x][y].room;
-				entities[targetX][targetY] = this;
-			}
-			else {
-				if(map[x][targetY].blocker || entities[x][targetY] != null ||
-						entities[x][targetY].getAltitude() != altitude) {
-					targetY = y;
-					forceMarchTo.y = y;
-				}
-				if(map[targetX][y].blocker || entities[targetX][y] != null ||
-						entities[targetX][y].getAltitude() != altitude) {
-					targetX = x;
-					forceMarchTo.x = x;
-				}
-				// Try to move again
-				if(!map[targetX][targetY].blocker && entities[targetX][targetY] == null ||
-						entities[targetX][targetY].getAltitude() != altitude) {
-					entities[x][y] = null;
-					x = targetX;
-					y = targetY;
-					room = map[x][y].room;
-					entities[targetX][targetY] = this;
-				}
-			}
-			
-			if(x == forceMarchTo.x && y == forceMarchTo.y) {
-				InGameState.endWait("animation");
-				forceMarch = false;
-				if(altitude > 0) altitude --;
-			}*/
 		}
 	}
 	
@@ -241,7 +123,7 @@ public class Character {
 		if(drawingAttack) {
 			if(!currentWeapon.draw(g2, camX, camY)) {
 				drawingAttack = false;
-				InGameState.endWait("animation");
+				//InGameState.endWait("animation"); //TODO: TURN ATTACKS INTO ANIMATIONS
 			}
 		}
 	}

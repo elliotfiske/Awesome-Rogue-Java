@@ -17,7 +17,6 @@ public class DrillDozer extends Pet {
 
 	public void takeTurn(MainCharacter mainChar, Tile[][] map) {
 		lifespan--;
-		
 		move(direction.x, direction.y, map, InGameState.getEntities());
 		//Each turn, the Drill Dozer looks for the three tiles in front of it and melts 'em
 		//  xx           x   
