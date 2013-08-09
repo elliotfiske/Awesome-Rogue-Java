@@ -186,8 +186,8 @@ public class Character {
 	 * @param newX X location to move to
 	 * @param newY Y location to move to NOTE: absolute, not relative
 	 */
-	public void moveTo(int newX, int newY, Tile[][] map) {
-		moveTo(newX, newY, InGameState.getEntities(), map);
+	public void moveTo(int newX, int newY) {
+		moveTo(newX, newY, InGameState.getEntities(), InGameState.map);
 	}
 	
 	public void moveTo(int newX, int newY, Character[][] entities, Tile[][] map) {

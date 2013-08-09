@@ -201,7 +201,7 @@ public class Enemy extends Character {
 		}
 		
 		if(numTries < 12) {
-			moveTo(x + randPoint.x, y + randPoint.y, map);
+			moveTo(x + randPoint.x, y + randPoint.y);
 		}
 	}
 	
@@ -421,7 +421,7 @@ public class Enemy extends Character {
 			//We pathed into a wall.  Oh well.  Don't move!
 		} else {
 
-			moveTo(x + proposedDX, y + proposedDY, map);
+			moveTo(x + proposedDX, y + proposedDY);
 
 			//System.out.println("Entity changed? Entity[x][y]: " + entities[x][y].getClass().getName() + " at " + x + ", " + y); TODO
 		}

@@ -97,7 +97,7 @@ public class ForceMarch extends Effect {
 		}
 
 		//I guess we have no choice left but to move :P
-		mover.moveTo(proposedX, proposedY, entities);
+		mover.moveTo(proposedX, proposedY);
 	}
 
 	public void render(Graphics2D g2) {

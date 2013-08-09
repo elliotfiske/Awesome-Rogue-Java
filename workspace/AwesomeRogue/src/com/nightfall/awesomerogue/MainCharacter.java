@@ -174,7 +174,7 @@ public class MainCharacter extends Character {
 					map[p.x][p.y] = new Tile(Tile.FLOOR, p.x, p.y);
 				}
 				
-				initPos(getX() + dx, getY() + dy);
+				moveTo(getX() + dx, getY() + dy);
 			}
 			
 		} else {
@@ -182,7 +182,7 @@ public class MainCharacter extends Character {
 			int targetY = y + dy;
 			
 			if(!map[targetX][targetY].blocker && entities[targetX][targetY] == null) {
-				moveTo(targetX, targetY, map);
+				moveTo(targetX, targetY);
 			}
 			else if(entities[targetX][targetY] == null) {
 				// Do action for the tile you tried to walk to.

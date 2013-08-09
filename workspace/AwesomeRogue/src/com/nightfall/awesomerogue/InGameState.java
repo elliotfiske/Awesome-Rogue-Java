@@ -62,10 +62,18 @@ public class InGameState extends GameState {
 	public static ArrayList<Effect> waitingOn;
 	private static ArrayList<Effect> effects;
 	private static ArrayList<OngoingEffect> ongoingEffects;
-	public static boolean suspended = false; //we could just check if waitingOn.size() == 0, but this is faster
 	public boolean takeEnemyTurn = false;
 	private boolean playerTurn = true;
 	private boolean resolvingEffects = false;
+	
+	/** These constants define what happens (if anything) when input is received. */
+	public static final int PLAYER_MOVE = 1;
+	public static final int PLAYER_CHOOSE_DIR = 2;
+	public static final int PLAYER_CHOOSE_TILE = 3;
+	public static final int ENEMY_TURN = 4;
+	public static final int EFFECT_HAPPENING = 5;
+	public static int inputState = PLAYER_MOVE;
+	
 
 	private BufferedImage[] tileImages;
 	private BufferedImage[] layovers;
@@ -166,38 +174,24 @@ public class InGameState extends GameState {
 		
 		//Resolve any effects that happened
 		resolveEffects();
-		
-		if(suspended) {
-			mainChar.update(map, entities);
-			
-			//update amigas
-			for(Character pet : pets) {
-				pet.update(map, entities);
-			}
-			
-			//update ENamigas
-			for(Character e : enemies) {
-				e.update(map, entities);
-			}
-			calculateLighting();
-		} else {
-			//Have the enemies take a turn if they deserve it.
-			if(takeEnemyTurn) {
-				enemyTurn();
-				takeEnemyTurn = false;
-			}
-		}
 	}
 	
 	private void playerTurn() {
-		//Set player turn to true. Might do more stuff in here later, so I'm making a method for it.
-		playerTurn = true;
+		//Wait for the player to move. Also waits for the player to make 
+		//a choice of direction/tile if a skill requires that.
+		inputState = PLAYER_MOVE;
+		while(inputState == PLAYER_MOVE        || 
+			  inputState == PLAYER_CHOOSE_DIR  ||
+			  inputState == PLAYER_CHOOSE_TILE    )  { }
 	}
 	
 	private void resolveEffects() {
 		while(effects.size() > 0) {
 			
 		}
+		
+		//TODO: Ongoing effects
+		//TODO: Regular effects
 	}
 
 	public static void newOngoingEffect(OngoingEffect oe) {
@@ -228,8 +222,12 @@ public class InGameState extends GameState {
 		for(int i = 0; i < texts.size(); i++) {
 			FloatyText ft = texts.get(i);
 			ft.update();
-			
 			draw();
+			
+			//Remove floatytexts that are done
+			if(ft.alpha <= 0) {
+				texts.remove(i--);
+			}
 		}
 		
 		imgSFX.drawResizedImage(g2, guiBG, 0, 0, GamePanel.PWIDTH, GamePanel.PHEIGHT);
@@ -387,7 +385,7 @@ public class InGameState extends GameState {
 //			initLevel(LevelInfo.ROOMS);
 //		}
 
-		//DEBUG: are we suspended?
+		//DEBUG CODE outside the "input state" switch
 		if(e.getKeyCode() == KeyEvent.VK_S) {
 			System.out.print("Are we suspended? ");
 			if(suspended) {
@@ -400,12 +398,16 @@ public class InGameState extends GameState {
 			}
 		}
 		
-		if(playerTurn) {
-			//Parse the direction from the given KeyPress
-			Point p = getDirection(e);if(e.getKeyCode() == KeyEvent.VK_R) {
+		if(e.getKeyCode() == KeyEvent.VK_R) {
 				undoLastTurn();
-			}
-			
+		}
+		
+		//Parse the direction from the given KeyPress
+		Point p = getDirection(e);
+		
+		//Do different things depending on what the "input state" is
+		switch(inputState) {
+		case PLAYER_MOVE:
 			if(p.x == 0 && p.y == 0) {
 				/*if(e.getKeyCode() == KeyEvent.VK_SPACE) {
 					InGameState.waitOn("attack"); //TODO: attacks -> an effect
@@ -424,12 +426,8 @@ public class InGameState extends GameState {
 				mainChar.move(p.x, p.y, map, entities);
 				
 				updateCamera();
-
-
-				//Enemy time!
-				queueEnemyTurn();
 				
-				//Iterate the iteratable effects here (the dead ones are removed in render() )
+				//Iterate the iterable effects here (the dead ones are removed in render() )
 				for(int i = 0; i < ongoingEffects.size(); i++) {
 					OngoingEffect oe = ongoingEffects.get(i);
 					oe.turnIterate(map, entities);
@@ -440,23 +438,30 @@ public class InGameState extends GameState {
 					Character pet = pets.get(i);
 					pet.takeTurn(mainChar, map);
 				}
+		
+				//Wipe tiles of their illustrations
+				for(int x = 0; x < map.length; x++) {
+					for(int y = 0; y < map[0].length; y++) {
+						map[x][y].illustrated = false;
+					}
+				}
 
 				calculateLighting();
 			}
 		}
 		
+		if(inputState == PLAYER_CHOOSE_DIR) {
+			
+		}
+		
+		if(inputState == PLAYER_CHOOSE_TILE) {
+			
+		}
 		
 		//Smartmove if we're waiting on smartmove and it's at the top of the stack
 		/*if(waitingOn.size() > 0 && waitingOn.get(0) == "smartmove") {
 			endWait("smartmove");
 		}*/
-		
-		//Wipe tiles of their illustrations
-		for(int x = 0; x < map.length; x++) {
-			for(int y = 0; y < map[0].length; y++) {
-				map[x][y].illustrated = false;
-			}
-		}
 
 		if(e.getKeyCode() == KeyEvent.VK_F && GODMODE_CAN_FREEZE_ENEMIES) {
 			areEnemiesFrozen = !areEnemiesFrozen;

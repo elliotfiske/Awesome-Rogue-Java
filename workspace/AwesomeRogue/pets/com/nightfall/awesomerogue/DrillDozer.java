@@ -17,7 +17,9 @@ public class DrillDozer extends Pet {
 
 	public void takeTurn(MainCharacter mainChar, Tile[][] map) {
 		lifespan--;
-		move(direction.x, direction.y, map, InGameState.getEntities());
+		//Using "super" should make so that our override down there vvv doesn't get called unless
+		//we're force marching.
+		super.moveTo(direction.x, direction.y);
 		//Each turn, the Drill Dozer looks for the three tiles in front of it and melts 'em
 		//  xx           x   
 		//  7x    v      x<   etc.
@@ -46,22 +48,24 @@ public class DrillDozer extends Pet {
 			dead = false;
 			InGameState.addPet(this);
 		}
-		move(-direction.x, direction.y, InGameState.map, InGameState.getEntities());
+		//Using "super" stops 
+		super.moveTo(-direction.x, direction.y);
 	}
 	
 	//If you falcon punch your drill dozer it carves a path even faster which is Awesome
 	@Override
 	public void forceMarch(int dx, int dy) {
 		super.forceMarch(dx, dy);
+		//Changes direction to match the force march
+		this.direction = new Point(Utility.sign(dx), Utility.sign(dy));
 		System.out.println("Your drill dozer flies through the air, frantically carving a path through the stone!");
 	}
 
 	@Override
-	public void update(Tile[][] map, Character[][] entities) {
-		super.update(map, entities);
-		if(isForceMarching()) {
-			InGameState.waitOn(new DrillDozerEffect(getX(), getY(), direction, map, InGameState.getEntities()));
-		}
+	//This is overridden so that a force marching drill dozer can carve a path through the stone.
+	public void moveTo(int newX, int newY, Character[][] entities, Tile[][] map) {
+		super.moveTo(newX, newY);
+		InGameState.waitOn(new DrillDozerEffect(getX(), getY(), direction, map, InGameState.getEntities()));
 	}
 
 	public String getName() {
