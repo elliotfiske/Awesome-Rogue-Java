@@ -49,7 +49,7 @@ public class InGameState extends GameState {
 	int mapHeight = 0;
 
 	private MainCharacter mainChar;
-	
+
 	private ImageSFX imgSFX;
 
 	private BufferedImage guiBG;
@@ -65,15 +65,19 @@ public class InGameState extends GameState {
 	public boolean takeEnemyTurn = false;
 	private boolean playerTurn = true;
 	private boolean resolvingEffects = false;
-	
+
 	/** These constants define what happens (if anything) when input is received. */
 	public static final int PLAYER_MOVE = 1;
 	public static final int PLAYER_CHOOSE_DIR = 2;
 	public static final int PLAYER_CHOOSE_TILE = 3;
-	public static final int ENEMY_TURN = 4;
-	public static final int EFFECT_HAPPENING = 5;
-	public static int inputState = PLAYER_MOVE;
-	
+	public static final int PET_TURN = 4;
+	public static final int ENEMY_TURN = 5;
+	public static final int NEW_TURN = 6;
+	public static volatile int inputState = PLAYER_MOVE;
+	/** If the player needs to choose a direction for a skill, the skill that's being
+	 * waited on hangs out here. */
+	public static String skillWaiting;
+	public static final Object synchronizer = new Object();
 
 	private BufferedImage[] tileImages;
 	private BufferedImage[] layovers;
@@ -81,9 +85,9 @@ public class InGameState extends GameState {
 	private boolean introLevel;
 
 	public static ArrayList<Enemy> enemies;
-	public static ArrayList<Character> pets;
+	public static ArrayList<Pet> pets;
 	private static Character[][] entities;
-	
+
 	public int prevHealth;
 	private static ArrayList<FloatyText> texts;
 	/** Lets us see how wide a string actually is rendered */
@@ -93,7 +97,7 @@ public class InGameState extends GameState {
 	private static ArrayList<Turn> pastTurns;
 	private static Turn currentTurn;
 	public static boolean REWINDING = false;
-	
+
 	private MetaGameState metaGame;
 
 	public InGameState(GamePanel gameCanvas, int levelType, MetaGameState metaGame, MainCharacter character) throws IOException {
@@ -130,18 +134,18 @@ public class InGameState extends GameState {
 		guiBG = ImageIO.read(new File("img/guiBG.png"));
 
 		waitingOn = new ArrayList<Effect>();
-		suspended = false;
+		skillWaiting = "";
 
 		levelGen = new LevelGenerator();
 
 		enemies = new ArrayList<Enemy>();
-		
-		pets = new ArrayList<Character>();
-		
+
+		pets = new ArrayList<Pet>();
+
 		texts = new ArrayList<FloatyText>();
 		pastTurns = new ArrayList<Turn>();
 		currentTurn = new Turn();
-		
+
 		defaultFont = new Font("Helvetica", Font.PLAIN, 12);
 		//fontMetrics = new Graphics.getFontMetrics(defaultFont);         
 
@@ -163,35 +167,51 @@ public class InGameState extends GameState {
 	}
 
 	public void update() {
-		//Do a player turn first
-		playerTurn();
+		//If effects are happening, NOTHING ELSE IS.
+		if(effects.size() > 0) return;
 		
-		//Resolve any effects that happened
-		resolveEffects();
+		switch(inputState) {
+		case PLAYER_MOVE:
+		case PLAYER_CHOOSE_DIR:
+		case PLAYER_CHOOSE_TILE:
+			//Nothing happens here since we're just waiting for a keypress.
+			break;
 		
-		//Do an enemy turn now
-		enemyTurn();
-		
-		//Resolve any effects that happened
-		resolveEffects();
+		case PET_TURN: //walk the dog
+			petTurn();
+			break;
+			
+		case ENEMY_TURN:
+			enemyTurn();
+			break;
+			
+		case NEW_TURN:
+			//Does some important stuff
+			beginNewTurn();
+			break;
+		}
 	}
-	
+
 	private void playerTurn() {
 		//Wait for the player to move. Also waits for the player to make 
 		//a choice of direction/tile if a skill requires that.
 		inputState = PLAYER_MOVE;
-		while(inputState == PLAYER_MOVE        || 
-			  inputState == PLAYER_CHOOSE_DIR  ||
-			  inputState == PLAYER_CHOOSE_TILE    )  { }
 	}
-	
-	private void resolveEffects() {
-		while(effects.size() > 0) {
-			
+
+	/** Called when the game should stop waiting for player input. */
+	public static void playerTurnDone() {
+		inputState = PET_TURN;
+	}
+
+	private void petTurn() {
+		for(Pet p : pets) {
+			p.takeTurn(mainChar, map);
 		}
-		
-		//TODO: Ongoing effects
-		//TODO: Regular effects
+		inputState = ENEMY_TURN;
+	}
+
+	private void resolveEffects() {
+		while(effects.size() > 0) { }		
 	}
 
 	public static void newOngoingEffect(OngoingEffect oe) {
@@ -199,18 +219,15 @@ public class InGameState extends GameState {
 		waitOn(oe.getIntro());
 		ongoingEffects.add(oe);
 	}
-	
+
 	public static void waitOn(Effect effect) {
 		waitingOn.add(effect);
 		addEvent(new Event.EffectHappened(effect));
-		suspended = true;
 	}
 
 	public static void endWait(Effect effect) {
 		System.out.println("removing " + effect.getName());
 		waitingOn.remove(effect);
-		if(InGameState.waitingOn.size() == 0)
-			InGameState.suspended = false;	// Gotta unpause!
 	}
 
 	public Character getMainChar() {
@@ -218,21 +235,22 @@ public class InGameState extends GameState {
 	}
 
 	public void render(Graphics2D g2) {
+		//System.out.println("Render called...");
 		//Update the floatytexts TODO: make it so that hundreds of floaytexts don't slow the game to a crawl
 		for(int i = 0; i < texts.size(); i++) {
 			FloatyText ft = texts.get(i);
 			ft.update();
 			draw();
-			
+
 			//Remove floatytexts that are done
 			if(ft.alpha <= 0) {
 				texts.remove(i--);
 			}
 		}
-		
+
 		imgSFX.drawResizedImage(g2, guiBG, 0, 0, GamePanel.PWIDTH, GamePanel.PHEIGHT);
 		g2.drawImage(mapImg, INGAME_WINDOW_OFFSET_X, INGAME_WINDOW_OFFSET_Y, null);
-		
+
 		for(int i = 0; i < effects.size(); i++) {
 			System.out.println("effects?");
 			Effect e = effects.get(i);
@@ -242,7 +260,7 @@ public class InGameState extends GameState {
 				effects.remove(i--); //Decrement i so we don't skip an effect
 			}
 		}
-		
+
 		for(int i = 0; i < ongoingEffects.size(); i++) {
 			OngoingEffect e = ongoingEffects.get(i);
 			e.renderAndIterate(g2, map, entities);
@@ -254,7 +272,6 @@ public class InGameState extends GameState {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	public void draw() {
 		Graphics2D g2 = (Graphics2D) mapImg_t.getGraphics();
 		//draw the GUI elements
@@ -280,15 +297,13 @@ public class InGameState extends GameState {
 						g2.fillRect((i-CAMERA_X)*TILE_SIZE, (j-CAMERA_Y)*TILE_SIZE, TILE_SIZE, TILE_SIZE);
 					}
 
-					if(map[i][j].getID() != 0 && GODMODE_DRAW_IDS) {
+					/*if(map[i][j].getID() != 0 && GODMODE_DRAW_IDS) {
 						g2.drawString(Integer.toString(map[i][j].getID() % 10), (i-CAMERA_X)*TILE_SIZE,
 								(j-CAMERA_Y)*TILE_SIZE + TILE_SIZE);
-					}
+					}*/
 
 				} else if(map[i][j].seen) {
 					//The tile is in our memory.  Draw it, but darkened.
-
-					//TODO: actually darken the tile.  Dunno how to do it right now
 					g2.drawImage(tileImages[ map[i][j].type*2+1 ], (i-CAMERA_X)*TILE_SIZE,
 							(j-CAMERA_Y)*TILE_SIZE, null);
 				}
@@ -332,16 +347,16 @@ public class InGameState extends GameState {
 				g2.drawString("?", (e.getX()-CAMERA_X)*TILE_SIZE, (e.getY()-CAMERA_Y)*TILE_SIZE + TILE_SIZE );
 			}
 		}
-		
+
 		//Draw the pets
 		for(int i = 0; i < pets.size(); i++) {
-			Character p = pets.get(i);
+			Pet p = pets.get(i);
 			if(p.dead()) {
 				//BURY IT
 				pets.remove(i--);
 				continue; //MOVE ON.
 			}
-			
+
 			//Gonna make it so that you can see through pet's eyes maybe?
 			p.draw(g2, CAMERA_X, CAMERA_Y);
 		}
@@ -350,7 +365,7 @@ public class InGameState extends GameState {
 		for(int f = 0; f < texts.size(); f++) {
 			texts.get(f).draw(g2);
 		}
-		
+
 		Graphics2D g = (Graphics2D) mapImg.getGraphics();
 		g.drawImage(mapImg_t,  0,  0,  null);
 	}
@@ -369,7 +384,7 @@ public class InGameState extends GameState {
 		} else {
 			CAMERA_X += dx;
 		}
-		
+
 		if(CAMERA_Y + dy < 0) {
 			CAMERA_Y = 0;
 		} else if(CAMERA_Y + dy + INGAME_WINDOW_HEIGHT > map[0].length) {                                                             
@@ -380,15 +395,15 @@ public class InGameState extends GameState {
 	}
 
 	public void keyPress(KeyEvent e) {
-//		if(e.getKeyCode() == KeyEvent.VK_SPACE) {
-//			LevelInfo.MAX_FEATURES ++;
-//			initLevel(LevelInfo.ROOMS);
-//		}
+		//		if(e.getKeyCode() == KeyEvent.VK_SPACE) {
+		//			LevelInfo.MAX_FEATURES ++;
+		//			initLevel(LevelInfo.ROOMS);
+		//		}
 
 		//DEBUG CODE outside the "input state" switch
 		if(e.getKeyCode() == KeyEvent.VK_S) {
 			System.out.print("Are we suspended? ");
-			if(suspended) {
+			if(waitingOn.size() > 0) {
 				System.out.println("WE SURE ARE! Dumping waitstack:");
 				for(Effect ef : waitingOn) {
 					System.out.println(ef.getName());
@@ -397,14 +412,20 @@ public class InGameState extends GameState {
 				System.out.println("WE ARE NOT NOT NOT!");
 			}
 		}
-		
+
 		if(e.getKeyCode() == KeyEvent.VK_R) {
-				undoLastTurn();
+			undoLastTurn();
 		}
-		
+
+		if(e.getKeyCode() == KeyEvent.VK_F && GODMODE_CAN_FREEZE_ENEMIES) {
+			areEnemiesFrozen = !areEnemiesFrozen;
+		}
+
 		//Parse the direction from the given KeyPress
 		Point p = getDirection(e);
-		
+
+		System.out.println("keypress called. Inputstate: " + inputState);
+
 		//Do different things depending on what the "input state" is
 		switch(inputState) {
 		case PLAYER_MOVE:
@@ -424,49 +445,46 @@ public class InGameState extends GameState {
 			} else {
 				//Move the main character
 				mainChar.move(p.x, p.y, map, entities);
-				
+
 				updateCamera();
-				
-				//Iterate the iterable effects here (the dead ones are removed in render() )
-				for(int i = 0; i < ongoingEffects.size(); i++) {
-					OngoingEffect oe = ongoingEffects.get(i);
-					oe.turnIterate(map, entities);
-				}
-				
+
 				//Move pets!
 				for(int i = 0; i < pets.size(); i++) {
-					Character pet = pets.get(i);
+					Pet pet = pets.get(i);
 					pet.takeTurn(mainChar, map);
 				}
-		
+
 				//Wipe tiles of their illustrations
 				for(int x = 0; x < map.length; x++) {
 					for(int y = 0; y < map[0].length; y++) {
 						map[x][y].illustrated = false;
 					}
 				}
-
+				playerTurnDone();
 				calculateLighting();
 			}
+			break;
+		case PLAYER_CHOOSE_DIR:
+			switch(skillWaiting) {
+			case "Z":
+				mainChar.activateSkill(0, p);
+				playerTurnDone();
+				break;
+			case "X":
+				mainChar.activateSkill(1, p);
+				playerTurnDone();
+				break;
+			case "C":
+				mainChar.activateSkill(2, p);
+				playerTurnDone();
+				break;
+			}
+			break;
+		case PLAYER_CHOOSE_TILE:
+			//"Targeted" skills, like teleport-to-location or something
+			break;
 		}
-		
-		if(inputState == PLAYER_CHOOSE_DIR) {
-			
-		}
-		
-		if(inputState == PLAYER_CHOOSE_TILE) {
-			
-		}
-		
-		//Smartmove if we're waiting on smartmove and it's at the top of the stack
-		/*if(waitingOn.size() > 0 && waitingOn.get(0) == "smartmove") {
-			endWait("smartmove");
-		}*/
 
-		if(e.getKeyCode() == KeyEvent.VK_F && GODMODE_CAN_FREEZE_ENEMIES) {
-			areEnemiesFrozen = !areEnemiesFrozen;
-		}
-		
 		if(e.getKeyCode() == KeyEvent.VK_T && GODMODE_EARTHQUAKE) {
 			for(int i = 0; i < enemies.size(); i++) {
 				//Choose random direction
@@ -477,64 +495,21 @@ public class InGameState extends GameState {
 				enemies.get(i).forceMarch(randDirectionP.x * 5, randDirectionP.y * 5);
 			}
 		}
-		
+
 		if(e.getKeyCode() == KeyEvent.VK_E) {
 			for(int i = 0; i < enemies.size(); i++) {
 				Character en = enemies.get(i);
 				((Enemy) en).getHealed(100);
 			}
 		}
-
-		if(!suspended) {
-			
-			//Smartmove
-			/*if(e.getKeyCode() == KeyEvent.VK_NUMPAD5) {
-				endAllWaits("smartmove");
-				waitOn("smartmove");
-			}*/
-			
-			
-		}
 		else {
-			Effect waiting = waitingOn.get(waitingOn.size()-1);
-			/*if(waiting.equals("attack")) {
-				mainChar.attack(p);
-				endWait("attack");   //I'm comin' for you next, attack-system.
-				queueEnemyTurn();
-			}*/
-			
-			if(waiting instanceof SkillUse) {
-				switch(((SkillUse) waiting).whichSkill) {
-				case "Z":
-					mainChar.activateSkill(0, p);
-					queueEnemyTurn();
-					break;
-				case "X":
-					mainChar.activateSkill(1, p);
-					queueEnemyTurn();
-					break;
-				case "C":
-					mainChar.activateSkill(2, p);
-					queueEnemyTurn();
-					break;
-				}
+			if(inputState == PLAYER_CHOOSE_DIR) {
 			}
 		}
 	}
 
-	/**
-	 *  This makes it so that the order of operations is shoot -> bullet finishes -> enemies attack
-	 *  
-	 *  This way, enemies don't get to take a turn right as you shoot and dodge your bullets, which is
-	 *  annoying.
-	 */
-	private void queueEnemyTurn() {
-		takeEnemyTurn = true;
-	}
-	
 	/** All the enemies take a turn */
 	private void enemyTurn() {
-		
 		for(int i = 0; i < enemies.size(); i ++) {
 			Character enemy = enemies.get(i);
 			if(enemy.dead()) {
@@ -548,31 +523,38 @@ public class InGameState extends GameState {
 			}
 		}
 		
-		beginNewTurn();
-		
+		inputState = NEW_TURN;
 	}
 
 	/** Called at the start of every turn. */
 	public void beginNewTurn() {
 		calculateLighting();
-		
+
 		//Calculate how much health the player lost this turn, display with FloatyText
 		int lostHealth = prevHealth - mainChar.getHealth();
 		hitText(mainChar.x, mainChar.y, lostHealth);
 		prevHealth = mainChar.getHealth();
-		
+
 		//Add the latest event to the event stack and wipe currentEvent
 		pastTurns.add(currentTurn);
 		currentTurn = new Turn();
-		
+
 		//Wipe floatytexts that are past their prime
 		for(int i = texts.size() - 1; i >= 0; i--) {
 			if(texts.get(i).alpha <= 0) {
 				texts.remove(i);
 			}
 		}
+
+		//Iterate the iterable effects here (the dead ones are removed in render() )
+		for(int i = 0; i < ongoingEffects.size(); i++) {
+			OngoingEffect oe = ongoingEffects.get(i);
+			oe.turnIterate(map, entities);
+		}
+		
+		inputState = PLAYER_MOVE;
 	}
-	
+
 	/**
 	 * Update the camera.  Used for teleporting or force marching
 	 */
@@ -602,7 +584,7 @@ public class InGameState extends GameState {
 		map = thisInfo.getMap();
 		enemies = thisInfo.getEnemies();
 		mainChar.initPos(thisInfo.getStartPos());
-		
+
 		/*
 		if(levelNum == 0) {
 			map = LevelGenerator.makeLevel(LevelInfo.INTRO, 38, 35, 1, enemies);
@@ -620,13 +602,13 @@ public class InGameState extends GameState {
 			levelGen.makeLevel(map, LevelGenerator.CAVE, 80, 70, 2);
 
 			mainChar.initPos(10, 10);
-			
+
 			//give the main character a map he's lost
 			mainChar.giveMap(map);
 
 			enemies = enemyList;
 		}
-*/
+		 */
 		calculateLighting();
 
 		// Fill entity array!
@@ -812,7 +794,7 @@ public class InGameState extends GameState {
 	public static Character[][] getEntities() {
 		return entities;
 	}
-	
+
 	/**
 	 * Enemies weren't dying properly.  How rude.
 	 * @param e The enemy to remove
@@ -826,7 +808,7 @@ public class InGameState extends GameState {
 		FloatyText text = new FloatyText(x, y, "+" + amount + " Awesome!", Color.blue);
 		texts.add(text);
 	}
-	
+
 	/** Floating text saying how much you got hurt. */
 	public void hitText(int x, int y, int amount) {
 		if(amount > 0) {
@@ -834,28 +816,28 @@ public class InGameState extends GameState {
 			texts.add(text);
 		}
 	}
-	
+
 	/** Floaty text saying how much was healed.  If it's an enemy make the message
 	 * a nasty shade of vomit-green, otherwise a nice healthy green. */
 	public static void healText(int x, int y, int amount, boolean isEnemy) {
 		Color healGreen = Color.green;
-		
+
 		if(isEnemy) {
 			healGreen = new Color(136, 164, 0); //ew
 		}
-		
+
 		if(amount > 0) {
 			FloatyText text = new FloatyText(x, y, "+" + amount + " Health!", healGreen);
 			texts.add(text);
 		}
 	}
-	
+
 	private static class FloatyText {
 		float x, y;
 		String message;
 		Color color;
 		int alpha;
-		
+
 		/**
 		 * Make a new floaty text
 		 * @param x TILE X
@@ -870,13 +852,13 @@ public class InGameState extends GameState {
 			this.color = color;
 			alpha = 255;
 		}
-		
+
 		public void draw(Graphics2D g2) {
 			Color color = new Color(this.color.getRed(), this.color.getGreen(), this.color.getBlue(), alpha);
 			g2.setColor(color);
 			g2.drawString(message, x - CAMERA_X * TILE_SIZE, y - CAMERA_Y * TILE_SIZE);
 		}
-		
+
 		public void update() {
 			alpha-=4;
 			if(alpha < 0) alpha = 0;
@@ -889,11 +871,11 @@ public class InGameState extends GameState {
 		map[destroyX][destroyY] = new Tile(Tile.FLOOR, destroyX, destroyY);
 		addEvent(new Event.MapChange(new Tile(Tile.FLOOR, destroyX, destroyY), new Tile(Tile.WALL, destroyX, destroyY)));
 	}
-	
+
 	public static void addEvent(Event event) {
 		currentTurn.addEvent(event);
 	}
-	
+
 	public void undoLastTurn() {
 		//If the level just started, tell the user that.
 		//(alternatively, add a secret feature that throws you back to the metagame?
@@ -903,11 +885,11 @@ public class InGameState extends GameState {
 			System.out.println("Nothing to rewind!");
 			return;
 		}
-		
+
 		//Bring up the last event that happened
 		Turn turnToUndo = pastTurns.get(pastTurns.size() - 1);
 		pastTurns.remove(turnToUndo);
-		
+
 		//Go through the turn and undo each event that happened
 		//"REWINDING" makes sure that events that happen while rewinding aren't recorded
 		REWINDING = true;
@@ -916,7 +898,7 @@ public class InGameState extends GameState {
 			lastEvent.undo();
 		}
 		REWINDING = false;
-		
+
 		calculateLighting();
 		updateCamera();
 	}

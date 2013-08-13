@@ -48,8 +48,6 @@ public class DrillDozer extends Pet {
 			dead = false;
 			InGameState.addPet(this);
 		}
-		//Using "super" stops 
-		super.moveTo(-direction.x, direction.y);
 	}
 	
 	//If you falcon punch your drill dozer it carves a path even faster which is Awesome

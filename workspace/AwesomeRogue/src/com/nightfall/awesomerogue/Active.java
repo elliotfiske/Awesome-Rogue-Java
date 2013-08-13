@@ -55,6 +55,7 @@ public class Active {
 	
 	private void prepFalconPunch() {
 		System.out.println("FALCONNNNNNNNNN...  (Choose a direction)");
+		InGameState.inputState = InGameState.PLAYER_CHOOSE_DIR;
 	}
 	
 	private void falconPunch(Point target) {
@@ -66,30 +67,30 @@ public class Active {
 	
 	private void prepGrenadeLauncher() {
 		System.out.println("You ready your grenade launcher (Choose a direction)");
+		InGameState.inputState = InGameState.PLAYER_CHOOSE_DIR;
 	}
 	
 	private void grenadeLauncher(Point target) {
 		Grenade nade = new Grenade(mainChar.getX(), mainChar.getY(), target);
-		mainChar.getLevel().addPet(nade);
+		InGameState.addPet(nade);
 		InGameState.addEvent(new Event.Spawn(nade));
 	}
 	
 	private void prepDrillDozer() {
 		System.out.println("You rev up the engine on your Portable Drill Dozer (Choose a direction)");
+		InGameState.inputState = InGameState.PLAYER_CHOOSE_DIR;
 	}
 	
 	private void drillDozer(Point target) {
 		DrillDozer dozer = new DrillDozer(mainChar.getX(), mainChar.getY(), target);
-		mainChar.getLevel().addPet(dozer);
+		InGameState.addPet(dozer);
 		InGameState.addEvent(new Event.Spawn(dozer));
 	}
 	
 	private void prepHulkSerum() {
 		InGameState.newOngoingEffect(new OngoingHulkOut(10, mainChar));
 		System.out.println("Your vision clouds with green as your body swells to grotesque proportions!");
-
-		//Make sure we don't waitOn a non-directional skill!
-		mainChar.activateSkill(HULK_SERUM, null);
+		InGameState.playerTurnDone();
 	}
 	
 	public void hulkOut() {

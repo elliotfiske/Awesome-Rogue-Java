@@ -31,9 +31,6 @@ public class MainCharacter extends Character {
 	
 	/** HULK SMASH??!? */
 	private boolean isHulking;	
-	
-	/** Keeps track of the skill we're currently waiting on. */
-	private SkillUse skillInUse;
 
 	public MainCharacter(int x, int y, Tile[][] map) {
 		super(x, y, "@");
@@ -89,16 +86,13 @@ public class MainCharacter extends Character {
 			
 			switch(skill) {
 			case 0:
-				skillInUse = new SkillUse("Z");
-				InGameState.waitOn(skillInUse);
+				InGameState.skillWaiting = "Z";
 				break;
 			case 1:
-				skillInUse = new SkillUse("X");
-				InGameState.waitOn(skillInUse);
+				InGameState.skillWaiting = "X";
 				break;
 			case 2:
-				skillInUse = new SkillUse("C");
-				InGameState.waitOn(skillInUse);
+				InGameState.skillWaiting = "C";
 				break;
 			}
 		} else {
@@ -114,7 +108,7 @@ public class MainCharacter extends Character {
 		
 		if(skills[skill] != Active.EMPTY_SLOT) {
 			actives.doActive(skills[skill], target);
-			InGameState.endWait(skillInUse);
+			InGameState.playerTurnDone();
 		}
 	}
 
