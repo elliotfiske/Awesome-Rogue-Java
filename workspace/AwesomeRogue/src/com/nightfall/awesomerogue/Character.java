@@ -83,7 +83,6 @@ public class Character {
 	public void forceMarch(int dx, int dy) {
 		forceMarch = true;
 		forceMarchTo = new Point(x + dx, y + dy);
-		//Just in case, remove other forcemarches from this guy
 		InGameState.waitOn(new ForceMarch(this, forceMarchTo));
 	}
 	

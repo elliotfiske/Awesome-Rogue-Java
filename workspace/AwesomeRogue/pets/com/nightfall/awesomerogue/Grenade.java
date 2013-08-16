@@ -3,13 +3,10 @@ package com.nightfall.awesomerogue;
 import java.awt.Point;
 
 public class Grenade extends Pet {
-	private Point direction;
 	private int timer; 
 	
 	public Grenade(int x, int y, Point direction) {
-		super(x, y, "G");
-		
-		this.direction = direction;
+		super(x, y, "GRENAAAADE");
 		forceMarch(direction.x*4, direction.y*4);
 		timer = 3;
 		

@@ -251,8 +251,7 @@ public class MainCharacter extends Character {
 			boolean blewStuffUp = false;
 			for(int dx = -1; dx <= 1; dx++) {
 				for(int dy = -1; dy <= 1; dy++) {
-					if(map[getX() + dx][getY() + dy].type == Tile.WALL) {
-						map[getX() + dx][getY() + dy] = new Tile(Tile.FLOOR, getX() + dx, getY() + dy);
+					if(InGameState.demolish(getX() + dx, getY() + dy)) {
 						blewStuffUp = true;
 					}
 					
@@ -284,7 +283,6 @@ public class MainCharacter extends Character {
 	
 	public void moveTo(int newX, int newY, Character[][] entities, Tile[][] map) {
 		super.moveTo(newX, newY, entities, map);
-		currentGameState.updateCamera();
 	}
 	
 	public int getHealth() {

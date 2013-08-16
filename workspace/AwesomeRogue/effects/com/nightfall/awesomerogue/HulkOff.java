@@ -13,8 +13,7 @@ public class HulkOff extends Effect {
 	public static final int MAX_ALPHA = HulkOut.MAX_ALPHA;
 	private boolean reversing = false;
 	
-	public void renderAndIterate(Graphics2D g2, Tile[][] map,
-			Character[][] entities) {
+	public void renderAndIterate(Graphics2D g2) {
 		if(!reversing) {
 			System.out.println("You shrink back to your normal size.");
 			//Get less green an less green an less green till you all outta green

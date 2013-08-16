@@ -18,8 +18,7 @@ public abstract class OngoingEffect extends Effect {
 	private Effect outro;
 	
 	@Override
-	public abstract void renderAndIterate(Graphics2D g2, Tile[][] map,
-			Character[][] entities);
+	public abstract void renderAndIterate(Graphics2D g2);
 
 	@Override
 	public abstract void render(Graphics2D g2);

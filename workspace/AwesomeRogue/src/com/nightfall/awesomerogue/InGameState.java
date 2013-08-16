@@ -54,17 +54,12 @@ public class InGameState extends GameState {
 
 	private BufferedImage guiBG;
 
-	private LevelGenerator levelGen;
-
 	protected BufferedImage mapImg;
 	private BufferedImage mapImg_t;
 
-	public static ArrayList<Effect> waitingOn;
 	private static ArrayList<Effect> effects;
 	private static ArrayList<OngoingEffect> ongoingEffects;
 	public boolean takeEnemyTurn = false;
-	private boolean playerTurn = true;
-	private boolean resolvingEffects = false;
 
 	/** These constants define what happens (if anything) when input is received. */
 	public static final int PLAYER_MOVE = 1;
@@ -77,7 +72,6 @@ public class InGameState extends GameState {
 	/** If the player needs to choose a direction for a skill, the skill that's being
 	 * waited on hangs out here. */
 	public static String skillWaiting;
-	public static final Object synchronizer = new Object();
 
 	private BufferedImage[] tileImages;
 	private BufferedImage[] layovers;
@@ -133,10 +127,7 @@ public class InGameState extends GameState {
 
 		guiBG = ImageIO.read(new File("img/guiBG.png"));
 
-		waitingOn = new ArrayList<Effect>();
 		skillWaiting = "";
-
-		levelGen = new LevelGenerator();
 
 		enemies = new ArrayList<Enemy>();
 
@@ -182,7 +173,10 @@ public class InGameState extends GameState {
 			break;
 			
 		case ENEMY_TURN:
+			long before = System.currentTimeMillis();
 			enemyTurn();
+			long after = System.currentTimeMillis();
+			System.out.println("Elapsed time: " + (after - before));
 			break;
 			
 		case NEW_TURN:
@@ -190,12 +184,6 @@ public class InGameState extends GameState {
 			beginNewTurn();
 			break;
 		}
-	}
-
-	private void playerTurn() {
-		//Wait for the player to move. Also waits for the player to make 
-		//a choice of direction/tile if a skill requires that.
-		inputState = PLAYER_MOVE;
 	}
 
 	/** Called when the game should stop waiting for player input. */
@@ -210,10 +198,6 @@ public class InGameState extends GameState {
 		inputState = ENEMY_TURN;
 	}
 
-	private void resolveEffects() {
-		while(effects.size() > 0) { }		
-	}
-
 	public static void newOngoingEffect(OngoingEffect oe) {
 		//Run the intro of the ongoing effect
 		waitOn(oe.getIntro());
@@ -221,13 +205,8 @@ public class InGameState extends GameState {
 	}
 
 	public static void waitOn(Effect effect) {
-		waitingOn.add(effect);
+		effects.add(effect);
 		addEvent(new Event.EffectHappened(effect));
-	}
-
-	public static void endWait(Effect effect) {
-		System.out.println("removing " + effect.getName());
-		waitingOn.remove(effect);
 	}
 
 	public Character getMainChar() {
@@ -235,7 +214,6 @@ public class InGameState extends GameState {
 	}
 
 	public void render(Graphics2D g2) {
-		//System.out.println("Render called...");
 		//Update the floatytexts TODO: make it so that hundreds of floaytexts don't slow the game to a crawl
 		for(int i = 0; i < texts.size(); i++) {
 			FloatyText ft = texts.get(i);
@@ -254,16 +232,15 @@ public class InGameState extends GameState {
 		for(int i = 0; i < effects.size(); i++) {
 			System.out.println("effects?");
 			Effect e = effects.get(i);
-			e.renderAndIterate(g2, map, entities);
+			e.renderAndIterate(g2);
 			if(!e.running()) {
-				endWait(e);
 				effects.remove(i--); //Decrement i so we don't skip an effect
 			}
 		}
 
 		for(int i = 0; i < ongoingEffects.size(); i++) {
 			OngoingEffect e = ongoingEffects.get(i);
-			e.renderAndIterate(g2, map, entities);
+			e.renderAndIterate(g2);
 			if(!e.running()) {
 				//Run the outro of the ongoing effect and take it out
 				waitOn(e.getOutro());
@@ -292,6 +269,7 @@ public class InGameState extends GameState {
 					g2.drawImage(tileImages[ map[i][j].type*2 ], (i-CAMERA_X)*TILE_SIZE,
 							(j-CAMERA_Y)*TILE_SIZE, null);
 
+					//Draw the tile illustrations (used for debuggin')
 					if(map[i][j].illustrated) {
 						g2.setColor(map[i][j].color);
 						g2.fillRect((i-CAMERA_X)*TILE_SIZE, (j-CAMERA_Y)*TILE_SIZE, TILE_SIZE, TILE_SIZE);
@@ -403,9 +381,9 @@ public class InGameState extends GameState {
 		//DEBUG CODE outside the "input state" switch
 		if(e.getKeyCode() == KeyEvent.VK_S) {
 			System.out.print("Are we suspended? ");
-			if(waitingOn.size() > 0) {
+			if(effects.size() > 0) {
 				System.out.println("WE SURE ARE! Dumping waitstack:");
-				for(Effect ef : waitingOn) {
+				for(Effect ef : effects) {
 					System.out.println(ef.getName());
 				}
 			} else {
@@ -445,15 +423,10 @@ public class InGameState extends GameState {
 			} else {
 				//Move the main character
 				mainChar.move(p.x, p.y, map, entities);
-
-				updateCamera();
-
-				//Move pets!
-				for(int i = 0; i < pets.size(); i++) {
-					Pet pet = pets.get(i);
-					pet.takeTurn(mainChar, map);
-				}
-
+				
+				//NOTE that we DON'T move the camera here. Instead, it's moved 
+				//after the enemies move to prevent a weird stuttering effect.
+				
 				//Wipe tiles of their illustrations
 				for(int x = 0; x < map.length; x++) {
 					for(int y = 0; y < map[0].length; y++) {
@@ -524,6 +497,7 @@ public class InGameState extends GameState {
 		}
 		
 		inputState = NEW_TURN;
+		updateCamera();
 	}
 
 	/** Called at the start of every turn. */
@@ -866,10 +840,14 @@ public class InGameState extends GameState {
 		}
 	}
 
-	/** Wall -> floor at destroyX, destroyY */
-	public static void demolish(int destroyX, int destroyY) {
-		map[destroyX][destroyY] = new Tile(Tile.FLOOR, destroyX, destroyY);
-		addEvent(new Event.MapChange(new Tile(Tile.FLOOR, destroyX, destroyY), new Tile(Tile.WALL, destroyX, destroyY)));
+	/** Wall -> floor at destroyX, destroyY. Returns true if a wall/door was destroyed */
+	public static boolean demolish(int destroyX, int destroyY) {
+		if(map[destroyX][destroyY].type == Tile.WALL || map[destroyX][destroyY].type == Tile.FLOOR) {
+			map[destroyX][destroyY] = new Tile(Tile.FLOOR, destroyX, destroyY);
+			addEvent(new Event.MapChange(new Tile(Tile.FLOOR, destroyX, destroyY), new Tile(Tile.WALL, destroyX, destroyY)));
+			return true;
+		}
+		return false;
 	}
 
 	public static void addEvent(Event event) {

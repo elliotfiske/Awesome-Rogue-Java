@@ -19,7 +19,7 @@ public class DrillDozer extends Pet {
 		lifespan--;
 		//Using "super" should make so that our override down there vvv doesn't get called unless
 		//we're force marching.
-		super.moveTo(direction.x, direction.y);
+		super.moveTo(x + direction.x, y + direction.y);
 		//Each turn, the Drill Dozer looks for the three tiles in front of it and melts 'em
 		//  xx           x   
 		//  7x    v      x<   etc.
@@ -62,7 +62,7 @@ public class DrillDozer extends Pet {
 	@Override
 	//This is overridden so that a force marching drill dozer can carve a path through the stone.
 	public void moveTo(int newX, int newY, Character[][] entities, Tile[][] map) {
-		super.moveTo(newX, newY);
+		super.moveTo(newX, newY, InGameState.getEntities(), InGameState.map);
 		InGameState.waitOn(new DrillDozerEffect(getX(), getY(), direction, map, InGameState.getEntities()));
 	}
 

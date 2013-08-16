@@ -8,6 +8,8 @@ public class ForceMarch extends Effect {
 	Character mover;
 	Point target;
 	Point origin;
+	/** How many milliseconds should elapse between each iteration of the effect? */
+	int timeout;
 
 	public ForceMarch(Character mover, Point target) {
 		super("Force March");
@@ -17,9 +19,13 @@ public class ForceMarch extends Effect {
 		origin = new Point(mover.x, mover.y);
 	}
 
-	public void renderAndIterate(Graphics2D g2, Tile[][] map,
-			Character[][] entities) {
+	public void renderAndIterate(Graphics2D g2) {
 
+		Tile[][] map = InGameState.map;
+		Character[][] entities = InGameState.getEntities();
+		
+		System.out.println("Force march iterated!");
+		
 		int proposedX = mover.x;
 		int proposedY = mover.y;
 
@@ -53,7 +59,6 @@ public class ForceMarch extends Effect {
 				System.out.println("The " + mover.getName() + " slams into a wall!");
 			}
 
-			InGameState.endWait(this);
 			setRunning(false);
 			return;
 		}
@@ -62,7 +67,6 @@ public class ForceMarch extends Effect {
 			//We just slammed into somebody.  LOOKS LIKE THEY'RE COMIN' ALONG FOR THE RIDE
 			//First make sure it is actually possible to force march them (i.e. they're not being sandwiched by a wall)
 			if(!entities[proposedX][proposedY].canForceMarch(new Point(proposedX - mover.x, proposedY - mover.y))) {
-				InGameState.endWait(this);
 				setRunning(false);
 				System.out.println("sandwich'd!!");
 				return;
@@ -91,7 +95,6 @@ public class ForceMarch extends Effect {
 		//Have we arrived at our destination?
 		if(target.x == mover.x && target.y == mover.y) {
 			//Feel free to move about the cabin
-			InGameState.endWait(this);
 			setRunning(false);
 			return;
 		}

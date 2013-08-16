@@ -51,10 +51,10 @@ public class Explosion extends Effect {
 		this.direction = new Point2D.Double((double)direction.x / SIZES.length, (double)direction.y / SIZES.length);
 	}
 
-	public void renderAndIterate(Graphics2D g2, Tile[][] map, Character[][] entities) {
+	public void renderAndIterate(Graphics2D g2) {
 		if(!running()) return;
-		render(g2, map);
-		iterateExplosion(map, entities);
+		render(g2, InGameState.map);
+		iterateExplosion(InGameState.map, InGameState.getEntities());
 		
 	}
 	

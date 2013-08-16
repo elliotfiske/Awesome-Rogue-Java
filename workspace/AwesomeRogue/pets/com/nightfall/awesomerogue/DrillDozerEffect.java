@@ -22,8 +22,7 @@ public class DrillDozerEffect extends Effect {
 	}
 	
 	@Override
-	public void renderAndIterate(Graphics2D g2, Tile[][] map,
-			Character[][] entities) {
+	public void renderAndIterate(Graphics2D g2) {
 		//Look at 3 tiles: the one we're exactly pointed at, the one clockwise around us, and the one counter
 		//clockwise around us.
 		

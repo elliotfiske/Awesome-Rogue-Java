@@ -14,8 +14,7 @@ public class HulkOut extends Effect {
 	private boolean reversing = false;
 	
 	@Override
-	public void renderAndIterate(Graphics2D g2, Tile[][] map,
-			Character[][] entities) {
+	public void renderAndIterate(Graphics2D g2) {
 		if(!reversing) {
 			//Get greener an greener an greener till you can't green no more
 			for(currAlpha = 0; currAlpha < MAX_ALPHA; currAlpha += 1) {
