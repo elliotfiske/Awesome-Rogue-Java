@@ -283,6 +283,7 @@ public class MainCharacter extends Character {
 	
 	public void moveTo(int newX, int newY, Character[][] entities, Tile[][] map) {
 		super.moveTo(newX, newY, entities, map);
+		System.out.println("entity here: " + entities[newX][newY].getName());
 	}
 	
 	public int getHealth() {

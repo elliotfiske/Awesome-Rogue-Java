@@ -475,10 +475,10 @@ public class LevelInfo {
 						currentFeatures++; //add to our quota
  
 						//then we mark the wall opening with a door
-						map[newx+xmod][newy+ymod] = new Tile(Tile.DOOR, newx, newy);
+						map[newx+xmod][newy+ymod] = new Tile(Tile.DOOR, newx+xmod, newy+ymod);
  
 						//clean up infront of the door so we can reach it
-						map[newx][newy] = new Tile(Tile.FLOOR, newx+xmod, newy+ymod);
+						map[newx][newy] = new Tile(Tile.FLOOR, newx, newy);
 						
 						if(roomType == ROOM_WEAPON) weaponRoom = true;
 					}
@@ -501,10 +501,10 @@ public class LevelInfo {
 						currentFeatures++; //add to our quota
  
 						//then we mark the wall opening with a door
-						map[newx+xmod][newy+ymod] = new Tile(Tile.DOOR, newx, newy);
+						map[newx+xmod][newy+ymod] = new Tile(Tile.DOOR, newx+xmod, newy+ymod);
  
 						//clean up infront of the door so we can reach it
-						map[newx][newy] = new Tile(Tile.FLOOR, newx+xmod, newy+ymod);
+						map[newx][newy] = new Tile(Tile.FLOOR, newx, newy);
 						
 						if(roomType == ROOM_WEAPON) weaponRoom = true;
 					}

@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -206,6 +207,13 @@ public class MetaGameState extends GameState {
 	
 			map[charX][charY].visible = true;
 		}
+	}
+	
+	public void mouseClick(MouseEvent e) {
+		int x = e.getX();
+		int y = e.getY();
+		
+		System.out.println("Mouseclick at " + x + ", " + y);
 	}
 
 	public BufferedImage[] getTileImages() {

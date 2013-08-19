@@ -234,6 +234,8 @@ public class Enemy extends Character {
 			if(map[straightPoint.x][straightPoint.y].isBlocker()) {
 				blocked = true;
 				//map[straightPoint.x][straightPoint.y].illustrate(Color.red);//TODO
+				//if(entities[straightPoint.x][straightPoint.y] != null && entities[straightPoint.x][straightPoint.y].getName() == "Main Character")
+					//map[straightPoint.x][straightPoint.y].illustrate(Color.green);
 			} else {
 				//map[straightPoint.x][straightPoint.y].illustrate(Color.yellow);// TODO
 			}
@@ -423,7 +425,7 @@ public class Enemy extends Character {
 
 			moveTo(x + proposedDX, y + proposedDY);
 
-			//System.out.println("Entity changed? Entity[x][y]: " + entities[x][y].getClass().getName() + " at " + x + ", " + y); TODO
+			//System.out.println("Entity changed? Entity[x][y]: " + entities[x][y].getClass().getName() + " at " + x + ", " + y);
 		}
 	}	
 

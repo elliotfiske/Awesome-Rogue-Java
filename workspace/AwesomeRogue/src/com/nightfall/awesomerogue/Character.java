@@ -199,7 +199,6 @@ public class Character {
 
 		if(map != null) {
 			room = map[x][y].room;
-			map[x][y].doAction(this);
 		}
 	}
 

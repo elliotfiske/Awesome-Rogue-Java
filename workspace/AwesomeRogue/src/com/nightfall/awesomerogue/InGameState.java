@@ -3,10 +3,10 @@ package com.nightfall.awesomerogue;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -160,25 +160,25 @@ public class InGameState extends GameState {
 	public void update() {
 		//If effects are happening, NOTHING ELSE IS.
 		if(effects.size() > 0) return;
-		
+
 		switch(inputState) {
 		case PLAYER_MOVE:
 		case PLAYER_CHOOSE_DIR:
 		case PLAYER_CHOOSE_TILE:
 			//Nothing happens here since we're just waiting for a keypress.
 			break;
-		
+
 		case PET_TURN: //walk the dog
 			petTurn();
 			break;
-			
+
 		case ENEMY_TURN:
 			long before = System.currentTimeMillis();
 			enemyTurn();
 			long after = System.currentTimeMillis();
 			System.out.println("Elapsed time: " + (after - before));
 			break;
-			
+
 		case NEW_TURN:
 			//Does some important stuff
 			beginNewTurn();
@@ -423,10 +423,10 @@ public class InGameState extends GameState {
 			} else {
 				//Move the main character
 				mainChar.move(p.x, p.y, map, entities);
-				
+
 				//NOTE that we DON'T move the camera here. Instead, it's moved 
 				//after the enemies move to prevent a weird stuttering effect.
-				
+
 				//Wipe tiles of their illustrations
 				for(int x = 0; x < map.length; x++) {
 					for(int y = 0; y < map[0].length; y++) {
@@ -481,6 +481,31 @@ public class InGameState extends GameState {
 		}
 	}
 
+	public void mouseClick(MouseEvent e) {
+		int x = e.getX();
+		int y = e.getY();
+
+		//		System.out.println("Mouseclick at " + x + ", " + y);
+		//Figure out what tile is getting clicked
+		x -= INGAME_WINDOW_OFFSET_X;
+		y -= INGAME_WINDOW_OFFSET_Y;
+
+		int tileX = x / TILE_SIZE;
+		int tileY = y / TILE_SIZE;
+
+		tileX += CAMERA_X;
+		tileY += CAMERA_Y;
+
+		if(entities[tileX][tileY] != null) {
+			System.out.println("Entity at " + tileX + ", " + tileY + ": " + entities[tileX][tileY].getName());
+		} else {
+			System.out.println("No entity at " + tileX + ", " + tileY);
+		}
+		System.out.println("blocking at " + tileX + ", " + tileY + "? " + map[tileX][tileY].blocker);
+		System.out.println("But isblocker says: " + map[tileX][tileY].isBlocker());
+		System.out.println("TILETYPE: " + map[tileX][tileY].type);
+	}
+
 	/** All the enemies take a turn */
 	private void enemyTurn() {
 		for(int i = 0; i < enemies.size(); i ++) {
@@ -495,7 +520,7 @@ public class InGameState extends GameState {
 				}
 			}
 		}
-		
+
 		inputState = NEW_TURN;
 		updateCamera();
 	}
@@ -525,7 +550,7 @@ public class InGameState extends GameState {
 			OngoingEffect oe = ongoingEffects.get(i);
 			oe.turnIterate(map, entities);
 		}
-		
+
 		inputState = PLAYER_MOVE;
 	}
 

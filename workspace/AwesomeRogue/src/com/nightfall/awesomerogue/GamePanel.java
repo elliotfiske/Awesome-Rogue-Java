@@ -107,6 +107,16 @@ public class GamePanel extends JPanel implements Runnable {
 				}
 			}
 		});
+		
+		addMouseListener( new MouseAdapter() {
+			//Listen for mouse clicks
+			public void mouseClicked(MouseEvent e) {
+				currentGameState.mouseClick(e);
+			}
+				
+			
+		});
+		
 	} // End readyForTermination
 	
 	// Make sure it is added to JFrame before starting

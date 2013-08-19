@@ -3,6 +3,7 @@ package com.nightfall.awesomerogue;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 
 public class TitlePageState extends GameState {	
 	public TitlePageState(GamePanel parentPanel) {
@@ -20,5 +21,13 @@ public class TitlePageState extends GameState {
 	public void keyPress(KeyEvent e) {
 		
 	}
+	
+	public void mouseClick(MouseEvent e) {
+		int x = e.getX();
+		int y = e.getY();
+		
+		System.out.println("Mouseclick at " + x + ", " + y);
+	}
+
 
 }
