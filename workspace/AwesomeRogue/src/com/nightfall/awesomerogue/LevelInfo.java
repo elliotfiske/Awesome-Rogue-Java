@@ -310,6 +310,9 @@ public class LevelInfo {
 		
 		System.out.println("WINRAR ID: " + recordID + " with " + recordHigh + " tiles!");
 		
+		//The new Tile system has tiles remembering where they are, so we just have to call
+		//the constructor. 
+		Tile t;
 		
 		//Convert the map of 0's and 1's to floors and walls.
 		for(int x = 0; x < width; x++) {
@@ -317,11 +320,12 @@ public class LevelInfo {
 				if(numMap[x][y] == 0) {
 					//tempMap still has the ID's in it.
 					//For debugging I want to print out the tile #'s.
-					map[x][y] = new Tile(Tile.FLOOR, (tempMap[x][y]), x, y);
+					newTile(Tile.FLOOR, tempMap[x][y], x, y, map);
 				}
 
 				if(numMap[x][y] == 1) {
-					map[x][y] = new Tile(Tile.WALL, 0, x, y);
+					
+					newTile(Tile.WALL, 0, x, y, map);
 				}
 			}
 		}
@@ -330,11 +334,11 @@ public class LevelInfo {
 		for(int x = 0; x < width; x++) {
 			for(int y = 0; y < height; y++) {
 				if(x == 0 || x == width - 1) {
-					map[x][y] = new Tile(Tile.IMPASSABLE, x, y);
+					t = new Tile(Tile.IMPASSABLE, x, y);
 				}
 				
 				if(y == 0 || y == height - 1) {
-					map[x][y] = new Tile(Tile.IMPASSABLE, x, y);
+					t = new Tile(Tile.IMPASSABLE, x, y);
 				}
 			}
 		}
@@ -377,7 +381,6 @@ public class LevelInfo {
 				}
 			}
 		}
-
 	}
 	
 	private void makeRooms(int width, int height, int difficulty) {
@@ -390,10 +393,10 @@ public class LevelInfo {
 		for(int i = 0; i < width; i ++) {
 			for(int j = 0; j < height; j ++) {
 				if(i == 0 || j == 0 || i == width-1 || j == height-1) {
-					map[i][j] = new Tile(Tile.WALL, i, j);
+					newTile(Tile.WALL, i, j, map);
 				}
 				else {
-					map[i][j] = new Tile(Tile.VOID, i, j);
+					newTile(Tile.VOID, i, j, map);
 				}
 			}
 		}
@@ -475,10 +478,10 @@ public class LevelInfo {
 						currentFeatures++; //add to our quota
  
 						//then we mark the wall opening with a door
-						map[newx+xmod][newy+ymod] = new Tile(Tile.DOOR, newx+xmod, newy+ymod);
+						newTile(Tile.DOOR, newx+xmod, newy+ymod, map);
  
 						//clean up infront of the door so we can reach it
-						map[newx][newy] = new Tile(Tile.FLOOR, newx, newy);
+						newTile(Tile.FLOOR, newx, newy, map);
 						
 						if(roomType == ROOM_WEAPON) weaponRoom = true;
 					}
@@ -501,10 +504,10 @@ public class LevelInfo {
 						currentFeatures++; //add to our quota
  
 						//then we mark the wall opening with a door
-						map[newx+xmod][newy+ymod] = new Tile(Tile.DOOR, newx+xmod, newy+ymod);
+						newTile(Tile.DOOR, newx+xmod, newy+ymod, map);
  
 						//clean up infront of the door so we can reach it
-						map[newx][newy] = new Tile(Tile.FLOOR, newx, newy);
+						newTile(Tile.FLOOR, newx, newy, map);
 						
 						if(roomType == ROOM_WEAPON) weaponRoom = true;
 					}
@@ -514,7 +517,7 @@ public class LevelInfo {
 						//same thing here, add to the quota and a door
 						currentFeatures++;
 
-						map[newx][newy] = new Tile(Tile.DOOR, newx, newy);
+						newTile(Tile.DOOR, newx, newy, map);
 					}
 				}
 			}
@@ -526,6 +529,8 @@ public class LevelInfo {
 		int len = numGen.nextInt(length-2) + 2;
 		int dir = 0;
 		if(direction > 0 && direction <= 8) dir = direction;
+		
+		Tile t;
 		
 		int xtemp = 0;
 		int ytemp = 0;
@@ -543,11 +548,11 @@ public class LevelInfo {
 
 			for(ytemp = y; ytemp > (y - len); ytemp --) {
 				if(ytemp == y - len + 1)
-					map[xtemp][ytemp] = new Tile(Tile.WALL, xtemp, ytemp);
+					newTile(Tile.WALL, xtemp, ytemp, map);
 				else
-					map[xtemp][ytemp] = new Tile(Tile.FLOOR, xtemp, ytemp);
-				map[xtemp-1][ytemp] = new Tile(Tile.WALL, xtemp, ytemp);
-				map[xtemp+1][ytemp] = new Tile(Tile.WALL, xtemp, ytemp);
+					newTile(Tile.FLOOR, xtemp, ytemp, map);
+				newTile(Tile.WALL, xtemp, ytemp, map);
+				newTile(Tile.WALL, xtemp, ytemp, map);
 			}
 			break;
 		case E:
@@ -562,11 +567,11 @@ public class LevelInfo {
 
 			for(xtemp = x; xtemp > (x - len); xtemp --) {
 				if(xtemp == x - len + 1)
-					map[xtemp][ytemp] = new Tile(Tile.WALL, xtemp, ytemp);
+					newTile(Tile.WALL, xtemp, ytemp, map);
 				else
-					map[xtemp][ytemp] = new Tile(Tile.FLOOR, xtemp, ytemp);
-				map[xtemp][ytemp-1] = new Tile(Tile.WALL, xtemp, ytemp);
-				map[xtemp][ytemp+1] = new Tile(Tile.WALL, xtemp, ytemp);
+					newTile(Tile.FLOOR, xtemp, ytemp, map);
+				newTile(Tile.WALL, xtemp, ytemp, map);
+				newTile(Tile.WALL, xtemp, ytemp, map);
 			}
 			break;
 		case S:
@@ -1214,5 +1219,16 @@ public class LevelInfo {
             }
         }
         return map;
+	}
+	
+	/** Creates a tile and puts it in the map. No more silly mistakes! */
+	public void newTile(int type, int id, int x, int y, Tile[][] currMap) {
+		Tile t = new Tile(type, id, x, y);
+		currMap[x][y] = t;
+	}
+	
+	public void newTile(int type, int x, int y, Tile[][] currMap) {
+		Tile t = new Tile(type, x, y);
+		currMap[x][y] = t;
 	}
 }

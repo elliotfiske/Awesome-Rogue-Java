@@ -117,10 +117,6 @@ public class Tile {
 	
 	public boolean isBlocker() {
 		boolean occupied = (InGameState.getEntities()[x][y] != null);
-		if(!blocker && occupied && type == OPEN_DOOR) {
-			System.out.println("WELL I DON'T KNOW ROCKET DOG. I GUESS IT'S A " + InGameState.getEntities()[x][y].getName());
-		}
 		return blocker || occupied;
 	}
-	
 }

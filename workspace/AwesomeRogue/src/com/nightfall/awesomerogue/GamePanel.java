@@ -163,6 +163,7 @@ public class GamePanel extends JPanel implements Runnable {
 		running = true;
 		while(running) {
 			
+			
 			gameUpdate();
 			gameRender();
 			paintScreen();

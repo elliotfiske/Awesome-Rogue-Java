@@ -158,6 +158,9 @@ public class InGameState extends GameState {
 	}
 
 	public void update() {
+		//Update stuff that's independent of anything (i.e. floatytexts)
+		independentUpdate();
+		
 		//If effects are happening, NOTHING ELSE IS.
 		if(effects.size() > 0) return;
 
@@ -173,16 +176,26 @@ public class InGameState extends GameState {
 			break;
 
 		case ENEMY_TURN:
-			long before = System.currentTimeMillis();
 			enemyTurn();
-			long after = System.currentTimeMillis();
-			System.out.println("Elapsed time: " + (after - before));
 			break;
 
 		case NEW_TURN:
 			//Does some important stuff
 			beginNewTurn();
 			break;
+		}
+	}
+	
+	public void independentUpdate() {
+		//update floatytexts :3
+		for(int f = 0; f < texts.size(); f++) {
+			FloatyText ft = texts.get(f);
+			ft.update();
+
+			//Remove floatytexts that are done
+			if(ft.alpha <= 0) {
+				texts.remove(f--);
+			}
 		}
 	}
 
@@ -215,22 +228,16 @@ public class InGameState extends GameState {
 
 	public void render(Graphics2D g2) {
 		//Update the floatytexts TODO: make it so that hundreds of floaytexts don't slow the game to a crawl
-		for(int i = 0; i < texts.size(); i++) {
-			FloatyText ft = texts.get(i);
-			ft.update();
-			draw();
 
-			//Remove floatytexts that are done
-			if(ft.alpha <= 0) {
-				texts.remove(i--);
-			}
+		//draw floaty texts :3
+		for(int f = 0; f < texts.size(); f++) {
+			texts.get(f).draw(g2);
 		}
 
 		imgSFX.drawResizedImage(g2, guiBG, 0, 0, GamePanel.PWIDTH, GamePanel.PHEIGHT);
 		g2.drawImage(mapImg, INGAME_WINDOW_OFFSET_X, INGAME_WINDOW_OFFSET_Y, null);
 
 		for(int i = 0; i < effects.size(); i++) {
-			System.out.println("effects?");
 			Effect e = effects.get(i);
 			e.renderAndIterate(g2);
 			if(!e.running()) {
@@ -247,6 +254,8 @@ public class InGameState extends GameState {
 				ongoingEffects.remove(i--);
 			}
 		}
+		
+		draw();
 	}
 
 	public void draw() {
@@ -339,11 +348,6 @@ public class InGameState extends GameState {
 			p.draw(g2, CAMERA_X, CAMERA_Y);
 		}
 
-		//draw floaty texts :3
-		for(int f = 0; f < texts.size(); f++) {
-			texts.get(f).draw(g2);
-		}
-
 		Graphics2D g = (Graphics2D) mapImg.getGraphics();
 		g.drawImage(mapImg_t,  0,  0,  null);
 	}
@@ -400,7 +404,7 @@ public class InGameState extends GameState {
 		}
 
 		//Parse the direction from the given KeyPress
-		Point p = getDirection(e);
+		Point p = Utility.getDirection(e);
 
 		System.out.println("keypress called. Inputstate: " + inputState);
 
@@ -434,7 +438,6 @@ public class InGameState extends GameState {
 					}
 				}
 				playerTurnDone();
-				calculateLighting();
 			}
 			break;
 		case PLAYER_CHOOSE_DIR:
@@ -680,7 +683,7 @@ public class InGameState extends GameState {
 			}
 		}
 
-		draw();
+		//draw();
 	}
 
 	/**
@@ -691,66 +694,6 @@ public class InGameState extends GameState {
 	 */
 	private boolean checkCoords(int x, int y) {
 		return x >= 0 && x < map.length && y >= 0 && y < map[0].length;
-	}
-
-	/**
-	 * Tells you which direction you should go based on a specified key. 
-	 * @param e - KeyEvent with desired key.
-	 * @return Point where x is the dx component and y is the dy component.
-	 */
-	public static Point getDirection(KeyEvent e) {
-		Point result = new Point(0,0);
-
-		switch(e.getKeyCode()) {
-		case KeyEvent.VK_Y:
-		case KeyEvent.VK_NUMPAD7:
-			result = new Point(-1, -1);
-			break;
-		case KeyEvent.VK_U:
-		case KeyEvent.VK_NUMPAD8:
-			result = new Point(0, -1);
-			break;
-		case KeyEvent.VK_I:
-		case KeyEvent.VK_NUMPAD9:
-			result = new Point(1, -1);
-			break;
-		case KeyEvent.VK_H:
-		case KeyEvent.VK_NUMPAD4:
-			result = new Point(-1, 0);
-			break;
-		case KeyEvent.VK_K:
-		case KeyEvent.VK_NUMPAD6:
-			result = new Point(1, 0);
-			break;
-		case KeyEvent.VK_N:
-		case KeyEvent.VK_NUMPAD1:
-			result = new Point(-1, 1);
-			break;
-		case KeyEvent.VK_M:
-		case KeyEvent.VK_NUMPAD2:
-			result = new Point(0, 1);
-			break;
-		case KeyEvent.VK_COMMA:
-		case KeyEvent.VK_NUMPAD3:
-			result = new Point(1, 1);
-			break;
-
-		case KeyEvent.VK_UP:
-			result = new Point(0, -1);
-			break;
-		case KeyEvent.VK_LEFT:
-			result = new Point(-1, 0);
-			break;
-		case KeyEvent.VK_DOWN:
-			result = new Point(0, 1);
-			break;
-		case KeyEvent.VK_RIGHT:
-			result = new Point(1, 0);
-			break;
-		case KeyEvent.VK_SPACE:
-		}
-
-		return result;
 	}
 
 	public static void addPet(Pet pet) {

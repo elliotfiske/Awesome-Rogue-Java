@@ -46,7 +46,7 @@ public class MainCharacter extends Character {
 		
 		skills[0] = Active.HULK_SERUM;
 		skills[1] = Active.GRENADE_LAUNCHER;
-		skills[2] = Active.DRILL_DOZER;
+		skills[2] = Active.FALCON_PUNCH;
 	}
 	
 	public MainCharacter(int x, int y) {
@@ -283,7 +283,7 @@ public class MainCharacter extends Character {
 	
 	public void moveTo(int newX, int newY, Character[][] entities, Tile[][] map) {
 		super.moveTo(newX, newY, entities, map);
-		System.out.println("entity here: " + entities[newX][newY].getName());
+		currentGameState.updateCamera();
 	}
 	
 	public int getHealth() {

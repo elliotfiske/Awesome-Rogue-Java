@@ -29,17 +29,18 @@ public class ForceMarch extends Effect {
 		int proposedX = mover.x;
 		int proposedY = mover.y;
 
-		/** Rough estimate of speed based on how far they're gonna go */
-		int speed = Math.abs(target.x - mover.x) + Math.abs(target.y - mover.y);
+		/** Rough estimate of speed based on how far they're gonna go 
+		 * Uses Math.max to get the LARGETS of either X or Y movement, instead of adding them.*/
+		int speed = Math.max(Math.abs(target.x - mover.x), Math.abs(target.y - mover.y));
 
-		// Calculate how far we want to move!
+		//Calculate how far we want to move!
 		if(target.x < mover.x) {
 			proposedX --;
 		}
 		else if(target.x > mover.x) {
 			proposedX ++;
 		}
-
+		
 		if(target.y < mover.y) {
 			proposedY --;
 		}
@@ -47,8 +48,6 @@ public class ForceMarch extends Effect {
 			proposedY ++;
 		}
 		
-		System.out.println("proposed x: " + proposedX + " proposed y: " + proposedY);
-
 		if(map[proposedX][proposedY].blocker) {
 			//you hit a wall ouuuch
 			if(mover instanceof MainCharacter) {
@@ -79,16 +78,16 @@ public class ForceMarch extends Effect {
 				int newSpeed = (int) (speed - Math.floor((double) hisWeight / (double) myWeight));
 				if(newSpeed < 1) { newSpeed = 1; }
 
-				//nolo
-				//if(this instanceof MainCharacter) { newSpeed = 5; }
-
 				//Now we gotta recalculate our target points.
 				//First, reverse engineer the direction.
-				Point direction = new Point((int) Math.signum(target.x - mover.x), (int) Math.signum(target.y - mover.y));
+				Point direction = new Point(Utility.sign(target.x - mover.x), Utility.sign(target.y - mover.y));
+				System.out.println("direction: " + direction);
 				//Now, move the guy we ran into to this new target! (direction * speed)
 				entities[proposedX][proposedY].forceMarch(direction.x * newSpeed, direction.y * newSpeed);
 				//Meanwhile, adjust our target to one behind the other guy's.
-				target = new Point(direction.x * (newSpeed-1), direction.y * (newSpeed-1));
+				target = new Point(mover.x + direction.x * (newSpeed-1), mover.y + direction.y * (newSpeed-1));
+				
+				return;
 			}
 		}
 

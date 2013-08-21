@@ -4,6 +4,8 @@ public class LevelTile {
 	//list of tile types
 	public static final int FLOOR = 0;
 
+	
+	
 	public boolean visible = false;
 	
 	public boolean[] walls;

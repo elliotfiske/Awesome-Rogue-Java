@@ -85,7 +85,10 @@ public class MetaGameState extends GameState {
 		
 		map = LevelInfo.makeMetaGame(META_MAP_WIDTH, META_MAP_HEIGHT);
 		map[0][0].visible = true;
-		map[0][0].type = 2; //TODO: change back to 0 if you want intro level
+		map[0][0].type = LevelInfo.ROOMS; //TODO: change back to 0 if you want intro level
+		
+		map[0][1].visible = true;
+		map[0][1].type = LevelInfo.CAVE;
 		
 		map[META_MAP_WIDTH-1][META_MAP_HEIGHT-1].visible = true;
 		map[META_MAP_WIDTH-1][META_MAP_HEIGHT-1].type = 1;
@@ -176,7 +179,7 @@ public class MetaGameState extends GameState {
 		}
 		else {
 			//Parse the direction from the given KeyPress
-			Point p = InGameState.getDirection(e);
+			Point p = Utility.getDirection(e);
 	
 			//Move the main character horizontally
 			if(p.x == 1) {
@@ -193,14 +196,14 @@ public class MetaGameState extends GameState {
 			}
 			//Move the main character vertically
 			if(p.y == -1) {
-				if(!map[charX][charY].walls[0]) {
-					if(map[charX][charY].isClear() || map[charX][charY+p.y].isClear())
+				if(!map[charX][charY].walls[0] || true) { //TODO: remove the "true"
+					if(map[charX][charY].isClear() || map[charX][charY+p.y].isClear() || true)
 						charY += p.y;
 				}
 			}
 			else if(p.y == 1) {
-				if(!map[charX][charY].walls[2]) {
-					if(map[charX][charY].isClear() || map[charX][charY+p.y].isClear())
+				if(!map[charX][charY].walls[2] || true) { //TODO: remove the "true"
+					if(map[charX][charY].isClear() || map[charX][charY+p.y].isClear() || true)
 						charY += p.y;
 				}
 			}
