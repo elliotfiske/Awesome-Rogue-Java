@@ -163,10 +163,12 @@ public class GamePanel extends JPanel implements Runnable {
 		running = true;
 		while(running) {
 			
-			
+
 			gameUpdate();
 			gameRender();
+			long btime = System.currentTimeMillis();
 			paintScreen();
+			System.out.println("Elapsed: " + (System.currentTimeMillis() - beforeTime));
 
 			//The GamePanel occasionally loses focus for unknown reasons.
 			//Don't ask TOO many times, but do ask politely for the focus back.

@@ -18,7 +18,7 @@ public class MainCharacter extends Character {
 	/** You've really let yourself go, main character.*/
 	private int weight = 50;
 
-	private InGameState currentGameState;
+	public InGameState currentGameState;
 	private Active actives; //Our handle to the actives.
 
 	/** Passives kind of works backwards from how skills work, since you can have ANY
@@ -108,7 +108,7 @@ public class MainCharacter extends Character {
 		
 		if(skills[skill] != Active.EMPTY_SLOT) {
 			actives.doActive(skills[skill], target);
-			InGameState.playerTurnDone();
+			currentGameState.playerTurnDone();
 		}
 	}
 

@@ -200,7 +200,7 @@ public class InGameState extends GameState {
 	}
 
 	/** Called when the game should stop waiting for player input. */
-	public static void playerTurnDone() {
+	public void playerTurnDone() {
 		inputState = PET_TURN;
 	}
 
@@ -406,7 +406,7 @@ public class InGameState extends GameState {
 		//Parse the direction from the given KeyPress
 		Point p = Utility.getDirection(e);
 
-		System.out.println("keypress called. Inputstate: " + inputState);
+//		System.out.println("keypress called. Inputstate: " + inputState);
 
 		//Do different things depending on what the "input state" is
 		switch(inputState) {

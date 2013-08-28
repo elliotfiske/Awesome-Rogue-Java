@@ -90,7 +90,7 @@ public class Active {
 	private void prepHulkSerum() {
 		InGameState.newOngoingEffect(new OngoingHulkOut(10, mainChar));
 		System.out.println("Your vision clouds with green as your body swells to grotesque proportions!");
-		InGameState.playerTurnDone();
+		mainChar.currentGameState.playerTurnDone();
 	}
 	
 	public void hulkOut() {
