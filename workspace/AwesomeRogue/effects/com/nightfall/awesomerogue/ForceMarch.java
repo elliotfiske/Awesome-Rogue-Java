@@ -17,6 +17,13 @@ public class ForceMarch extends Effect {
 		this.target = target;
 		
 		origin = new Point(mover.x, mover.y);
+		
+		//Stun enemy for one turn, otherwise it gets to move RIGHT after getting forcemarched and it
+		//looks weird
+		if(mover instanceof Enemy) {
+			System.out.println("Enemy force marched");
+			((Enemy) mover).stun(1);
+		}
 	}
 
 	public void renderAndIterate(Graphics2D g2) {

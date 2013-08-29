@@ -25,6 +25,11 @@ public class Enemy extends Character {
 
 	/** Enemies have a speed/5 chance of moving */
 	int speed;
+	
+	/** An enemy is stuck in place until "stunned" is 0, decremented each turn. */
+	int stunned;
+	/** Frozen is like stunned, but bluuue */
+	int frozen;
 
 	private int xBounty, yBounty;
 	private Tile bounty;
@@ -39,6 +44,7 @@ public class Enemy extends Character {
 		this.whichEnemy = whichEnemy;
 
 		smartSeen = false;
+		stunned = frozen = 0;
 		
 		switch(whichEnemy) {
 		case ANGRY_MUSHROOM:
@@ -107,6 +113,16 @@ public class Enemy extends Character {
 	}
 
 	public void takeTurn(MainCharacter mainChar, Tile[][] map) {
+		if(stunned > 0) {
+			stunned--;
+			return;
+		}
+		
+		if(frozen > 0) {
+			frozen--;
+			return;
+		}
+		
 		if(whichEnemy == RAT) {
 			//Rats move randumbly
 			if(Math.random() < 0.3) {
@@ -160,6 +176,14 @@ public class Enemy extends Character {
 			//TODO!
 			//InGameState.addEvent("killed" + getName() + "at" + x + "x" + y);
 		}
+	}
+	
+	public void stun(int turns) {
+		stunned = turns;
+	}
+	
+	public void freeze(int turns) {
+		frozen = turns;
 	}
 	
 	/**

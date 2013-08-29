@@ -163,7 +163,11 @@ public class InGameState extends GameState {
 		
 		//If effects are happening, NOTHING ELSE IS.
 		if(effects.size() > 0) return;
-
+		
+ 		if(inputState == ENEMY_TURN) {
+			enemyTurn();
+		}
+		
 		switch(inputState) {
 		case PLAYER_MOVE:
 		case PLAYER_CHOOSE_DIR:
@@ -171,13 +175,14 @@ public class InGameState extends GameState {
 			//Nothing happens here since we're just waiting for a keypress.
 			break;
 
+		case ENEMY_TURN:
+			//enemyTurn();
+			break;
+			
 		case PET_TURN: //walk the dog
 			petTurn();
 			break;
 
-		case ENEMY_TURN:
-			enemyTurn();
-			break;
 
 		case NEW_TURN:
 			//Does some important stuff
@@ -201,14 +206,18 @@ public class InGameState extends GameState {
 
 	/** Called when the game should stop waiting for player input. */
 	public void playerTurnDone() {
-		inputState = PET_TURN;
+		if(effects.size() == 0) {
+			enemyTurn();
+		} else {
+			inputState = ENEMY_TURN;
+		}
 	}
 
 	private void petTurn() {
 		for(Pet p : pets) {
 			p.takeTurn(mainChar, map);
 		}
-		inputState = ENEMY_TURN;
+		inputState = NEW_TURN;
 	}
 
 	public static void newOngoingEffect(OngoingEffect oe) {
@@ -524,7 +533,7 @@ public class InGameState extends GameState {
 			}
 		}
 
-		inputState = NEW_TURN;
+		inputState = PET_TURN;
 		updateCamera();
 	}
 
@@ -622,7 +631,7 @@ public class InGameState extends GameState {
 		entities[mainChar.getX()][mainChar.getY()] = mainChar;
 	}
 
-	private void calculateLighting() {
+	public void calculateLighting() {
 		int x = mainChar.getX(), y = mainChar.getY();
 		for(int tx=0;tx<map.length;tx++) {
 			for(int ty=0;ty<map[0].length;ty++) {

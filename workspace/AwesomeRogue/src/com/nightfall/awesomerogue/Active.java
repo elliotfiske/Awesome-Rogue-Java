@@ -8,9 +8,10 @@ public class Active {
 	public static final int FALCON_PUNCH = 2;
 	public static final int DRILL_DOZER = 3;
 	public static final int HULK_SERUM = 4;
+	public static final int BODY_SLAM = 5;
 	
 	/** number of implemented actives.  Be sure to update this if you add an active! */
-	public static final int NUM_ACTIVES = 4;
+	public static final int NUM_ACTIVES = 5;
 	
 	MainCharacter mainChar;
 	

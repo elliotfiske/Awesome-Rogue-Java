@@ -284,6 +284,7 @@ public class MainCharacter extends Character {
 	public void moveTo(int newX, int newY, Character[][] entities, Tile[][] map) {
 		super.moveTo(newX, newY, entities, map);
 		currentGameState.updateCamera();
+		currentGameState.calculateLighting();
 	}
 	
 	public int getHealth() {
