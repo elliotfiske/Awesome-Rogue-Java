@@ -44,7 +44,7 @@ public class MainCharacter extends Character {
 		
 		actives = new Active(this);
 		
-		skills[0] = Active.HULK_SERUM;
+		skills[0] = Active.ICE_CROWN;
 		skills[1] = Active.GRENADE_LAUNCHER;
 		skills[2] = Active.FALCON_PUNCH;
 	}

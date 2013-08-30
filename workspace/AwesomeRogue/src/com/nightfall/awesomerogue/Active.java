@@ -8,7 +8,7 @@ public class Active {
 	public static final int FALCON_PUNCH = 2;
 	public static final int DRILL_DOZER = 3;
 	public static final int HULK_SERUM = 4;
-	public static final int BODY_SLAM = 5;
+	public static final int ICE_CROWN = 5;
 	
 	/** number of implemented actives.  Be sure to update this if you add an active! */
 	public static final int NUM_ACTIVES = 5;
@@ -34,6 +34,9 @@ public class Active {
 		case HULK_SERUM:
 			prepHulkSerum();
 			break;
+		case ICE_CROWN:
+			prepIceCrown();
+			break;
 		}
 	}
 	
@@ -50,6 +53,9 @@ public class Active {
 			break;
 		case HULK_SERUM:
 			hulkOut();
+			break;
+		case ICE_CROWN:
+			iceBlast(target);
 			break;
 		}
 	}
@@ -95,5 +101,16 @@ public class Active {
 	}
 	
 	public void hulkOut() {
+	
+	}
+	
+	public void prepIceCrown() {
+		System.out.println("You call upon the powers of the ice and snow... (Choose a direction)");
+		InGameState.inputState = InGameState.PLAYER_CHOOSE_DIR;
+	}
+	
+	public void iceBlast(Point target) {
+		System.out.println("You bring forth a flurry of ice and snow!");
+		InGameState.addEvent(new IceBlast(""));
 	}
 }

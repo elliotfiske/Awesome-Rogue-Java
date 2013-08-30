@@ -6,7 +6,7 @@ public class Grenade extends Pet {
 	private int timer; 
 	
 	public Grenade(int x, int y, Point direction) {
-		super(x, y, "GRENAAAADE");
+		super(x, y, "G");
 		forceMarch(direction.x*4, direction.y*4);
 		timer = 3;
 		

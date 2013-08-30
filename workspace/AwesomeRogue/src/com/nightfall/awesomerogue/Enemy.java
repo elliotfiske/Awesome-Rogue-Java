@@ -143,7 +143,13 @@ public class Enemy extends Character {
 	 * @param camY Camera Y offset
 	 */
 	public void draw(Graphics2D g2, int camX, int camY) {
-		g2.setColor(Color.white);
+		
+		if(frozen > 0) {
+			g2.setColor(Color.blue);
+		} else {
+			g2.setColor(Color.white);
+		}
+		
 		g2.drawString(icon, ((x - camX)*12 + 2),
 				((y - camY)*12 + 10));	
 	}

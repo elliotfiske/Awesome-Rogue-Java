@@ -691,8 +691,6 @@ public class InGameState extends GameState {
 				}
 			}
 		}
-
-		//draw();
 	}
 
 	/**
