@@ -220,12 +220,12 @@ public class Enemy extends Character {
 	 */
 	private void moveRandomly(Tile[][] map) {
 		int randDirection = (int) Math.floor(Math.random() * 8);
-		Point randPoint = getPointDirection(randDirection);
+		Point randPoint = Utility.getPointDirection(randDirection);
 		int numTries = 0;
 		
 		while(map[x + randPoint.x][y + randPoint.y].isBlocker() && numTries < 12) {
 			randDirection = (int) Math.floor(Math.random() * 8);
-			randPoint = getPointDirection(randDirection);
+			randPoint = Utility.getPointDirection(randDirection);
 			
 			numTries++;
 		}
@@ -501,39 +501,6 @@ public class Enemy extends Character {
 	}
 
 	/**
-	 * Converts from point with directional components --> one number representin direction.
-	 * 
-	 * Directions:
-	 * 7 0 1
-	 * 6 X 2
-	 * 5 4 3
-	 * 
-	 * @param delta Point with |x| <= 1 and |y| <= 1 describing direction
-	 * @return Sweet, sweet directional number.
-	 * @throws PANICEVERYTHINGISBROKENERROR OH NO WHAT HAVE YOU DONE OH NOOOOO
-	 */
-	public static int getNumberedDirection(Point delta) {
-		int diffX = delta.x;
-		int diffY = delta.y;
-		int result = -1;
-
-		if(diffX == 0 && diffY == -1)  { result = 0; }
-		if(diffX == 1 && diffY == -1)  { result = 1; }
-		if(diffX == 1 && diffY == 0)   { result = 2; }
-		if(diffX == 1 && diffY == 1)   { result = 3; }
-		if(diffX == 0 && diffY == 1)   { result = 4; }
-		if(diffX == -1 && diffY == 1)  { result = 5; }
-		if(diffX == -1 && diffY == 0)  { result = 6; }
-		if(diffX == -1 && diffY == -1) { result = 7; }
-
-		if(result == -1) {
-			//throw new PANICEVERYTHINGISBROKENERROR("DiffX and DiffY are wrong! They're " + diffX + ", " + diffY);
-		}
-
-		return result;
-	}
-
-	/**
 	 * This method takes a feeler and makes it follow the right wall.
 	 * 
 	 * @param feeler The feeler that will be moved along the wall.
@@ -574,7 +541,7 @@ public class Enemy extends Character {
 		diffX = lastWall.x - feeler.x;
 		diffY = lastWall.y - feeler.y;
 
-		int result = getNumberedDirection(new Point(diffX, diffY));
+		int result = Utility.getNumberedDirection(new Point(diffX, diffY));
 		if(result == -1) {
 			//We're probably stuck in a crowd. Just chill.
 			System.out.println("The guy at " + x + ", " + y + "doesn't like you.  Zooming in now:");
@@ -595,8 +562,8 @@ public class Enemy extends Character {
 				}
 			}
 
-			diffX = getPointDirection(result).x;
-			diffY = getPointDirection(result).y;
+			diffX = Utility.getPointDirection(result).x;
+			diffY = Utility.getPointDirection(result).y;
 
 			//Outta bounds check!
 			if(feeler.x + diffX < 0 || feeler.x + diffX >= map.length ||
@@ -607,7 +574,7 @@ public class Enemy extends Character {
 			if(!map[feeler.x + diffX][feeler.y + diffY].isBlocker()) {
 				//We did it!
 				//Grab the result of this function: the last-touched wall.
-				int wallDirection = getNumberedDirection(new Point(diffX, diffY));
+				int wallDirection = Utility.getNumberedDirection(new Point(diffX, diffY));
 
 				//(it should be one cycle back).
 				if(goingRight) {
@@ -619,7 +586,7 @@ public class Enemy extends Character {
 					wallDirection = (wallDirection + 1) % 8;
 				}
 
-				Point wallDiff = getPointDirection(wallDirection);
+				Point wallDiff = Utility.getPointDirection(wallDirection);
 				Point lastWallTouched = new Point(feeler.x + wallDiff.x, feeler.y + wallDiff.y);
 
 				//Move the feeler to the proper location:
@@ -636,49 +603,6 @@ public class Enemy extends Character {
 		System.out.println("The guy at " + x + ", " + y + "doesn't like you.  Zooming in now:");
 
 		return new Point(0,0);
-	}
-
-	/**
-	 * Converts from a numbered direction style to a "difference" style direction.
-	 * 
-	 * @param numDirection Which direction you'd like converted to coordinates.
-	 * @return A Point containing the two coordinates you had in mind.
-	 */
-	public static Point getPointDirection(int numDirection) {
-		int diffX = 0, diffY = 0;
-
-		switch(numDirection) {
-		case 0:
-			diffX = 0; diffY = -1; 
-			break;
-		case 1:
-			diffX = 1; diffY = -1; 
-			break;
-		case 2:
-			diffX = 1; diffY = 0; 
-			break;
-		case 3:
-			diffX = 1; diffY = 1; 
-			break;
-		case 4:
-			diffX = 0; diffY = 1; 
-			break;
-		case 5:
-			diffX = -1; diffY = 1; 
-			break;
-		case 6:
-			diffX = -1; diffY = 0; 
-			break;
-		case 7:
-			diffX = -1; diffY = -1; 
-			break;
-		}
-
-		if(diffX == 0 && diffY == 0) {
-			throw new PANICEVERYTHINGISBROKENERROR("Oh man.  You put in a direction number outside of 0-7 you dolt.  Entered value: " + numDirection);
-		}
-		return new Point(diffX, diffY);
-
 	}
 
 	private Point lastWallLeft;

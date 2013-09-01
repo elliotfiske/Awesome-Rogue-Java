@@ -1,15 +1,19 @@
 package com.nightfall.awesomerogue;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.Random;
 
 /****
  * Has a bunch of handy static methods. I'm gonna move the pathfinding algorithm here in a bit.
  */
 public class Utility {
 
+	public static Random r = new Random();
+	
 	public static int sign(int i) {
 		if(i < 0) return -1;
 		if(i > 0) return 1;
@@ -71,6 +75,81 @@ public class Utility {
 			result = new Point(1, 0);
 			break;
 		case KeyEvent.VK_SPACE:
+		}
+
+		return result;
+	}
+
+	/**
+	 * Converts from a numbered direction style to a "difference" style direction.
+	 * 
+	 * @param numDirection Which direction you'd like converted to coordinates.
+	 * @return A Point containing the two coordinates you had in mind.
+	 */
+	public static Point getPointDirection(int numDirection) {
+		int diffX = 0, diffY = 0;
+
+		switch(numDirection) {
+		case 0:
+			diffX = 0; diffY = -1; 
+			break;
+		case 1:
+			diffX = 1; diffY = -1; 
+			break;
+		case 2:
+			diffX = 1; diffY = 0; 
+			break;
+		case 3:
+			diffX = 1; diffY = 1; 
+			break;
+		case 4:
+			diffX = 0; diffY = 1; 
+			break;
+		case 5:
+			diffX = -1; diffY = 1; 
+			break;
+		case 6:
+			diffX = -1; diffY = 0; 
+			break;
+		case 7:
+			diffX = -1; diffY = -1; 
+			break;
+		}
+
+		if(diffX == 0 && diffY == 0) {
+			throw new PANICEVERYTHINGISBROKENERROR("Oh man.  You put in a direction number outside of 0-7 you dolt.  Entered value: " + numDirection);
+		}
+		return new Point(diffX, diffY);
+	}
+
+	/**
+	 * Converts from point with directional components --> one number representin direction.
+	 * 
+	 * Directions:
+	 * 7 0 1
+	 * 6 X 2
+	 * 5 4 3
+	 * 
+	 * @param delta Point with |x| <= 1 and |y| <= 1 describing direction
+	 * @return Sweet, sweet directional number.
+	 * @throws PANICEVERYTHINGISBROKENERROR OH NO WHAT HAVE YOU DONE OH NOOOOO
+	 */
+	public static int getNumberedDirection(Point delta) {
+		int diffX = delta.x;
+		int diffY = delta.y;
+		int result = -1;
+
+		if(diffX == 0 && diffY == -1)  { result = 0; }
+		if(diffX == 1 && diffY == -1)  { result = 1; }
+		if(diffX == 1 && diffY == 0)   { result = 2; }
+		if(diffX == 1 && diffY == 1)   { result = 3; }
+		if(diffX == 0 && diffY == 1)   { result = 4; }
+		if(diffX == -1 && diffY == 1)  { result = 5; }
+		if(diffX == -1 && diffY == 0)  { result = 6; }
+		if(diffX == -1 && diffY == -1) { result = 7; }
+
+		if(result == -1) {
+			//throw new PANICEVERYTHINGISBROKENERROR("DiffX and DiffY are wrong! They're " + diffX + ", " + diffY);
 		}
 
 		return result;
@@ -166,6 +245,10 @@ public class Utility {
 		return result;
 	}
 	
+	public static Point[] makePointArray(int[] coords, Point direction) {
+		return makePointArray(coords, getNumberedDirection(direction));
+	}
+	
 	/**
 	 * QUITE COMPLEX, NO? This gives you an array of ColorPoints (A color, at a point oooo) that correspond
 	 * to the particle effect you generated with the following crazy arguments:
@@ -179,14 +262,46 @@ public class Utility {
 	 * @param startColor The darkest color a particle can be.
 	 * @param stopColor The lightest color a particle can be. The method chooses a random color b/w start and 
 	 * stop color for each particle.
-	 * @param dispersal Your old friend, dispersal, with a NEW TWIST: now, each particle has a dispersal/100
+	 * @param dispersion Your old friend, dispersion, with a NEW TWIST: now, each particle has a dispersion/100
 	 * chance of being displayed. Pretty slick.
 	 * @return Draw each color, at each point, to make the particle effect happen on-screen.
 	 */
-	public static ArrayList<ColorPoint> particleEffect(int x, int y, Point[] points, 
-			double startDistance, double stopDistance, Color startColor, Color stopColor, int dispersal) {
+	public static ArrayList<ColorPoint> particleEffect(Point[] points, 
+			double startDistance, double stopDistance, Color startColor, Color stopColor, int dispersion) {
 		ArrayList<ColorPoint> result = new ArrayList<ColorPoint>();
 		
+		for(Point p: points) {
+			//First, see if dispersion even lets us show a point here
+			if(Math.random() * 100 < dispersion) continue;
+			
+			//Next, determine if the distance lets us show a point here
+			double distance = Math.sqrt(p.x*p.x + p.y*p.y);
+			if(distance < startDistance || distance > stopDistance) continue;
+			
+			//Choose a color
+			int red = r.nextInt(stopColor.getRed() - startColor.getRed()) + startColor.getRed();
+			int green = r.nextInt(stopColor.getGreen() - startColor.getGreen()) + startColor.getGreen();
+			int blue = r.nextInt(stopColor.getBlue() - startColor.getBlue()) + startColor.getBlue();
+			
+			Color resultColor = new Color(red, green,blue);
+			
+			//Make a new ColorPoint and add it to the result
+			result.add(new ColorPoint(resultColor, p));
+		}
+		
 		return result;
+	}
+
+	/**
+	 * Draw over the specified tile with the specified color.
+	 * @param x
+	 * @param y
+	 * @param g2
+	 */
+	public static void drawTileRectangle(int x, int y, Color color, Graphics2D g2) {
+		g2.setColor(color);
+		g2.fillRect( x * InGameState.TILE_SIZE + InGameState.INGAME_WINDOW_OFFSET_X - InGameState.CAMERA_X * InGameState.TILE_SIZE, 
+				y * InGameState.TILE_SIZE + InGameState.INGAME_WINDOW_OFFSET_Y - InGameState.CAMERA_Y * InGameState.TILE_SIZE, 
+				InGameState.TILE_SIZE, InGameState.TILE_SIZE);
 	}
 }

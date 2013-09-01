@@ -475,7 +475,7 @@ public class InGameState extends GameState {
 				//Choose random direction
 				int randDirection = (int) (Math.random() * 8);
 				//convert to point coords
-				Point randDirectionP = Enemy.getPointDirection(randDirection);
+				Point randDirectionP = Utility.getPointDirection(randDirection);
 				//Shove 'em!
 				enemies.get(i).forceMarch(randDirectionP.x * 5, randDirectionP.y * 5);
 			}

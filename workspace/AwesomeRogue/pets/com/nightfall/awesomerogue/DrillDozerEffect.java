@@ -35,17 +35,17 @@ public class DrillDozerEffect extends Effect {
 		}
 		
 		//Number two:
-		int newDirection = (Enemy.getNumberedDirection(direction) + 1) % 8;
-		Point newPoint = Enemy.getPointDirection(newDirection);
+		int newDirection = (Utility.getNumberedDirection(direction) + 1) % 8;
+		Point newPoint = Utility.getPointDirection(newDirection);
 		myTile = InGameState.tileAt(x + newPoint.x, y + newPoint.y);
 		if(myTile.type == Tile.WALL || myTile.type == Tile.DOOR) {
 			done &= drill(x + newPoint.x, y + newPoint.y, g2);
 		}
 		
 		//Number 3:
-		newDirection = Enemy.getNumberedDirection(direction) - 1;
+		newDirection = Utility.getNumberedDirection(direction) - 1;
 		if(newDirection == -1) { newDirection = 7; }
-		newPoint = Enemy.getPointDirection(newDirection);
+		newPoint = Utility.getPointDirection(newDirection);
 		myTile = InGameState.tileAt(x + newPoint.x, y + newPoint.y);
 		if(myTile.type == Tile.WALL || myTile.type == Tile.DOOR) {
 			done &= drill(x + newPoint.x, y + newPoint.y, g2);

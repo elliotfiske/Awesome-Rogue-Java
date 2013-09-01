@@ -111,6 +111,6 @@ public class Active {
 	
 	public void iceBlast(Point target) {
 		System.out.println("You bring forth a flurry of ice and snow!");
-		InGameState.addEvent(new IceBlast(""));
+		InGameState.waitOn(new IceBlast(mainChar.x, mainChar.y, target));
 	}
 }
