@@ -253,6 +253,8 @@ public class Character {
 		
 	}
 	
+	
+	
 	/**
 	 * How heavy you are.  Important for collisions.
 	 */
