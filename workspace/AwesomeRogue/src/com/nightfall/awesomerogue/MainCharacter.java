@@ -10,11 +10,15 @@ public class MainCharacter extends Character {
 	public static final int VISIONRANGE = 35;
 
 	private int awesome;
+	private int health;
 	/** Array containing a list of the actives you've gotten so far */
 	private int[] skills;
 	private int numSkills;
+	
+	/** You've really let yourself go, main character.*/
+	private int weight = 50;
 
-	private InGameState currentGameState;
+	public InGameState currentGameState;
 	private Active actives; //Our handle to the actives.
 
 	/** Passives kind of works backwards from how skills work, since you can have ANY
@@ -31,6 +35,7 @@ public class MainCharacter extends Character {
 	public MainCharacter(int x, int y, Tile[][] map) {
 		super(x, y, "@");
 		awesome = 100;
+		health = 200;
 		setCurrentWeapon(new Pistol());
 		skills = new int[4];
 		passives = new boolean[Passive.NUM_PASSIVES];
@@ -39,9 +44,9 @@ public class MainCharacter extends Character {
 		
 		actives = new Active(this);
 		
-		skills[0] = Active.FALCON_PUNCH;
-		skills[1] = Active.HULK_SERUM;
-		skills[2] = Active.DRILL_DOZER;
+		skills[0] = Active.ICE_CROWN;
+		skills[1] = Active.GRENADE_LAUNCHER;
+		skills[2] = Active.FALCON_PUNCH;
 	}
 	
 	public MainCharacter(int x, int y) {
@@ -81,13 +86,13 @@ public class MainCharacter extends Character {
 			
 			switch(skill) {
 			case 0:
-				InGameState.waitOn("Z");
+				InGameState.skillWaiting = "Z";
 				break;
 			case 1:
-				InGameState.waitOn("X");
+				InGameState.skillWaiting = "X";
 				break;
 			case 2:
-				InGameState.waitOn("C");
+				InGameState.skillWaiting = "C";
 				break;
 			}
 		} else {
@@ -103,17 +108,7 @@ public class MainCharacter extends Character {
 		
 		if(skills[skill] != Active.EMPTY_SLOT) {
 			actives.doActive(skills[skill], target);
-			switch(skill) {
-			case 0:
-				InGameState.endWait("Z");
-				break;
-			case 1:
-				InGameState.endWait("X");
-				break;
-			case 2:
-				InGameState.endWait("C");
-				break;
-			}
+			currentGameState.playerTurnDone();
 		}
 	}
 
@@ -142,6 +137,12 @@ public class MainCharacter extends Character {
 						canMove = false;
 						System.out.println("You pound your fists against the wall in vain; it won't budge.");
 					}
+					
+					//Knock away anything in my way.
+					Character victim = entities[getX() + dx + offsetX][getY() + dy + offsetY];
+					if(victim != null && !(victim instanceof MainCharacter)) { //I kept hitting myself around the room.  It was pretty funny, though.
+						knockAway(victim, 7);
+					}
 				}
 			}
 			
@@ -167,14 +168,49 @@ public class MainCharacter extends Character {
 					map[p.x][p.y] = new Tile(Tile.FLOOR, p.x, p.y);
 				}
 				
-				initPos(getX() + dx, getY() + dy);
+				moveTo(getX() + dx, getY() + dy);
 			}
 			
 		} else {
-			super.move(dx, dy, map, entities);
+			int targetX = x + dx;
+			int targetY = y + dy;
+			
+			if(!map[targetX][targetY].blocker && entities[targetX][targetY] == null) {
+				moveTo(targetX, targetY);
+			}
+			else if(entities[targetX][targetY] == null) {
+				// Do action for the tile you tried to walk to.
+				// That way we can have impassable tiles that
+				// Can be interacted with.
+				// Only do action if there's no enemy there though.
+				map[targetX][targetY].doAction(this);
+			}
+			else if(entities[targetX][targetY] instanceof Enemy){
+				attack(new Point(dx, dy));
+			} else {
+				System.out.println("Your " + entities[targetX][targetY].getName() + " is in the way.");
+			}
 		}
 	}
 
+	public void attack(Point direction) {
+		
+		if(isHulking) {
+			Character[][] entities = InGameState.getEntities();
+			System.out.println("HULK SMASH!!");
+			for(int offsetX = -2; offsetX <= 2; offsetX++) {
+				for(int offsetY = -2; offsetY <= 2; offsetY++) {
+					Point spaceToCheck = new Point(getX() + offsetX, getY() + offsetY);
+					if(entities[spaceToCheck.x][spaceToCheck.y] != null && !(entities[spaceToCheck.x][spaceToCheck.y] instanceof MainCharacter) ) {
+						knockAway(entities[spaceToCheck.x][spaceToCheck.y], 7);
+					}
+				}
+			}
+		} else {
+			super.attack(direction);
+		}
+	}
+	
 	public boolean hasPassive(int passive) {
 		return passives[passive] || InGameState.EVERY_PASSIVE_UNLOCKED;
 	}
@@ -199,19 +235,28 @@ public class MainCharacter extends Character {
 		if(isHulking && !willBeHulking) {
 			//SHRIIINK
 			isHulking = false;
+			weight = 20;
 		}
 		
 		if(!isHulking && willBeHulking) {
 			//TRANSFOOOORM
 			isHulking = true;
 			
+			//GAINS
+			weight = 100;
+			
+			Character[][] entities = InGameState.getEntities();
+			
 			//knock down any walls around you
 			boolean blewStuffUp = false;
 			for(int dx = -1; dx <= 1; dx++) {
 				for(int dy = -1; dy <= 1; dy++) {
-					if(map[getX() + dx][getY() + dy].type == Tile.WALL) {
-						map[getX() + dx][getY() + dy] = new Tile(Tile.FLOOR, getX() + dx, getY() + dy);
+					if(InGameState.demolish(getX() + dx, getY() + dy)) {
 						blewStuffUp = true;
+					}
+					
+					if(entities[getX() + dx][getY() + dy] != null) {
+						knockAway(entities[getX() + dx][getY() + dy], 5);
 					}
 				}
 			}
@@ -231,4 +276,47 @@ public class MainCharacter extends Character {
 		System.out.println("MAP RECEIVED");
 		Tile wat = map[20][20];
 	}
+	
+	public int getWeight() {
+		return weight;
+	}
+	
+	public void moveTo(int newX, int newY, Character[][] entities, Tile[][] map) {
+		super.moveTo(newX, newY, entities, map);
+		currentGameState.updateCamera();
+		currentGameState.calculateLighting();
+	}
+	
+	public int getHealth() {
+		return health;
+	}
+	
+	public void setHealth(int health) {
+		this.health = health;
+	}
+	
+	public void addAwesome(int awesome) {
+		this.awesome += awesome;
+		currentGameState.awesomeText(x , y , awesome);
+	}
+
+	public void getHit(int damage, Tile[][] map, Character[][] entities) {
+		System.out.println("YOUCH you take " + damage + " damage!");
+		//Floatytext handled in InGameState
+		health -= damage;
+		InGameState.addEvent(new Event.DamageTaken(this, damage));
+	}
+	
+	public void getHealed(int amount) {
+		health += amount;
+		
+		InGameState.healText(x, y, amount, false);
+	}
+	
+	public String getName() {
+		return "Main Character";
+	}
 }
+
+
+

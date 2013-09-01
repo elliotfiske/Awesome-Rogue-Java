@@ -73,7 +73,6 @@ public class GameFrame extends JFrame implements WindowListener {
 			int height = stripIm.getHeight();
 			
 			int number = stripIm.getWidth() / imWidth;
-			System.out.println("number for " + filename + ": " + number);
 			strip = new BufferedImage[number];
 			
 			for(int i=0; i < number; i ++) {

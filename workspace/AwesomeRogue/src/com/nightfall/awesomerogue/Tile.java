@@ -5,12 +5,15 @@ import java.awt.Color;
 public class Tile { 	
 
 	//list of tile types
+	public static final int VOID = -1;
 	public static final int FLOOR = 0;
 	public static final int WALL = 1;
 	public static final int DOOR = 2;
 	public static final int OPEN_DOOR = 3;
 	public static final int CHEST = 4;
 	public static final int IMPASSABLE = 5; //"bedrock" so to speak
+	public static final int CLOSED_PIT = 6;
+	public static final int OPEN_PIT = 7;
 
 	public boolean blocker = false;
 	public boolean visible = false, seen = false;
@@ -33,7 +36,7 @@ public class Tile {
 		switch(type) {
 		case WALL:
 		case DOOR:
-			//case CHEST:
+		case CHEST:
 		case IMPASSABLE:
 			blocker = true;
 			break;
@@ -73,6 +76,10 @@ public class Tile {
 				}
 			}
 			break;
+		case CLOSED_PIT:
+			type = OPEN_PIT;
+			System.out.println("You fall in a hole!");
+			break;
 		}
 	}
 
@@ -106,5 +113,10 @@ public class Tile {
 		}
 
 		return false;
+	}
+	
+	public boolean isBlocker() {
+		boolean occupied = (InGameState.getEntities()[x][y] != null);
+		return blocker || occupied;
 	}
 }

@@ -10,12 +10,15 @@ import java.awt.Graphics2D;
 
 public abstract class OngoingEffect extends Effect {
 
+	public OngoingEffect(String name) {
+		super(name);
+	}
+
 	private Effect intro;
 	private Effect outro;
 	
 	@Override
-	public abstract void renderAndIterate(Graphics2D g2, Tile[][] map,
-			Character[][] entities);
+	public abstract void renderAndIterate(Graphics2D g2);
 
 	@Override
 	public abstract void render(Graphics2D g2);

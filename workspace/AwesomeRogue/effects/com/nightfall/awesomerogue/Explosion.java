@@ -9,23 +9,24 @@ import java.awt.geom.Point2D.Double;
 public class Explosion extends Effect {
 	// Dispersion. Math.random()*100 < dispersion means that there will be no explosion
 	// At that point. Small number = tight, large number = few flames
-	public static final int[] DISPERSION = new int[] {0,0,0,0,0,20,20,20,20,30,30,30,35,45,60,75,90,90}; 
+	public int[] DISPERSION = new int[] {0,0,0,0,0,20,20,20,20,30,30,30,35,45,60,75,90,90}; 
 	// Size od the explosion
-	public static final int[] SIZES = new int[] 	 {1,1,2,2,2, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 6, 5, 5};//{1,1,2,2, 4, 4, 4, 6}; 
+	public int[] SIZES = new int[] 	 {1,1,2,2,2, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 6, 5, 5};//{1,1,2,2, 4, 4, 4, 6}; 
 	
 	// Keeps track of its position and size
 	private double x, y;
-	private int sizeindex;
+	private int sizeIndex;
 	private Color[][] explosionSquares;
 	
 	private double directionAngle;
 	private Double direction;
 	
 	public Explosion(int x, int y) {
-		this.x = x;
-		this.y = y;
-		sizeindex = 0;
-		int size = SIZES[sizeindex];
+		super("Explosion Effect");
+		this.x = x - InGameState.CAMERA_X;
+		this.y = y - InGameState.CAMERA_Y;
+		sizeIndex = 0;
+		int size = SIZES[sizeIndex];
 		
 		// Initialize array of no colors
 		explosionSquares = new Color[size][size];
@@ -50,10 +51,10 @@ public class Explosion extends Effect {
 		this.direction = new Point2D.Double((double)direction.x / SIZES.length, (double)direction.y / SIZES.length);
 	}
 
-	public void renderAndIterate(Graphics2D g2, Tile[][] map, Character[][] entities) {
+	public void renderAndIterate(Graphics2D g2) {
 		if(!running()) return;
-		render(g2, map);
-		iterateExplosion(map, entities);
+		render(g2, InGameState.map);
+		iterateExplosion(InGameState.map, InGameState.getEntities());
 		
 	}
 	
@@ -84,7 +85,7 @@ public class Explosion extends Effect {
 	}
 	
 	private void iterateExplosion(Tile[][] map, Character[][] entities) {
-		if(sizeindex >= SIZES.length) {	// IF we reach the end of the explosion, stop exploding
+		if(sizeIndex >= SIZES.length) {	// IF we reach the end of the explosion, stop exploding
 			explosionSquares = new Color[0][0];
 			setRunning(false);
 			return;
@@ -94,9 +95,9 @@ public class Explosion extends Effect {
 			y += direction.y;
 		}
 		
-		int size = SIZES[sizeindex]; 
+		int size = SIZES[sizeIndex]; 
 		int arrsize = size * 2;
-		int dispersion = DISPERSION[sizeindex];
+		int dispersion = DISPERSION[sizeIndex];
 		explosionSquares = new Color[arrsize][arrsize];
 		for(int radius = 0; radius < size; radius ++) {
 			for(int i = 0; i < arrsize*2; i ++) {
@@ -153,6 +154,29 @@ public class Explosion extends Effect {
 			}
 		}
 		
-		sizeindex ++;
+		sizeIndex ++;
+	}
+	
+	public void reverse() {
+		System.out.println("reversing explosion!");
+		sizeIndex = 0;
+		
+		for(int i = 0; i < DISPERSION.length / 2; i++) {
+			int temp = DISPERSION[i];
+			DISPERSION[i] = DISPERSION[DISPERSION.length - i - 1];
+			DISPERSION[DISPERSION.length - i - 1] = temp;
+		}
+		
+		for(int i = 0; i < SIZES.length / 2; i++) {
+			int temp = SIZES[i];
+			SIZES[i] = SIZES[SIZES.length - i - 1];
+			SIZES[SIZES.length - i - 1] = temp;
+		}
+		
+		for(int i : SIZES) {
+			System.out.println("size: " + i);
+		}
+		
+		setRunning(true);
 	}
 }

@@ -107,6 +107,16 @@ public class GamePanel extends JPanel implements Runnable {
 				}
 			}
 		});
+		
+		addMouseListener( new MouseAdapter() {
+			//Listen for mouse clicks
+			public void mouseClicked(MouseEvent e) {
+				currentGameState.mouseClick(e);
+			}
+				
+			
+		});
+		
 	} // End readyForTermination
 	
 	// Make sure it is added to JFrame before starting
@@ -152,7 +162,7 @@ public class GamePanel extends JPanel implements Runnable {
 		// update, render, sleep
 		running = true;
 		while(running) {
-			
+
 			gameUpdate();
 			gameRender();
 			paintScreen();

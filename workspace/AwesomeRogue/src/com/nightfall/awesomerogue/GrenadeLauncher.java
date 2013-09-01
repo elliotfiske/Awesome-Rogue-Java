@@ -1,4 +1,4 @@
-package com.nightfall.awesomerogue;
+	package com.nightfall.awesomerogue;
 
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -15,7 +15,7 @@ public class GrenadeLauncher extends Skill {
 	}
 
 	public void activate(Point direction, MainCharacter mainChar) {
-		mainChar.getLevel().addCharacter(new Grenade(mainChar.getX(), mainChar.getY(), direction));
+		mainChar.getLevel().addPet(new Grenade(mainChar.getX(), mainChar.getY(), direction));
 	}
 
 	public void update() {

@@ -14,58 +14,86 @@ public class Enemy extends Character {
 	public static final int SKELETON = 4;
 	public static final int WIZARD = 5;
 	public static final int MUSHROOM = 6;
+	public static final int OGRE = 7;
 
 	public static final String[] enemyIcons = {"M", "r", "R", "Z", "S", "W", "m"};
 
-	private int x, y, whichEnemy, health = 0;
+	private int whichEnemy, health = 0;
 	String name;
 	String icon;
 	int weight;
 
+	/** Enemies have a speed/5 chance of moving */
+	int speed;
+	
+	/** An enemy is stuck in place until "stunned" is 0, decremented each turn. */
+	int stunned;
+	/** Frozen is like stunned, but bluuue */
+	int frozen;
+
 	private int xBounty, yBounty;
 	private Tile bounty;
+	
+	/** smartMove stops if a enemy has been seen that WAS NOT seen before. If smartSeen is true
+	 * then the enemy has been visible since smartMove began. */
+	public boolean smartSeen;
 
 	public Enemy /* number one */ (int x, int y, int whichEnemy) {
 		super(x, y, enemyIcons[whichEnemy]);
-		this.x = x;
-		this.y = y;
 
 		this.whichEnemy = whichEnemy;
 
+		smartSeen = false;
+		stunned = frozen = 0;
+		
 		switch(whichEnemy) {
 		case ANGRY_MUSHROOM:
 			health = 15;
 			name = "angry mushroom";
 			weight = 20;
+			speed = 0;
 			break;
 		case MUSHROOM:
 			health = 1;
 			name = "mushroom";
 			weight = 15;
+			speed = 0;
 			break;
 		case RAT:
 			health = 10;
 			name = "rat";
 			weight = 15;
+			speed = 5;
 			break;
 		case ZOMBIE:
 			health = 30;
 			name = "zombie";
 			weight = 30;
+			speed = 3;
 			break;
 		case SKELETON:
 			health = 40;
 			name = "skeleton";
 			weight = 10;
+			speed = 4;
 			break;
 		case WIZARD:
 			health = 50;
 			name = "ALLAN PLEASE PUT IN WIZARD NAME";
 			//TODO: implement sweet wizard name maker
 			weight = 35;
+			speed = 5;
+			break;
+		case OGRE:
+			health = 20;
+			name = "ogre";
+			weight = 30;
+			speed = 2;
 			break;
 		}
 
+		super.character = name;
+		
 		icon = enemyIcons[whichEnemy];
 
 		setCurrentWeapon(new EnemyWeapon(whichEnemy));
@@ -76,21 +104,137 @@ public class Enemy extends Character {
 		yBounty = y;
 		bounty = bountyTile;
 	}
+	
+	public int getType() { return whichEnemy; }
 
 	public void move(int dx, int dy, Tile[][] map) {
-		x += dx;
-		y += dy;
-
+		initPos(dx, dy);
 		//sanity check here.
 	}
 
-	public int getX() { return x; }
-	public int getY() { return y; }
-
 	public void takeTurn(MainCharacter mainChar, Tile[][] map) {
-		pathToHeroAndMove(mainChar.getX(), mainChar.getY(), map);
+		if(stunned > 0) {
+			stunned--;
+			return;
+		}
+		
+		if(frozen > 0) {
+			frozen--;
+			return;
+		}
+		
+		if(whichEnemy == RAT) {
+			//Rats move randumbly
+			if(Math.random() < 0.3) {
+				moveRandomly(map);
+			} else {
+				pathToHeroAndMove(mainChar.getX(), mainChar.getY(), map);
+			}
+		} else {
+			pathToHeroAndMove(mainChar.getX(), mainChar.getY(), map);
+		}
 	}
 
+	/**
+	 * Render the enemy to the screen.
+	 * 
+	 * @param g2 The Graphics2D handle it uses to draw itself.
+	 * @param camX Camera X offset
+	 * @param camY Camera Y offset
+	 */
+	public void draw(Graphics2D g2, int camX, int camY) {
+		
+		if(frozen > 0) {
+			g2.setColor(Color.blue);
+		} else {
+			g2.setColor(Color.white);
+		}
+		
+		g2.drawString(icon, ((x - camX)*12 + 2),
+				((y - camY)*12 + 10));	
+	}
+
+	/**
+	 * Enemies have hit points (unlike the player's "Awesome level.")
+	 * 
+	 * This takes them away.  It also checks if they're dead.
+	 * 
+	 * @param damage How much damage to do to the monster.
+	 */
+	public void getHit(int damage, Tile[][] map, Character[][] entities) {
+		health -= damage;
+		InGameState.addEvent(new Event.DamageTaken(this, damage));
+		
+		if(health <= 0) {
+			die();
+			entities[x][y] = null;
+
+			if(bounty != null) {
+				map[xBounty][yBounty] = bounty;
+			}
+
+			if(whichEnemy == WIZARD) {
+				//win
+			}
+
+			System.out.println("The " + name + " is slain!");
+
+			//TODO!
+			//InGameState.addEvent("killed" + getName() + "at" + x + "x" + y);
+		}
+	}
+	
+	public void stun(int turns) {
+		stunned = turns;
+	}
+	
+	public void freeze(int turns) {
+		frozen = turns;
+	}
+	
+	/**
+	 * Heals an enemy. I'd like to implement some kind of enemy-healer, because
+	 * those guys are so wonderfully annoying and it's super satisfying to
+	 * mash their heads into the ground.
+	 * 
+	 * @param health How much healing?
+	 */
+	public void getHealed(int healing) {
+		this.health += healing;
+		
+		InGameState.healText(x, y, healing, true);
+	}
+
+	public int getWeight() {
+		return weight;
+	}
+
+	public void die() {
+		super.die();
+		InGameState.removeEnemy(this);
+	}
+
+	/**
+	 * Move randomly. Rats occasionally do this, and maybe we'll have a "confused" status!
+	 * @param map I'm the map, I'm the map, I'm the map, I'm the map, I'M THE MAP
+	 */
+	private void moveRandomly(Tile[][] map) {
+		int randDirection = (int) Math.floor(Math.random() * 8);
+		Point randPoint = getPointDirection(randDirection);
+		int numTries = 0;
+		
+		while(map[x + randPoint.x][y + randPoint.y].isBlocker() && numTries < 12) {
+			randDirection = (int) Math.floor(Math.random() * 8);
+			randPoint = getPointDirection(randDirection);
+			
+			numTries++;
+		}
+		
+		if(numTries < 12) {
+			moveTo(x + randPoint.x, y + randPoint.y);
+		}
+	}
+	
 	//Fuzzy pathfinding = fun times for all!
 	/**
 	 * @param targetX
@@ -98,6 +242,9 @@ public class Enemy extends Character {
 	 * @param map
 	 */
 	public void pathToHeroAndMove(int targetX, int targetY, Tile[][] map) {
+		//Grab a handle to the entities array
+		Character[][] entities = InGameState.getEntities();
+		
 		//Try to path straight from the monster to the hero.
 
 		//Coordinates of the line that walks to the player.
@@ -105,19 +252,33 @@ public class Enemy extends Character {
 
 		/** List of tiles straight from the monster to the player. */
 		ArrayList<Tile> straightTiles = new ArrayList<Tile>();
-
+		
+		boolean blocked = false;
+		
 		while(!(straightPoint.x == targetX && straightPoint.y == targetY)) {
 			//Calculate which direction it would be smart to go in order to walk to the player.
 			walkStraight(straightPoint, new Point(targetX, targetY), 3);
-			
+
 			straightTiles.add(new Tile( map[straightPoint.x][straightPoint.y].type , 0, straightPoint.x, straightPoint.y));
 
-			if(map[straightPoint.x][straightPoint.y].blocker) {
+			if(map[straightPoint.x][straightPoint.y].isBlocker()) {
+				blocked = true;
 				//map[straightPoint.x][straightPoint.y].illustrate(Color.red);//TODO
+				//if(entities[straightPoint.x][straightPoint.y] != null && entities[straightPoint.x][straightPoint.y].getName() == "Main Character")
+					//map[straightPoint.x][straightPoint.y].illustrate(Color.green);
 			} else {
 				//map[straightPoint.x][straightPoint.y].illustrate(Color.yellow);// TODO
 			}
 		}
+
+		//First off, check if the enemies even CAN move:
+		double chanceOfMoving = speed / 5;
+		if(chanceOfMoving < Math.random()) {
+			return;
+		}
+		
+		//TODO: Swarming mechanics
+		
 
 		//DEAL WITH OBSTACLES HERE
 
@@ -128,35 +289,25 @@ public class Enemy extends Character {
 		for(int whichTile = 0; whichTile < straightTiles.size(); whichTile++) {
 			Tile t = straightTiles.get(whichTile);
 			Tile prevTile = null;
-			
+
 			//Ran into some nasty array index out of bounds exceptions don'cha know.
 			if(whichTile == 0) {
 				prevTile = map[x][y];
 			} else {
 				prevTile = straightTiles.get(whichTile - 1);
 			}
-			
-			//Go through until we run into sexy trouble (blocker)
+
+			//Go through until we run into sexy trouble (blocker) or another enemy.
 			//Also make sure that the tile PREVIOUS to this one is NOT a blocker (so we don't do two blockers in a row).
-			if(t.blocker && !prevTile.blocker) {
+			if((t.isBlocker() && !prevTile.blocker)) {
 				//OH NO! Blocker found.  Send out "feelers" to go along right and left walls.
 				//Start feelers at the square on the straight-line path right BEFORE the wall.
-				Point rightFeeler = null;
-				Point leftFeeler = null;
+				Point rightFeeler = new Point(prevTile.x, prevTile.y);
+				Point leftFeeler = new Point(prevTile.x, prevTile.y);
 				ArrayList<Point> leftPath = new ArrayList<Point>();
 				ArrayList<Point> rightPath = new ArrayList<Point>();
-				if(whichTile == 0) {
-					//If the very first tile looked at was a blocker, use the enemy coordinates.
-					rightFeeler = new Point(x, y);
-					leftFeeler = new Point(x, y);
-					leftPath.add(new Point(leftFeeler.x, leftFeeler.y));
-					rightPath.add(new Point(rightFeeler.x, rightFeeler.y));
-				} else {
-					rightFeeler = new Point(straightTiles.get(whichTile - 1).x, straightTiles.get(whichTile - 1).y);
-					leftFeeler = new Point(rightFeeler.x, rightFeeler.y);
-					leftPath.add(new Point(leftFeeler.x, leftFeeler.y));
-					rightPath.add(new Point(rightFeeler.x, rightFeeler.y));
-				}
+				leftPath.add(new Point(leftFeeler.x, leftFeeler.y));
+				rightPath.add(new Point(rightFeeler.x, rightFeeler.y));
 
 				//Get started on feelin' things out.
 				//Right:
@@ -164,6 +315,10 @@ public class Enemy extends Character {
 
 				//Left:
 				lastWallLeft = getDirection(leftFeeler, new Point(t.x, t.y), false, map);
+
+				if(lastWallRight.equals(new Point(0,0)) || lastWallLeft.equals(new Point(0,0))) {
+					return;
+				}
 
 				Point lastRightFeeler = new Point(rightFeeler.x, rightFeeler.y);
 				Point lastLeftFeeler = new Point(leftFeeler.x, leftFeeler.y);
@@ -175,7 +330,7 @@ public class Enemy extends Character {
 				//map[leftFeeler.x][leftFeeler.y].illustrate(Color.cyan);
 
 				int numTiles = 0;
-				while(numTiles < 100) {
+				while(numTiles < 1000) {
 					//follow right wall
 
 					lastWallRight = getDirection(rightFeeler, lastWallRight, true, map);
@@ -185,6 +340,10 @@ public class Enemy extends Character {
 					//follow left wall
 					lastWallLeft = getDirection(leftFeeler, lastWallLeft, false, map);
 
+					if(lastWallRight.equals(new Point(0,0)) || lastWallLeft.equals(new Point(0,0))) {
+						return;
+					}
+					
 					//map[leftFeeler.x][leftFeeler.y].illustrate(Color.cyan);
 
 					leftPath.add(new Point(leftFeeler.x, leftFeeler.y));
@@ -214,6 +373,11 @@ public class Enemy extends Character {
 
 					numTiles++;
 				}
+				
+				if(numTiles >= 999) {
+					//No path found, I guess.
+					break;
+				}
 			}
 		}
 
@@ -222,70 +386,77 @@ public class Enemy extends Character {
 		int proposedDX = 0;
 		int proposedDY = 0;
 		if(firstCorrectPath != null) {
-			
+
 			boolean weDidIt = false;
 			for(int i = firstCorrectPath.size() - 1; i > 0; i--) {
 				Point pointToCheck = firstCorrectPath.get(i);
 				//map[pointToCheck.x][pointToCheck.y].illustrate(Color.pink); //TODO
-				
+
 				//If there's a straight, unblocked path to the pink tile we've just found our
 				//route to the player.
 				Point finalPath = new Point(x, y);
-				
+
 				ArrayList<Point> finalPathPoints = new ArrayList<Point>();
 				finalPathPoints.add(new Point(finalPath.x, finalPath.y));
-				
+
 				/** The step we WOULD take to follow this new path is: */
 				Point firstStep = new Point(finalPath.x, finalPath.y);
 				walkStraight(firstStep, new Point(pointToCheck.x, pointToCheck.y), 3);
-				
+
 				//optimism!
 				weDidIt = true;
-				
+
 				while(finalPath.x != pointToCheck.x || finalPath.y != pointToCheck.y) {
 					walkStraight(finalPath, pointToCheck, 3);
 					finalPathPoints.add(new Point(finalPath.x, finalPath.y));
 					//map[finalPath.x][finalPath.y].illustrate(Color.black); //TODO
-					if(map[finalPath.x][finalPath.y].blocker) {
+					if(map[finalPath.x][finalPath.y].isBlocker()) {
 						//map[finalPath.x][finalPath.y].illustrate(Color.red); //TODO
 						//Outta luck.  Try the next one!
 						weDidIt = false;
 						break;
 					}
 				}
-				
+
 				//straight path found! rejoice!
 				if(weDidIt) {
 					proposedDX = firstStep.x - x;
 					proposedDY = firstStep.y - y;
-					int wut = 0;
 					for(Point p : finalPathPoints) {
 						//map[p.x][p.y].illustrate(Color.green); //TODO
-						//System.out.println("wut" + wut);
 					}
 					//map[firstStep.x][firstStep.y].illustrate(Color.ORANGE); //TODO
 					break;
 				}
 			}
-			
+
 			//Don't worry.  Just follow the feelers from before.
 			if(!weDidIt) {
-				
+
 			}
 		} else {
+			//potential problem if the rat is inside of me
+			if(straightTiles.size() == 0) {
+				throw new PANICEVERYTHINGISBROKENERROR("THE " + getName() + " IS INSIDE ME! INSIIIIIIDE ME!!!");
+			}
+			
 			//There must have been no obstacles.  Follow the straight path.
 			proposedDX = straightTiles.get(0).x - x;
 			proposedDY = straightTiles.get(0).y - y;
 			//map[x + proposedDX][y + proposedDY].illustrate(Color.ORANGE);
 		}
-		
-		Character[][] entities = InGameState.getEntities();
-		entities[x][y] = null;
-		
-		x += proposedDX;
-		y += proposedDY;
-		
-		entities[x][y] = this;
+
+		if(entities[x + proposedDX][y + proposedDY] instanceof MainCharacter) {
+			System.out.println("The rat scratches you!");
+			entities[x+proposedDX][y+proposedDY].getHit(5, null, null);
+		} else if(map[x + proposedDX][y + proposedDY].isBlocker()) {
+			//We pathed into a wall.  Oh well.  Don't move!
+		} else {
+
+			moveTo(x + proposedDX, y + proposedDY);
+
+			//System.out.println("Entity changed? Entity[x][y]: " + entities[x][y].getClass().getName() + " at " + x + ", " + y);
+		}
 	}	
 
 	/**
@@ -345,7 +516,7 @@ public class Enemy extends Character {
 		int diffX = delta.x;
 		int diffY = delta.y;
 		int result = -1;
-		
+
 		if(diffX == 0 && diffY == -1)  { result = 0; }
 		if(diffX == 1 && diffY == -1)  { result = 1; }
 		if(diffX == 1 && diffY == 0)   { result = 2; }
@@ -356,7 +527,7 @@ public class Enemy extends Character {
 		if(diffX == -1 && diffY == -1) { result = 7; }
 
 		if(result == -1) {
-			throw new PANICEVERYTHINGISBROKENERROR("DiffX and DiffY are wrong! They're " + diffX + ", " + diffY);
+			//throw new PANICEVERYTHINGISBROKENERROR("DiffX and DiffY are wrong! They're " + diffX + ", " + diffY);
 		}
 
 		return result;
@@ -404,6 +575,12 @@ public class Enemy extends Character {
 		diffY = lastWall.y - feeler.y;
 
 		int result = getNumberedDirection(new Point(diffX, diffY));
+		if(result == -1) {
+			//We're probably stuck in a crowd. Just chill.
+			System.out.println("The guy at " + x + ", " + y + "doesn't like you.  Zooming in now:");
+
+			return new Point(0,0);
+		}
 
 		//anti-infinity fail-safe
 		int numTries = 0;
@@ -427,7 +604,7 @@ public class Enemy extends Character {
 				continue; //pretend it's a blocker.
 			}
 
-			if(!map[feeler.x + diffX][feeler.y + diffY].blocker) {
+			if(!map[feeler.x + diffX][feeler.y + diffY].isBlocker()) {
 				//We did it!
 				//Grab the result of this function: the last-touched wall.
 				int wallDirection = getNumberedDirection(new Point(diffX, diffY));
@@ -455,8 +632,10 @@ public class Enemy extends Character {
 			numTries++;
 		}
 
-		//oops.
-		throw new PANICEVERYTHINGISBROKENERROR("We couldn't find the next Tile for the feeler to move to :(");
+		//We're probably stuck in a crowd. Just chill.
+		System.out.println("The guy at " + x + ", " + y + "doesn't like you.  Zooming in now:");
+
+		return new Point(0,0);
 	}
 
 	/**
@@ -519,10 +698,10 @@ public class Enemy extends Character {
 
 		int x = straightPoint.x;
 		int y = straightPoint.y;
-		
+
 		int targetX = targetPoint.x;
 		int targetY = targetPoint.y;
-		
+
 		int diffX = targetX - x;
 		int diffY = targetY - y;
 
@@ -594,47 +773,5 @@ public class Enemy extends Character {
 
 		straightPoint.x += result.x;
 		straightPoint.y += result.y;
-	}
-
-	/**
-	 * Render the enemy to the screen.
-	 * 
-	 * @param g2 The Graphics2D handle it uses to draw itself.
-	 * @param camX Camera X offset
-	 * @param camY Camera Y offset
-	 */
-	public void draw(Graphics2D g2, int camX, int camY) {
-		g2.drawString(icon, ((x - camX)*12 + 2),
-				((y - camY)*12 + 10));	
-	}
-
-	/**
-	 * Enemies have hit points (unlike the player's "Awesome level.")
-	 * 
-	 * This takes them away.  It also checks if they're dead.
-	 * 
-	 * @param damage How much damage to do to the monster.
-	 */
-	public void getHit(int damage, Tile[][] map, Character[][] entities) {
-		health -= damage;
-		if(health <= 0) {
-			die();
-			entities[x][y] = null;
-
-			if(bounty != null) {
-				map[xBounty][yBounty] = bounty;
-			}
-
-			if(whichEnemy == WIZARD) {
-				//win
-			}
-
-			System.out.println("The " + name + " is slain!");
-
-		}
-	}
-	
-	public int getWeight() {
-		return weight;
-	}
+	}	
 }
