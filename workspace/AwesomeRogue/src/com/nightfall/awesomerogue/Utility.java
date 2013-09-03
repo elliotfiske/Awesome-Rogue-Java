@@ -275,15 +275,16 @@ public class Utility {
 			if(Math.random() * 100 < dispersion) continue;
 			
 			//Next, determine if the distance lets us show a point here
-			double distance = Math.sqrt(p.x*p.x + p.y*p.y);
+			double distance = Math.floor(Math.sqrt(p.x*p.x + p.y*p.y));
 			if(distance < startDistance || distance > stopDistance) continue;
 			
 			//Choose a color
 			int red = r.nextInt(stopColor.getRed() - startColor.getRed()) + startColor.getRed();
 			int green = r.nextInt(stopColor.getGreen() - startColor.getGreen()) + startColor.getGreen();
 			int blue = r.nextInt(stopColor.getBlue() - startColor.getBlue()) + startColor.getBlue();
+			int alpha = r.nextInt(stopColor.getAlpha() - startColor.getAlpha()) + startColor.getAlpha();
 			
-			Color resultColor = new Color(red, green,blue);
+			Color resultColor = new Color(red, green, blue, alpha);
 			
 			//Make a new ColorPoint and add it to the result
 			result.add(new ColorPoint(resultColor, p));
