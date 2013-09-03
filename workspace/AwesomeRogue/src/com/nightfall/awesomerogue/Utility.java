@@ -154,6 +154,120 @@ public class Utility {
 
 		return result;
 	}
+
+	/******************************************
+	 *           PATHFINDING YO               *
+	 ******************************************/
+
+	/**
+	 * Handy helper method.  Calculates the direction an enemy should logically take
+	 * to walk STRAIGHT from (x, y) to (targetX, targetY).
+	 * @param Point straightPoint The Point that is going to be modified to be further down the "straight" path
+	 * @param Point targetPoint The Point that the straightPoint is moving towards.
+	 * @param int smoothness Basically the "slope" that the path follows.  If 1, will always move diagonally if it can.
+	 * @return Point with x from -1 --> 1 saying you should move that far in the x direction, 
+	 * 		   and y from -1 --> 1 saying you should move that far in the y direction
+	 */
+	public static void walkStraight(Point straightPoint, Point targetPoint, double smoothness) {
+		Point result = new Point(-100,-100);
+
+		int x = straightPoint.x;
+		int y = straightPoint.y;
+
+		int targetX = targetPoint.x;
+		int targetY = targetPoint.y;
+
+		int diffX = targetX - x;
+		int diffY = targetY - y;
+
+		//Figure out the slope to the target
+		//First, prevent /0 error:
+		if(diffX == 0 && diffY < 0) {
+			straightPoint.x +=  0;
+			straightPoint.y +=  -1;
+			return;
+		}
+
+		if(diffX == 0 && diffY > 0) {
+			straightPoint.x +=  0;
+			straightPoint.y +=  1;
+			return;
+		}
+
+		//Make sure it handles diffy = 0 correctly
+		if(diffY == 0) {
+			straightPoint.x += (int) Math.signum((float) diffX);
+			straightPoint.y +=  0;
+			return;
+		}
+
+		double slope = (double) diffY / diffX;
+
+		//I hand-calculated these values, on some sweet graph paper.
+		//Come look at it sometime.
+
+		//  |      ^
+		//  |  or  |
+		//  v      |
+		if(slope <= -smoothness) {
+			result.x = 0;
+			result.y = 1 * (int) Math.signum((float) diffY);
+		}
+
+		//    /        ^ 
+		//   /   or   /
+		//  L        /
+		if(-smoothness < slope && slope < -1/smoothness) {
+			result.x = 1 * (int) Math.signum((float) diffX);
+			result.y = 1 * (int) Math.signum((float) diffY);
+		}
+
+		//
+		// < - -   or  - - >
+		//
+		if(-1/smoothness <= slope && slope <= 1/smoothness) {
+			result.x = 1 * (int) Math.signum((float) diffX);
+			result.y = 0;
+		}
+
+		// ^       \
+		//  \  or   \
+		//   \       V
+		if(1/smoothness < slope && slope < smoothness) {
+			result.x = 1 * (int) Math.signum((float) diffX);
+			result.y = 1 * (int) Math.signum((float) diffY);
+		}
+
+		//  |      ^
+		//  |  or  |
+		//  v      |
+		if(slope >= smoothness) {
+			result.x = 0;
+			result.y = 1 * (int) Math.signum((float) diffY);
+		}
+
+		straightPoint.x += result.x;
+		straightPoint.y += result.y;
+	}	
+	
+	/**
+	 * Given a start point and a finish point, tells you if there's a simple straight path there
+	 * @param startPoint Where you start
+	 * @param targetPoint Where you end
+	 * @param smoothness See walkStraight
+	 * @return True if there's a straight, unblocked path to the location, false otherwise.
+	 */
+	public static boolean straightPathTo(Point startPoint, Point targetPoint, double smoothness) {
+		while(!(startPoint.x == targetPoint.x && startPoint.y == targetPoint.y)) {
+			//Calculate which direction it would be smart to go in order to walk to the player.
+			Utility.walkStraight(startPoint, targetPoint, smoothness);
+
+			if(InGameState.map[startPoint.x][startPoint.y].blocker)
+				return false;
+		}
+		
+		return true;
+	}
 	
 	/** This method converts from an int array that looks like:
 	 *  [1,2,  3,4,  -1,9,  12,23] to a Point array with those same coordinates.
@@ -278,10 +392,10 @@ public class Utility {
 			double distance = Math.floor(Math.sqrt(p.x*p.x + p.y*p.y));
 			if(distance < startDistance || distance > stopDistance) continue;
 			
-			//Choose a color
-			int red = r.nextInt(stopColor.getRed() - startColor.getRed()) + startColor.getRed();
+			//Choose a color randomly within the correct range
+			int red =   r.nextInt(stopColor.getRed()   - startColor.getRed())   + startColor.getRed();
 			int green = r.nextInt(stopColor.getGreen() - startColor.getGreen()) + startColor.getGreen();
-			int blue = r.nextInt(stopColor.getBlue() - startColor.getBlue()) + startColor.getBlue();
+			int blue =  r.nextInt(stopColor.getBlue()  - startColor.getBlue())  + startColor.getBlue();
 			int alpha = r.nextInt(stopColor.getAlpha() - startColor.getAlpha()) + startColor.getAlpha();
 			
 			Color resultColor = new Color(red, green, blue, alpha);

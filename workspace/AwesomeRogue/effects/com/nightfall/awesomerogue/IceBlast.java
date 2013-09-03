@@ -61,6 +61,11 @@ public class IceBlast extends Effect {
 			int cx = cp.point.x + x;
 			int cy = cp.point.y + y;
 			
+			//Check if there's anything blocking the freeze blast
+			if(!Utility.straightPathTo(new Point(x, y), new Point(cx, cy), 10)) {
+				continue;
+			}
+			
 			//See if there are monsters to freeze!
 			Character victim = InGameState.getEntities()[cx][cy];
 			if(victim != null && victim instanceof Enemy) {

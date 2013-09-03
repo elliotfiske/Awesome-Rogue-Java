@@ -257,7 +257,7 @@ public class Enemy extends Character {
 		
 		while(!(straightPoint.x == targetX && straightPoint.y == targetY)) {
 			//Calculate which direction it would be smart to go in order to walk to the player.
-			walkStraight(straightPoint, new Point(targetX, targetY), 3);
+			Utility.walkStraight(straightPoint, new Point(targetX, targetY), 3);
 
 			straightTiles.add(new Tile( map[straightPoint.x][straightPoint.y].type , 0, straightPoint.x, straightPoint.y));
 
@@ -401,13 +401,13 @@ public class Enemy extends Character {
 
 				/** The step we WOULD take to follow this new path is: */
 				Point firstStep = new Point(finalPath.x, finalPath.y);
-				walkStraight(firstStep, new Point(pointToCheck.x, pointToCheck.y), 3);
+				Utility.walkStraight(firstStep, new Point(pointToCheck.x, pointToCheck.y), 3);
 
 				//optimism!
 				weDidIt = true;
 
 				while(finalPath.x != pointToCheck.x || finalPath.y != pointToCheck.y) {
-					walkStraight(finalPath, pointToCheck, 3);
+					Utility.walkStraight(finalPath, pointToCheck, 3);
 					finalPathPoints.add(new Point(finalPath.x, finalPath.y));
 					//map[finalPath.x][finalPath.y].illustrate(Color.black); //TODO
 					if(map[finalPath.x][finalPath.y].isBlocker()) {
@@ -607,95 +607,4 @@ public class Enemy extends Character {
 
 	private Point lastWallLeft;
 	private Point lastWallRight;
-
-	/**
-	 * Handy helper method.  Calculates the direction an enemy should logically take
-	 * to walk STRAIGHT from (x, y) to (targetX, targetY).
-	 * @param Point straightPoint The Point that is going to be modified to be further down the "straight" path
-	 * @param Point targetPoint The Point that the straightPoint is moving towards.
-	 * @param int smoothness Basically the "slope" that the path follows.  If 1, will always move diagonally if it can.
-	 * @return Point with x from -1 --> 1 saying you should move that far in the x direction, 
-	 * 		   and y from -1 --> 1 saying you should move that far in the y direction
-	 */
-	public void walkStraight(Point straightPoint, Point targetPoint, double smoothness) {
-		Point result = new Point(-100,-100);
-
-		int x = straightPoint.x;
-		int y = straightPoint.y;
-
-		int targetX = targetPoint.x;
-		int targetY = targetPoint.y;
-
-		int diffX = targetX - x;
-		int diffY = targetY - y;
-
-		//Figure out the slope to the target
-		//First, prevent /0 error:
-		if(diffX == 0 && diffY < 0) {
-			straightPoint.x +=  0;
-			straightPoint.y +=  -1;
-			return;
-		}
-
-		if(diffX == 0 && diffY > 0) {
-			straightPoint.x +=  0;
-			straightPoint.y +=  1;
-			return;
-		}
-
-		//Make sure it handles diffy = 0 correctly
-		if(diffY == 0) {
-			straightPoint.x += (int) Math.signum((float) diffX);
-			straightPoint.y +=  0;
-			return;
-		}
-
-		double slope = (double) diffY / diffX;
-
-		//I hand-calculated these values, on some sweet graph paper.
-		//Come look at it sometime.
-
-		//  |      ^
-		//  |  or  |
-		//  v      |
-		if(slope <= -smoothness) {
-			result.x = 0;
-			result.y = 1 * (int) Math.signum((float) diffY);
-		}
-
-		//    /        ^ 
-		//   /   or   /
-		//  L        /
-		if(-smoothness < slope && slope < -1/smoothness) {
-			result.x = 1 * (int) Math.signum((float) diffX);
-			result.y = 1 * (int) Math.signum((float) diffY);
-		}
-
-		//
-		// < - -   or  - - >
-		//
-		if(-1/smoothness <= slope && slope <= 1/smoothness) {
-			result.x = 1 * (int) Math.signum((float) diffX);
-			result.y = 0;
-		}
-
-		// ^       \
-		//  \  or   \
-		//   \       V
-		if(1/smoothness < slope && slope < smoothness) {
-			result.x = 1 * (int) Math.signum((float) diffX);
-			result.y = 1 * (int) Math.signum((float) diffY);
-		}
-
-		//  |      ^
-		//  |  or  |
-		//  v      |
-		if(slope >= smoothness) {
-			result.x = 0;
-			result.y = 1 * (int) Math.signum((float) diffY);
-		}
-
-		straightPoint.x += result.x;
-		straightPoint.y += result.y;
-	}	
 }
