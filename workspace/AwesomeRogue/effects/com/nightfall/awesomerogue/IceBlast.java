@@ -21,12 +21,10 @@ public class IceBlast extends Effect {
 	
 	//Start distance defines how far away from yo body the ice STARTS rendering
 	private static final int[] startDistances = 
-		{0, 0, 0, 0, 0, 1, 1, 3, 4,  5};
+		{0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 	//Stop distance defines how far away from ya bod the ice STOPS rendering
-	private static final int[] stopDistances  = 
-		{1, 2, 3, 4, 5,  6,  7,  8,  9, 10};
-	private static final int[] dispersion =     
-		{0, 0, 0, 0, 0, 20, 20, 20, 20, 30, 30, 30, 35, 45, 60, 75, 90, 90};
+	private static final int[] stopDistances  =  
+		{1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 8};
 	
 	private static Color startColor = new Color(34, 143, 186);
 	private static Color stopColor = new Color(138, 222, 255);
@@ -50,7 +48,7 @@ public class IceBlast extends Effect {
 		}
 		ArrayList<ColorPoint> colorPoints = Utility.particleEffect(
 				points, startDistances[iterations], stopDistances[iterations], 
-				startColor, stopColor, dispersion[iterations]);
+				startColor, stopColor, 0);
 		
 		//Draw each ColorPoint we got back
 		for(ColorPoint cp : colorPoints) {
