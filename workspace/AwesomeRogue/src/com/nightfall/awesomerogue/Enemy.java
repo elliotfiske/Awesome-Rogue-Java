@@ -185,10 +185,12 @@ public class Enemy extends Character {
 	}
 	
 	public void stun(int turns) {
+		if(stunned > turns) return;
 		stunned = turns;
 	}
 	
 	public void freeze(int turns) {
+		if(frozen > turns) return;
 		frozen = turns;
 	}
 	

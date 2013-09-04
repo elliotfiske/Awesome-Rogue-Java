@@ -69,7 +69,7 @@ public class Active {
 		System.out.println("PAWNCHHHHH in the direction of dx="+target.x+", dy="+target.y);
 		mainChar.forceMarch(target.x*4, target.y*4);
 		
-		InGameState.waitOn(new Explosion(mainChar.getX(), mainChar.getY(), new Point(target.x*4, target.y*4)));
+		InGameState.waitOn(new Explosion(mainChar.getX(), mainChar.getY()));
 	}
 	
 	private void prepGrenadeLauncher() {

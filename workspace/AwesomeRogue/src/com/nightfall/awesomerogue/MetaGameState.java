@@ -92,6 +92,7 @@ public class MetaGameState extends GameState {
 		
 		map[META_MAP_WIDTH-1][META_MAP_HEIGHT-1].visible = true;
 		map[META_MAP_WIDTH-1][META_MAP_HEIGHT-1].type = 1;
+		
 		/*if(!map[charX][charY].walls[1]) {
 			map[charX+1][charY].visible = true;
 		}

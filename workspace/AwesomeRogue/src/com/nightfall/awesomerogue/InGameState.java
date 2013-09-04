@@ -92,6 +92,10 @@ public class InGameState extends GameState {
 	private static Turn currentTurn;
 	public static boolean REWINDING = false;
 
+	/** Stores how much time has passed since the last frame.
+	 * Basically, it's my implementation of clock.tick() from python! */
+	long timePassed, beforeTime;
+	
 	private MetaGameState metaGame;
 
 	public InGameState(GamePanel gameCanvas, int levelType, MetaGameState metaGame, MainCharacter character) throws IOException {
@@ -105,6 +109,12 @@ public class InGameState extends GameState {
 		tileImages = metaGame.getTileImages();
 
 		if(levelType == 0) introLevel = true;
+		
+		//Initialize 1 explosion here. The first time an explosion happens, there's a slight
+		//delay b/c it calculates the circular points. It's static though, so this should
+		//prevent the first explosion being delayed
+		Explosion e = new Explosion(0, 0);
+		
 		initLevel(levelType);
 	}
 
@@ -150,6 +160,8 @@ public class InGameState extends GameState {
 			mainChar = new MainCharacter(10,10,map);
 			mainChar.setLevel(this);
 		}
+		
+		timePassed = beforeTime = 0;
 	}
 
 	public void clearLevel() {
@@ -192,6 +204,10 @@ public class InGameState extends GameState {
 	}
 	
 	public void independentUpdate() {
+		//Calculate the deltatime value
+		timePassed = System.currentTimeMillis() - beforeTime;
+		beforeTime = System.currentTimeMillis();
+		
 		//update floatytexts :3
 		for(int f = 0; f < texts.size(); f++) {
 			FloatyText ft = texts.get(f);
@@ -248,7 +264,8 @@ public class InGameState extends GameState {
 
 		for(int i = 0; i < effects.size(); i++) {
 			Effect e = effects.get(i);
-			e.renderAndIterate(g2);
+			e.iterate(timePassed);
+			e.render(g2);
 			if(!e.running()) {
 				effects.remove(i--); //Decrement i so we don't skip an effect
 			}
@@ -256,7 +273,8 @@ public class InGameState extends GameState {
 
 		for(int i = 0; i < ongoingEffects.size(); i++) {
 			OngoingEffect e = ongoingEffects.get(i);
-			e.renderAndIterate(g2);
+			e.iterate(timePassed);
+			e.render(g2);
 			if(!e.running()) {
 				//Run the outro of the ongoing effect and take it out
 				waitOn(e.getOutro());

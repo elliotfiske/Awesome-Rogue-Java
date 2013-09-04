@@ -11,6 +11,15 @@ public class IceBlast extends Effect {
 	Point direction;
 	int iterations;
 	
+	//How long should we wait between each iteration?
+	//(Otherwise it goes crazy crazy fast)
+	private static final long cooldown = 50;
+	//How much time is in the current iteration?
+	private long elapsedTime;
+	
+	//Stores the current ice blast coordinates
+	private ArrayList<ColorPoint> colorPoints;
+	
 	//The basic pattern of tiles that are affected by an ice blast
 	private static final int[] iceBlastStraightCoords = 
 			{-2,-8, -2,-7, -2,-6, -2,-5,
@@ -29,7 +38,7 @@ public class IceBlast extends Effect {
 		{0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 9.5, 9.8, 10};
 	//Stop distance defines how far away from ya bod the ice STOPS rendering
 	private static final double[] stopDistances  =  
-		{1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 9, 9.8, 10, 10};
+		{1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 9, 9.8, 10,  10};
 	
 	private static Color startColor = new Color(34, 143, 186, 50);
 	private static Color stopColor = new Color(138, 222, 255, 255);
@@ -40,10 +49,19 @@ public class IceBlast extends Effect {
 		this.y = y;
 		this.direction = direction;
 		iterations = 0;
+		elapsedTime = 0;
+		colorPoints = new ArrayList<ColorPoint>();
 	}
 
 	@Override
-	public void renderAndIterate(Graphics2D g2) {
+	public void iterate(long deltaTime) {
+		//Check the cooldown
+		elapsedTime += deltaTime;
+		if(elapsedTime < cooldown) {
+			return;
+		}
+		elapsedTime = 0;
+		
 		Point[] points;
 		int numDirection = Utility.getNumberedDirection(direction);
 		if(numDirection % 2 == 0) { //Even directions are cardinal
@@ -51,18 +69,21 @@ public class IceBlast extends Effect {
 		} else { //Odd directions are diagonal
 			points = Utility.makePointArray(iceBlastDiagonalCoords, numDirection);
 		}
-		ArrayList<ColorPoint> colorPoints = Utility.particleEffect(
+		colorPoints = Utility.particleEffect(
 				points, startDistances[iterations], stopDistances[iterations], 
 				startColor, stopColor, 0);
 		
-		//Draw each ColorPoint we got back
-		for(ColorPoint cp : colorPoints) {
-			//Cell coordinates of current freezysquare
-			int cx = cp.point.x + x;
-			int cy = cp.point.y + y;
-			
+		for(int p = 0; p < colorPoints.size(); p++) {
 			//Check if there's anything blocking the freeze blast
-			if(!Utility.straightPathTo(new Point(x, y), new Point(cx, cy), 10)) {
+			//Check first with a "path smoothness" of 1, then a smoothness of 10
+			//to allow for the most possible tiles 'cuz we're nice to the player
+			int cx = colorPoints.get(p).point.x + x;
+			int cy = colorPoints.get(p).point.y + y;
+			
+			if(!(Utility.straightPathExists(new Point(x, y), new Point(cx, cy), 1) || 
+					Utility.straightPathExists(new Point(x, y), new Point(cx, cy), 10))) {
+				colorPoints.remove(p);
+				p--;
 				continue;
 			}
 			
@@ -71,14 +92,6 @@ public class IceBlast extends Effect {
 			if(victim != null && victim instanceof Enemy) {
 				((Enemy) victim).frozen = 10;
 			}
-			
-			Utility.drawTileRectangle(cp.point.x + x, cp.point.y + y, cp.color, g2);
-		}
-		
-		try {
-			Thread.sleep(50);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
 		}
 		
 		iterations++;
@@ -89,7 +102,14 @@ public class IceBlast extends Effect {
 
 	@Override
 	public void render(Graphics2D g2) {
-		//Do nothing?? Why is this even here???!?
+		//Draw each ColorPoint
+		for(ColorPoint cp : colorPoints) {
+			//Cell coordinates of current freezysquare
+			int cx = cp.point.x + x;
+			int cy = cp.point.y + y;
+			
+			Utility.drawTileRectangle(cx, cy, cp.color, g2);
+		}
 	}
 
 	@Override

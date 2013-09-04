@@ -257,7 +257,7 @@ public class Utility {
 	 * @param smoothness See walkStraight
 	 * @return True if there's a straight, unblocked path to the location, false otherwise.
 	 */
-	public static boolean straightPathTo(Point startPoint, Point targetPoint, double smoothness) {
+	public static boolean straightPathExists(Point startPoint, Point targetPoint, double smoothness) {
 		while(!(startPoint.x == targetPoint.x && startPoint.y == targetPoint.y)) {
 			//Calculate which direction it would be smart to go in order to walk to the player.
 			Utility.walkStraight(startPoint, targetPoint, smoothness);
@@ -361,6 +361,37 @@ public class Utility {
 	
 	public static Point[] makePointArray(int[] coords, Point direction) {
 		return makePointArray(coords, getNumberedDirection(direction));
+	}
+	
+	/**
+	 * @return An ArrayList of points in a circle, suitable for an explosion
+	 */
+	public static Point[] makeCircularPointArray() {
+		int MAX_RADIUS = 6;
+		double ANGLE_STEP = Math.PI / 25;
+		
+		//Figure out magically how many points will be in the final array
+		int numPoints = (int) Math.round(MAX_RADIUS * (Math.PI * 2 / ANGLE_STEP));
+	    ArrayList<Point> arrayListResult = new ArrayList<Point>();
+		
+		int i = 0;
+		for(int radius = 0; radius < MAX_RADIUS; radius++) {
+			for(double angle = 0; angle < 2 * Math.PI; angle += ANGLE_STEP) {
+				int x = (int) Math.round(radius * Math.cos(angle));
+				int y = (int) Math.round(radius * Math.sin(angle));
+				
+				arrayListResult.add(new Point(x, y));
+				i++;
+			}
+		}
+		
+		//Convert from ArrayList to Array
+		Point[] result = new Point[arrayListResult.size()];
+		result = arrayListResult.toArray(result);
+		
+		System.out.println("booo");
+		
+		return result;
 	}
 	
 	/**

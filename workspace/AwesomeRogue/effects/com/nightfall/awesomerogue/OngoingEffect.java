@@ -18,7 +18,7 @@ public abstract class OngoingEffect extends Effect {
 	private Effect outro;
 	
 	@Override
-	public abstract void renderAndIterate(Graphics2D g2);
+	public abstract void iterate(long deltaTime);
 
 	@Override
 	public abstract void render(Graphics2D g2);
