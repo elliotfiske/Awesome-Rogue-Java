@@ -46,7 +46,7 @@ public class MainCharacter extends Character {
 		
 		skills[0] = Active.ICE_CROWN;
 		skills[1] = Active.GRENADE_LAUNCHER;
-		skills[2] = Active.DRILL_DOZER;
+		skills[2] = Active.HULK_SERUM;
 	}
 	
 	public MainCharacter(int x, int y) {

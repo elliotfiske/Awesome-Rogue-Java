@@ -272,12 +272,16 @@ public class InGameState extends GameState {
 		}
 
 		for(int i = 0; i < ongoingEffects.size(); i++) {
-			OngoingEffect e = ongoingEffects.get(i);
-			e.iterate(timePassed);
-			e.render(g2);
-			if(!e.running()) {
+			OngoingEffect oe = ongoingEffects.get(i);
+			
+			//Only render an ongoing effect if its intro is done
+			if(!oe.getIntro().running()) {
+				oe.render(g2);
+			}
+			
+			if(!oe.running()) {
 				//Run the outro of the ongoing effect and take it out
-				waitOn(e.getOutro());
+				waitOn(oe.getOutro());
 				ongoingEffects.remove(i--);
 			}
 		}
@@ -578,8 +582,12 @@ public class InGameState extends GameState {
 		//Iterate the iterable effects here (the dead ones are removed in render() )
 		for(int i = 0; i < ongoingEffects.size(); i++) {
 			OngoingEffect oe = ongoingEffects.get(i);
-			oe.turnIterate(map, entities);
+			//Only iterate an ongoing effect if its intro is done
+			if(!oe.getIntro().running()) {
+				oe.turnIterate(map, entities);
+			}
 		}
+		
 
 		inputState = PLAYER_MOVE;
 	}

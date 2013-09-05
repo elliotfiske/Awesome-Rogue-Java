@@ -20,7 +20,6 @@ public class OngoingHulkOut extends OngoingEffect {
 		mainChar.setHulking(true);
 	}
 
-	@Override
 	public void renderAndIterate(Graphics2D g2) {
 		Color transGreen = new Color(0, 255, 0, HulkOut.MAX_ALPHA);
 		g2.setColor(transGreen);
@@ -30,8 +29,10 @@ public class OngoingHulkOut extends OngoingEffect {
 
 	@Override
 	public void render(Graphics2D g2) {
-		// TODO Auto-generated method stub
-		
+		Color transGreen = new Color(0, 255, 0, HulkOut.MAX_ALPHA);
+		g2.setColor(transGreen);
+		g2.fillRect(InGameState.INGAME_WINDOW_OFFSET_X, InGameState.INGAME_WINDOW_OFFSET_Y,
+				InGameState.INGAME_WINDOW_WIDTH * InGameState.TILE_SIZE, InGameState.INGAME_WINDOW_HEIGHT * InGameState.TILE_SIZE);
 	}
 
 	@Override
@@ -47,6 +48,16 @@ public class OngoingHulkOut extends OngoingEffect {
 	public void reverse() {
 		//Nothing changes for this guy at least.
 		setRunning(true);
+	}
+
+	@Override
+	public void iterate(long deltaTime) {
+		duration--;
+		
+		if(duration <= 0) {
+			setRunning(false);
+			mainChar.setHulking(false);
+		}
 	}
 	
 }
