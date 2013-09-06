@@ -142,7 +142,7 @@ public class Enemy extends Character {
 	 * @param camX Camera X offset
 	 * @param camY Camera Y offset
 	 */
-	public void draw(Graphics2D g2, int camX, int camY) {
+	public void draw(Graphics2D g2, int camX, int camY, int screenShake) {
 		
 		if(frozen > 0) {
 			g2.setColor(Color.blue);
@@ -150,8 +150,8 @@ public class Enemy extends Character {
 			g2.setColor(Color.white);
 		}
 		
-		g2.drawString(icon, ((x - camX)*12 + 2),
-				((y - camY)*12 + 10));	
+		g2.drawString(icon, ((x - camX) * InGameState.TILE_SIZE + 2),
+				((y - camY) * InGameState.TILE_SIZE + 10 + InGameState.screenShake));	
 	}
 
 	/**

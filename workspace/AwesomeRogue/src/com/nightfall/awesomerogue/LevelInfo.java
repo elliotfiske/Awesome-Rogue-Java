@@ -522,7 +522,17 @@ public class LevelInfo {
 				}
 			}
 		}
-	}
+		
+		//Change all the Void tiles to Wall tiles
+		for(int i = 0; i < map.length; i++) {
+			for(int j = 0; j < map[0].length; j++) {
+				Tile t = map[i][j];
+				if(t.type == Tile.VOID) {
+					t.type = Tile.WALL;
+				}
+			}
+		}
+	} 
 	
 	private boolean makeCorridor(int x, int y, int length, int direction, Random numGen) {
 		// Define the dimensions

@@ -158,6 +158,7 @@ public class MainCharacter extends Character {
 				
 				if(walls.size() > 0 || doors.size() > 0) {
 					System.out.println("You smash through the " + wallString + conjunctionJunction + doorString + "!");
+					InGameState.shakeScreen(5);
 				}
 				
 				for(Point p : walls) {
@@ -220,13 +221,15 @@ public class MainCharacter extends Character {
 	}
 	
 	@Override
-	public void draw(Graphics2D g2, int camX, int camY) {
+	public void draw(Graphics2D g2, int camX, int camY, int screenShake) {
 		if(!isHulking) {
-			super.draw(g2, camX, camY);
+			super.draw(g2, camX, camY, screenShake);
 		} else {
 			//TODO: replace with big green @
 			g2.setColor(Color.green);
-			g2.fillRect((getX()-camX)*12 - 12, ((getY()-camY)*12 - 12), InGameState.TILE_SIZE * 3, InGameState.TILE_SIZE * 3);
+			g2.fillRect((getX()-camX)* InGameState.TILE_SIZE - InGameState.TILE_SIZE,
+					    ((getY()-camY)*InGameState.TILE_SIZE - InGameState.TILE_SIZE + screenShake), 
+					     InGameState.TILE_SIZE * 3, InGameState.TILE_SIZE * 3);
 		}
 	}
 
@@ -263,6 +266,7 @@ public class MainCharacter extends Character {
 			
 			if(blewStuffUp) {
 				System.out.println("You smash down the walls around you as you transform!");
+				InGameState.shakeScreen(7);
 			}
 		}
 	}

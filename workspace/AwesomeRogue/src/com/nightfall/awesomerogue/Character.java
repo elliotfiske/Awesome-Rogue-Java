@@ -115,10 +115,11 @@ public class Character {
 	 * @param g2 The Graphics2D context that will be used to draw.
 	 * @param camX Where the camera is horizontally.
 	 * @param camY Where the camera is vertically.
+	 * @param screenShake The current screen shaking offset
 	 */
-	public void draw(Graphics2D g2, int camX, int camY) {
+	public void draw(Graphics2D g2, int camX, int camY, int screenShake) {
 		g2.setColor(Color.white);
-		g2.drawString(character, ((x-camX)*12), ((y-camY)*12+12));
+		g2.drawString(character, ((x-camX)*12), ((y-camY)*12+12 + screenShake));
 		if(drawingAttack) {
 			if(!currentWeapon.draw(g2, camX, camY)) {
 				drawingAttack = false;

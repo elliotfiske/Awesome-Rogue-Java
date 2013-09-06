@@ -42,7 +42,14 @@ public class InGameState extends GameState {
 	 */
 	public static int CAMERA_X = 0;
 	public static int CAMERA_Y = 0;
-
+	
+	/** The PIXEL y value of the camera after screenshake is applied*/
+	public static int SHAKEN_CAMERA_Y = 0;
+	
+	/** I can shake-a my fanny I can shake-a my can */
+	public static int screenShake;
+	private static int elapsedShake;
+	private static final int SHAKE_COOLDOWN = 32;
 
 	public static Tile[][] map;
 	int mapWidth = 0;
@@ -110,11 +117,6 @@ public class InGameState extends GameState {
 
 		if(levelType == 0) introLevel = true;
 		
-		//Initialize 1 explosion here. The first time an explosion happens, there's a slight
-		//delay b/c it calculates the circular points. It's static though, so this should
-		//prevent the first explosion being delayed
-		Explosion e = new Explosion(0, 0);
-		
 		initLevel(levelType);
 	}
 
@@ -142,6 +144,11 @@ public class InGameState extends GameState {
 		enemies = new ArrayList<Enemy>();
 
 		pets = new ArrayList<Pet>();
+		
+		beforeTime = System.currentTimeMillis();
+		
+		screenShake = 0;
+		elapsedShake = 0;
 
 		texts = new ArrayList<FloatyText>();
 		pastTurns = new ArrayList<Turn>();
@@ -218,6 +225,17 @@ public class InGameState extends GameState {
 				texts.remove(f--);
 			}
 		}
+		
+		//Iterate screenshake
+		if(screenShake != 0) {
+			elapsedShake += timePassed;
+			if(elapsedShake > SHAKE_COOLDOWN) {
+				screenShake = -(screenShake - Utility.sign(screenShake));
+				elapsedShake = 0;
+			}
+		}
+		
+		SHAKEN_CAMERA_Y = CAMERA_Y * TILE_SIZE + screenShake;
 	}
 
 	/** Called when the game should stop waiting for player input. */
@@ -307,12 +325,12 @@ public class InGameState extends GameState {
 					//Draw the tile image (its type should correspond to the index in tileImages[] that
 					//represents it)
 					g2.drawImage(tileImages[ map[i][j].type*2 ], (i-CAMERA_X)*TILE_SIZE,
-							(j-CAMERA_Y)*TILE_SIZE, null);
+							j*TILE_SIZE - SHAKEN_CAMERA_Y, null);
 
 					//Draw the tile illustrations (used for debuggin')
 					if(map[i][j].illustrated) {
 						g2.setColor(map[i][j].color);
-						g2.fillRect((i-CAMERA_X)*TILE_SIZE, (j-CAMERA_Y)*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+						g2.fillRect((i-CAMERA_X)*TILE_SIZE, j*TILE_SIZE - SHAKEN_CAMERA_Y, TILE_SIZE, TILE_SIZE);
 					}
 
 					/*if(map[i][j].getID() != 0 && GODMODE_DRAW_IDS) {
@@ -323,14 +341,12 @@ public class InGameState extends GameState {
 				} else if(map[i][j].seen) {
 					//The tile is in our memory.  Draw it, but darkened.
 					g2.drawImage(tileImages[ map[i][j].type*2+1 ], (i-CAMERA_X)*TILE_SIZE,
-							(j-CAMERA_Y)*TILE_SIZE, null);
+							j*TILE_SIZE - SHAKEN_CAMERA_Y, null);
 				}
 
 				if(map[i][j].illustrated) {
-					g2.setColor(map[i][j].color);
-					g2.fillRect((i-CAMERA_X)*TILE_SIZE, (j-CAMERA_Y)*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+					Utility.drawTileRectangle((i-CAMERA_X) * TILE_SIZE, j * TILE_SIZE - SHAKEN_CAMERA_Y, map[i][j].color, g2);
 				}
-
 			}
 		}
 
@@ -349,7 +365,7 @@ public class InGameState extends GameState {
 		}
 
 		//Draw the user character.
-		mainChar.draw(g2, CAMERA_X, CAMERA_Y);
+		mainChar.draw(g2, CAMERA_X, CAMERA_Y, screenShake);
 
 		//Draw the enemies.
 		for(int i = 0; i < enemies.size(); i++) {
@@ -359,10 +375,10 @@ public class InGameState extends GameState {
 				continue;
 			}
 			if(map[e.getX()][e.getY()].visible || GODMODE_VISION){ 
-				e.draw(g2, CAMERA_X, CAMERA_Y);
+				e.draw(g2, CAMERA_X, CAMERA_Y, screenShake);
 			} else if(mainChar.hasPassive(Passive.XRAY_GOGGLES)) {
 				g2.setColor(Color.red);
-				g2.drawString("?", (e.getX()-CAMERA_X)*TILE_SIZE, (e.getY()-CAMERA_Y)*TILE_SIZE + TILE_SIZE );
+				g2.drawString("?", (e.getX()-CAMERA_X)*TILE_SIZE, (e.getY()-CAMERA_Y)*TILE_SIZE + TILE_SIZE + screenShake);
 			}
 		}
 
@@ -376,7 +392,7 @@ public class InGameState extends GameState {
 			}
 
 			//Gonna make it so that you can see through pet's eyes maybe?
-			p.draw(g2, CAMERA_X, CAMERA_Y);
+			p.draw(g2, CAMERA_X, CAMERA_Y, screenShake);
 		}
 
 		Graphics2D g = (Graphics2D) mapImg.getGraphics();
@@ -407,6 +423,10 @@ public class InGameState extends GameState {
 		}
 	}
 
+	public static void shakeScreen(int intensity) {
+		screenShake = intensity;
+	}
+	
 	public void keyPress(KeyEvent e) {
 		//		if(e.getKeyCode() == KeyEvent.VK_SPACE) {
 		//			LevelInfo.MAX_FEATURES ++;
@@ -587,7 +607,6 @@ public class InGameState extends GameState {
 				oe.turnIterate(map, entities);
 			}
 		}
-		
 
 		inputState = PLAYER_MOVE;
 	}
@@ -843,7 +862,8 @@ public class InGameState extends GameState {
 
 	/** Wall -> floor at destroyX, destroyY. Returns true if a wall/door was destroyed */
 	public static boolean demolish(int destroyX, int destroyY) {
-		if(map[destroyX][destroyY].type == Tile.WALL || map[destroyX][destroyY].type == Tile.FLOOR) {
+		if(map[destroyX][destroyY].type == Tile.WALL || map[destroyX][destroyY].type == Tile.DOOR ||
+				map[destroyX][destroyY].type == Tile.OPEN_DOOR) {
 			map[destroyX][destroyY] = new Tile(Tile.FLOOR, destroyX, destroyY);
 			addEvent(new Event.MapChange(new Tile(Tile.FLOOR, destroyX, destroyY), new Tile(Tile.WALL, destroyX, destroyY)));
 			return true;

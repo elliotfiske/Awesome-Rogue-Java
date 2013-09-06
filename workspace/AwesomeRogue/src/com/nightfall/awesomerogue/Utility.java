@@ -447,7 +447,7 @@ public class Utility {
 	public static void drawTileRectangle(int x, int y, Color color, Graphics2D g2) {
 		g2.setColor(color);
 		g2.fillRect( x * InGameState.TILE_SIZE + InGameState.INGAME_WINDOW_OFFSET_X - InGameState.CAMERA_X * InGameState.TILE_SIZE, 
-				y * InGameState.TILE_SIZE + InGameState.INGAME_WINDOW_OFFSET_Y - InGameState.CAMERA_Y * InGameState.TILE_SIZE, 
+				y * InGameState.TILE_SIZE + InGameState.INGAME_WINDOW_OFFSET_Y - InGameState.CAMERA_Y * InGameState.TILE_SIZE + InGameState.screenShake, 
 				InGameState.TILE_SIZE, InGameState.TILE_SIZE);
 	}
 }

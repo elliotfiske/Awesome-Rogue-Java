@@ -34,6 +34,8 @@ public class Explosion extends Effect {
 		iterations = 0;
 		elapsedTime = 0;
 		colorPoints = new ArrayList<ColorPoint>();
+		
+		InGameState.shakeScreen(10);
 	}
 
 	@Override
@@ -49,10 +51,10 @@ public class Explosion extends Effect {
 				startColor, stopColor, 65);
 		
 		for(int p = 0; p < colorPoints.size(); p++) {
-			//Check if there's anything blocking the explosion
 			int cx = colorPoints.get(p).point.x + x;
 			int cy = colorPoints.get(p).point.y + y;
 			
+			//Check if there's anything blocking the explosion
 			if(!(Utility.straightPathExists(new Point(x, y), new Point(cx, cy), 1) || 
 					Utility.straightPathExists(new Point(x, y), new Point(cx, cy), 10))) {
 				colorPoints.remove(p);
