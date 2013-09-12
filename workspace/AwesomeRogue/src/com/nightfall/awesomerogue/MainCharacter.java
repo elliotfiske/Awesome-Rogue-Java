@@ -221,14 +221,14 @@ public class MainCharacter extends Character {
 	}
 	
 	@Override
-	public void draw(Graphics2D g2, int camX, int camY, int screenShake) {
+	public void draw(Graphics2D g2, int camX, int camY) {
 		if(!isHulking) {
-			super.draw(g2, camX, camY, screenShake);
+			super.draw(g2, camX, camY);
 		} else {
 			//TODO: replace with big green @
 			g2.setColor(Color.green);
-			g2.fillRect((getX()-camX)* InGameState.TILE_SIZE - InGameState.TILE_SIZE,
-					    ((getY()-camY)*InGameState.TILE_SIZE - InGameState.TILE_SIZE + screenShake), 
+			g2.fillRect((getX() - 1) * InGameState.TILE_SIZE - camX,
+					   ((getY() - 1) * InGameState.TILE_SIZE - camY), 
 					     InGameState.TILE_SIZE * 3, InGameState.TILE_SIZE * 3);
 		}
 	}

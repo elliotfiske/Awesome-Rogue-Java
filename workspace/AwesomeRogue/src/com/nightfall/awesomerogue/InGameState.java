@@ -37,7 +37,7 @@ public class InGameState extends GameState {
 	public static final boolean GODMODE_EARTHQUAKE = true;
 
 	/**
-	 * Describes the cell location of the upper lefthand corner of the area
+	 * Describes the pixel location of the upper lefthand corner of the area
 	 * we render.
 	 */
 	public static int CAMERA_X = 0;
@@ -316,21 +316,21 @@ public class InGameState extends GameState {
 		g2.setColor(Color.white);
 
 		// Draw the tiles of the map.
-		for(int i = CAMERA_X; i < CAMERA_X + INGAME_WINDOW_WIDTH && i < map.length; i++) {
-			for(int j = CAMERA_Y; j < CAMERA_Y + INGAME_WINDOW_HEIGHT && j < map[0].length; j++) {
+		for(int i = CAMERA_X / TILE_SIZE; i < CAMERA_X / TILE_SIZE + INGAME_WINDOW_WIDTH && i < map.length; i++) {
+			for(int j = CAMERA_Y / TILE_SIZE; j < CAMERA_Y / TILE_SIZE + INGAME_WINDOW_HEIGHT && j < map[0].length; j++) {
 				// Don't draw the void!!
 				if(map[i][j].type == Tile.VOID) continue; 
 				if(map[i][j].visible || GODMODE_VISION) {
 
 					//Draw the tile image (its type should correspond to the index in tileImages[] that
 					//represents it)
-					g2.drawImage(tileImages[ map[i][j].type*2 ], (i-CAMERA_X)*TILE_SIZE,
+					g2.drawImage(tileImages[ map[i][j].type*2 ], i * TILE_SIZE - CAMERA_X,
 							j*TILE_SIZE - SHAKEN_CAMERA_Y, null);
 
 					//Draw the tile illustrations (used for debuggin')
 					if(map[i][j].illustrated) {
 						g2.setColor(map[i][j].color);
-						g2.fillRect((i-CAMERA_X)*TILE_SIZE, j*TILE_SIZE - SHAKEN_CAMERA_Y, TILE_SIZE, TILE_SIZE);
+						g2.fillRect(i * TILE_SIZE - CAMERA_X, j * TILE_SIZE - SHAKEN_CAMERA_Y, TILE_SIZE, TILE_SIZE);
 					}
 
 					/*if(map[i][j].getID() != 0 && GODMODE_DRAW_IDS) {
@@ -340,12 +340,12 @@ public class InGameState extends GameState {
 
 				} else if(map[i][j].seen) {
 					//The tile is in our memory.  Draw it, but darkened.
-					g2.drawImage(tileImages[ map[i][j].type*2+1 ], (i-CAMERA_X)*TILE_SIZE,
+					g2.drawImage(tileImages[ map[i][j].type*2+1 ], i * TILE_SIZE - CAMERA_X,
 							j*TILE_SIZE - SHAKEN_CAMERA_Y, null);
 				}
 
 				if(map[i][j].illustrated) {
-					Utility.drawTileRectangle((i-CAMERA_X) * TILE_SIZE, j * TILE_SIZE - SHAKEN_CAMERA_Y, map[i][j].color, g2);
+					Utility.drawTileRectangle(i * TILE_SIZE - CAMERA_X, j * TILE_SIZE - SHAKEN_CAMERA_Y, map[i][j].color, g2);
 				}
 			}
 		}
@@ -365,7 +365,7 @@ public class InGameState extends GameState {
 		}
 
 		//Draw the user character.
-		mainChar.draw(g2, CAMERA_X, CAMERA_Y, screenShake);
+		mainChar.draw(g2, CAMERA_X, SHAKEN_CAMERA_Y);
 
 		//Draw the enemies.
 		for(int i = 0; i < enemies.size(); i++) {
@@ -375,10 +375,10 @@ public class InGameState extends GameState {
 				continue;
 			}
 			if(map[e.getX()][e.getY()].visible || GODMODE_VISION){ 
-				e.draw(g2, CAMERA_X, CAMERA_Y, screenShake);
+				e.draw(g2, CAMERA_X, SHAKEN_CAMERA_Y);
 			} else if(mainChar.hasPassive(Passive.XRAY_GOGGLES)) {
 				g2.setColor(Color.red);
-				g2.drawString("?", (e.getX()-CAMERA_X)*TILE_SIZE, (e.getY()-CAMERA_Y)*TILE_SIZE + TILE_SIZE + screenShake);
+				g2.drawString("?", e.getX() * TILE_SIZE - CAMERA_X, (e.getY() + 1) * TILE_SIZE - SHAKEN_CAMERA_Y);
 			}
 		}
 
@@ -392,7 +392,7 @@ public class InGameState extends GameState {
 			}
 
 			//Gonna make it so that you can see through pet's eyes maybe?
-			p.draw(g2, CAMERA_X, CAMERA_Y, screenShake);
+			p.draw(g2, CAMERA_X, SHAKEN_CAMERA_Y);
 		}
 
 		Graphics2D g = (Graphics2D) mapImg.getGraphics();
@@ -401,23 +401,25 @@ public class InGameState extends GameState {
 
 	/**
 	 * Character calls this if the camera needs to be moved.
-	 * Also useful for shaking!
 	 * @param dx How much to move the camera by (x)
 	 * @param dy How much to move the camera by (y)
 	 */
 	public void moveCamera(int dx, int dy) {
+		dx *= TILE_SIZE;
+		dy *= TILE_SIZE;
+		
 		if(CAMERA_X + dx < 0) {
 			CAMERA_X = 0;
-		} else if(CAMERA_X + dx + INGAME_WINDOW_WIDTH > map.length) {                                                             
-			CAMERA_X = map.length - INGAME_WINDOW_WIDTH;
+		} else if(CAMERA_X + dx + INGAME_WINDOW_WIDTH * TILE_SIZE > map.length * TILE_SIZE) {                                                             
+			CAMERA_X = (map.length - INGAME_WINDOW_WIDTH) * TILE_SIZE;
 		} else {
 			CAMERA_X += dx;
 		}
 
 		if(CAMERA_Y + dy < 0) {
 			CAMERA_Y = 0;
-		} else if(CAMERA_Y + dy + INGAME_WINDOW_HEIGHT > map[0].length) {                                                             
-			CAMERA_Y = map[0].length - INGAME_WINDOW_HEIGHT;
+		} else if(CAMERA_Y + dy + INGAME_WINDOW_HEIGHT * TILE_SIZE > map[0].length * TILE_SIZE) {                                                             
+			CAMERA_Y = (map[0].length - INGAME_WINDOW_HEIGHT) * TILE_SIZE;
 		} else {
 			CAMERA_Y += dy;
 		}
@@ -544,11 +546,8 @@ public class InGameState extends GameState {
 		x -= INGAME_WINDOW_OFFSET_X;
 		y -= INGAME_WINDOW_OFFSET_Y;
 
-		int tileX = x / TILE_SIZE;
-		int tileY = y / TILE_SIZE;
-
-		tileX += CAMERA_X;
-		tileY += CAMERA_Y;
+		int tileX = (x + CAMERA_X) / TILE_SIZE;
+		int tileY = (y + SHAKEN_CAMERA_Y) / TILE_SIZE;
 
 		if(entities[tileX][tileY] != null) {
 			System.out.println("Entity at " + tileX + ", " + tileY + ": " + entities[tileX][tileY].getName());
@@ -615,21 +614,24 @@ public class InGameState extends GameState {
 	 * Update the camera.  Used for teleporting or force marching
 	 */
 	public void updateCamera() {
-		if(mainChar.getX() - CAMERA_X < INGAME_SCROLL_MINX) {
-			int cameraMoveDistance = INGAME_SCROLL_MINX - (mainChar.getX() - CAMERA_X);
+		double cellCameraX = CAMERA_X / (double) TILE_SIZE;
+		double cellCameraY = CAMERA_Y / (double) TILE_SIZE;
+		
+		if(mainChar.getX() - cellCameraX < INGAME_SCROLL_MINX) {
+			int cameraMoveDistance = (int) (INGAME_SCROLL_MINX - (mainChar.getX() - cellCameraX));
 			moveCamera(-cameraMoveDistance, 0);
 		}
-		else if(mainChar.getX() - CAMERA_X > INGAME_SCROLL_MAXX) {
-			int cameraMoveDistance = mainChar.getX() - CAMERA_X - INGAME_SCROLL_MAXX;
+		else if(mainChar.getX() - cellCameraX > INGAME_SCROLL_MAXX) {
+			int cameraMoveDistance = (int) (mainChar.getX() - cellCameraX - INGAME_SCROLL_MAXX);
 			moveCamera(cameraMoveDistance, 0);
 		}
 
-		if(mainChar.getY() - CAMERA_Y < INGAME_SCROLL_MINY) {
-			int cameraMoveDistance = INGAME_SCROLL_MINY - (mainChar.getY() - CAMERA_Y);
+		if(mainChar.getY() - cellCameraY < INGAME_SCROLL_MINY) {
+			int cameraMoveDistance = (int) (INGAME_SCROLL_MINY - (mainChar.getY() - cellCameraY));
 			moveCamera(0, -cameraMoveDistance);
 		}
-		else if(mainChar.getY() - CAMERA_Y > INGAME_SCROLL_MAXY) {
-			int cameraMoveDistance = mainChar.getY() - CAMERA_Y - INGAME_SCROLL_MAXY;
+		else if(mainChar.getY() - cellCameraY > INGAME_SCROLL_MAXY) {
+			int cameraMoveDistance = (int) (mainChar.getY() - cellCameraY - INGAME_SCROLL_MAXY);
 			moveCamera(0, cameraMoveDistance);
 		}
 	}
@@ -850,7 +852,7 @@ public class InGameState extends GameState {
 		public void draw(Graphics2D g2) {
 			Color color = new Color(this.color.getRed(), this.color.getGreen(), this.color.getBlue(), alpha);
 			g2.setColor(color);
-			g2.drawString(message, x - CAMERA_X * TILE_SIZE, y - CAMERA_Y * TILE_SIZE);
+			g2.drawString(message, x - CAMERA_X, y - SHAKEN_CAMERA_Y);
 		}
 
 		public void update() {
