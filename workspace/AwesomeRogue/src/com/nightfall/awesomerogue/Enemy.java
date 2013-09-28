@@ -3,10 +3,21 @@ package com.nightfall.awesomerogue;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 public class Enemy extends Character {
 
+	public static enum Data {
+		MUSHROOM("mushroom", 5, 1, 0), RAT("rat", 10, 2, 5), ZOMBIE("zombie", 15, 7, 3), SKELETON("skeleton", 15, 3, 5),
+		OGRE("ogre", 25, 15, 2), WIZARD("wizard", 50, 10, 5);
+		public String name;
+		public static BufferedImage image;
+		private Data(String name, int health, int weight, int speed) {
+			this.name = name;
+		}
+	}
+	
 	public static final int ANGRY_MUSHROOM = 0;
 	public static final int RAT = 1;
 	public static final int GIANT_RAT = 2;
@@ -19,7 +30,6 @@ public class Enemy extends Character {
 	public static final String[] enemyIcons = {"M", "r", "R", "Z", "S", "W", "m"};
 
 	private int whichEnemy, health = 0;
-	String name;
 	String icon;
 	int weight;
 
@@ -38,64 +48,17 @@ public class Enemy extends Character {
 	 * then the enemy has been visible since smartMove began. */
 	public boolean smartSeen;
 
-	public Enemy /* number one */ (int x, int y, int whichEnemy) {
-		super(x, y, enemyIcons[whichEnemy]);
+	public Enemy /* number one */ (int x, int y, Data whichEnemy) {
+		super(x, y, Data.image);
 
 		this.whichEnemy = whichEnemy;
 
 		smartSeen = false;
 		stunned = frozen = 0;
-		
-		switch(whichEnemy) {
-		case ANGRY_MUSHROOM:
-			health = 15;
-			name = "angry mushroom";
-			weight = 20;
-			speed = 0;
-			break;
-		case MUSHROOM:
-			health = 1;
-			name = "mushroom";
-			weight = 15;
-			speed = 0;
-			break;
-		case RAT:
-			health = 10;
-			name = "rat";
-			weight = 15;
-			speed = 5;
-			break;
-		case ZOMBIE:
-			health = 30;
-			name = "zombie";
-			weight = 30;
-			speed = 3;
-			break;
-		case SKELETON:
-			health = 40;
-			name = "skeleton";
-			weight = 10;
-			speed = 4;
-			break;
-		case WIZARD:
-			health = 50;
-			name = "ALLAN PLEASE PUT IN WIZARD NAME";
-			//TODO: implement sweet wizard name maker
-			weight = 35;
-			speed = 5;
-			break;
-		case OGRE:
-			health = 20;
-			name = "ogre";
-			weight = 30;
-			speed = 2;
-			break;
-		}
 
-		super.character = name;
-		
 		icon = enemyIcons[whichEnemy];
-
+		super.character = icon;
+		
 		setCurrentWeapon(new EnemyWeapon(whichEnemy));
 	}
 
@@ -142,7 +105,8 @@ public class Enemy extends Character {
 	 * @param camX Camera X offset
 	 * @param camY Camera Y offset
 	 */
-	public void draw(Graphics2D g2, int camX, int camY, int screenShake) {
+	@Override
+	public void draw(Graphics2D g2, int camX, int camY) {
 		
 		if(frozen > 0) {
 			g2.setColor(Color.blue);
@@ -150,8 +114,8 @@ public class Enemy extends Character {
 			g2.setColor(Color.white);
 		}
 		
-		g2.drawString(icon, ((x - camX) * InGameState.TILE_SIZE + 2),
-				((y - camY) * InGameState.TILE_SIZE + 10 + InGameState.screenShake));	
+		g2.drawString(icon, x * InGameState.TILE_SIZE - camX + 2,
+				            y * InGameState.TILE_SIZE + 10 - camY);	
 	}
 
 	/**

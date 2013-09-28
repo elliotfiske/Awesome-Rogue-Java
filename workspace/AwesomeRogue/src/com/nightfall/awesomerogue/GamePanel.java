@@ -20,7 +20,7 @@ import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
 public class GamePanel extends JPanel implements Runnable {
-	public static final int PHEIGHT = 700;
+	public static final int PHEIGHT = 1200;
 	public static final int PWIDTH = (int) (PHEIGHT * 1.2); //PWIDTH needs to be 1.2 * PHEIGHT
 	
 	private Thread animator;

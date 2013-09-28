@@ -84,7 +84,6 @@ public class GameFrame extends JFrame implements WindowListener {
 			
 			return strip;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			
 			return null;

@@ -17,15 +17,15 @@ import javax.imageio.ImageIO;
 public class InGameState extends GameState {
 	public static final int INGAME_WINDOW_OFFSET_X = 46;	// In pixels, not cells
 	public static final int INGAME_WINDOW_OFFSET_Y = 18;	// In pixels, not cells
-	public static final int INGAME_WINDOW_WIDTH = 38;		// In cells, not pixels
-	public static final int INGAME_WINDOW_HEIGHT = 35;		// In cells, not pixels
+	public static final int INGAME_WINDOW_WIDTH = 20;		// In cells, not pixels
+	public static final int INGAME_WINDOW_HEIGHT = 20;		// In cells, not pixels
 	public static final int INGAME_SCROLL_PADDING = 10;		// Padding to scroll the viewing window
 	public static final int INGAME_SCROLL_MINX = INGAME_SCROLL_PADDING;
 	public static final int INGAME_SCROLL_MAXX = INGAME_WINDOW_WIDTH - INGAME_SCROLL_PADDING;
 	public static final int INGAME_SCROLL_MINY = INGAME_SCROLL_PADDING;
 	public static final int INGAME_SCROLL_MAXY = INGAME_WINDOW_HEIGHT - INGAME_SCROLL_PADDING;
 
-	public static final int TILE_SIZE = 12;
+	public static final int TILE_SIZE = 42;
 
 	//Enable to debug stuff
 	public static final boolean GODMODE_VISION = false;
@@ -243,7 +243,7 @@ public class InGameState extends GameState {
 			}
 		}
 		
-		SHAKEN_CAMERA_Y = CAMERA_PX_Y * TILE_SIZE + screenShake;
+		SHAKEN_CAMERA_Y = CAMERA_PX_Y + screenShake;
 	}
 
 	/** Called when the game should stop waiting for player input. */
@@ -285,7 +285,7 @@ public class InGameState extends GameState {
 			texts.get(f).draw(g2);
 		}
 
-		imgSFX.drawResizedImage(g2, guiBG, 0, 0, GamePanel.PWIDTH, GamePanel.PHEIGHT);
+		//imgSFX.drawResizedImage(g2, guiBG, 0, 0, GamePanel.PWIDTH, GamePanel.PHEIGHT);
 		g2.drawImage(mapImg, INGAME_WINDOW_OFFSET_X, INGAME_WINDOW_OFFSET_Y, null);
 
 		for(int i = 0; i < effects.size(); i++) {
@@ -332,13 +332,12 @@ public class InGameState extends GameState {
 
 					//Draw the tile image (its type should correspond to the index in tileImages[] that
 					//represents it)
-					g2.drawImage(tileImages[ map[i][j].type*2 ], (i-CAMERA_CELL_X)*TILE_SIZE,
-							(j-CAMERA_CELL_Y)*TILE_SIZE, null);
-
+					imgSFX.drawResizedImage(g2, tileImages[ map[i][j].type*2 ], i * TILE_SIZE - CAMERA_PX_X,
+							j * TILE_SIZE - SHAKEN_CAMERA_Y, TILE_SIZE, TILE_SIZE);
 					//Draw the tile illustrations (used for debuggin')
 					if(map[i][j].illustrated) {
 						g2.setColor(map[i][j].color);
-						g2.fillRect((i-CAMERA_CELL_X)*TILE_SIZE, (j-CAMERA_CELL_Y)*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+						g2.fillRect(i * TILE_SIZE - CAMERA_PX_X, j * TILE_SIZE - SHAKEN_CAMERA_Y, TILE_SIZE, TILE_SIZE);
 					}
 
 					/*if(map[i][j].getID() != 0 && GODMODE_DRAW_IDS) {
@@ -348,13 +347,13 @@ public class InGameState extends GameState {
 
 				} else if(map[i][j].seen) {
 					//The tile is in our memory.  Draw it, but darkened.
-					g2.drawImage(tileImages[ map[i][j].type*2+1 ], (i-CAMERA_CELL_X)*TILE_SIZE,
-							(j-CAMERA_CELL_Y)*TILE_SIZE, null);
+					g2.drawImage(tileImages[ map[i][j].type*2+1 ], i * TILE_SIZE - CAMERA_PX_X,
+							j * TILE_SIZE - SHAKEN_CAMERA_Y, null);
 				}
 
 				if(map[i][j].illustrated) {
 					g2.setColor(map[i][j].color);
-					g2.fillRect((i-CAMERA_CELL_X)*TILE_SIZE, (j-CAMERA_CELL_Y)*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+					g2.fillRect(i * TILE_SIZE - CAMERA_PX_X, j * TILE_SIZE - SHAKEN_CAMERA_Y, TILE_SIZE, TILE_SIZE);
 				}
 
 			}
@@ -415,7 +414,6 @@ public class InGameState extends GameState {
 	 * @param dy How much to move the camera by (y)
 	 */
 	public void moveCamera(int dx, int dy) {
-		System.out.println("mc called");
 		if(CAMERA_CELL_X + dx < 0) {
 			CAMERA_CELL_X = 0;
 		} else if(CAMERA_CELL_X + dx + INGAME_WINDOW_WIDTH > map.length) {                                                             

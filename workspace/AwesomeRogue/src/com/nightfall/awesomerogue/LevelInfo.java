@@ -345,7 +345,7 @@ public class LevelInfo {
 		
 		//Plop down some enemies based on the difficulty.
 		if(difficulty == 1) {
-			Enemy bob = new Enemy(25, 10, Enemy.RAT);
+			Enemy bob = new Enemy(25, 10, Enemy.Data.RAT);
 			enemies.add(bob);
 		}
 		
@@ -359,13 +359,13 @@ public class LevelInfo {
 						int monsterY = numGen.nextInt(10) + yTen;
 						
 						//Choose a type
-						int type = 0;
+						Enemy.Data type = 0;
 						switch(numGen.nextInt(2)) {
 						case 0:
-							type = Enemy.ANGRY_MUSHROOM;
+							type = Enemy.Data.MUSHROOM;
 							break;
 						case 1:
-							type = Enemy.RAT;
+							type = Enemy.Data.RAT;
 							break;
 						}
 						
