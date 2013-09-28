@@ -23,8 +23,8 @@ public class Oldxplosion extends Effect {
 	
 	public Oldxplosion(int x, int y) {
 		super("Explosion Effect");
-		this.x = x - InGameState.CAMERA_X;
-		this.y = y - InGameState.CAMERA_Y;
+		this.x = x - InGameState.CAMERA_PX_X;
+		this.y = y - InGameState.CAMERA_PX_Y;
 		sizeIndex = 0;
 		int size = SIZES[sizeIndex];
 		

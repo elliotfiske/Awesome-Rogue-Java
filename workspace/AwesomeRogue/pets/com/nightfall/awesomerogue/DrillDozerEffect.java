@@ -79,8 +79,8 @@ public class DrillDozerEffect extends Effect {
 		for(Tile crackTile : crackingTiles) {
 			int drillX = crackTile.x;
 			int drillY = crackTile.y;
-			g2.drawImage(Sprites.cracks[iterations], (drillX - InGameState.CAMERA_X) * InGameState.TILE_SIZE + InGameState.INGAME_WINDOW_OFFSET_X, 
-					(drillY - InGameState.CAMERA_Y) * InGameState.TILE_SIZE + InGameState.INGAME_WINDOW_OFFSET_Y, null);
+			g2.drawImage(Sprites.cracks[iterations], (drillX - InGameState.CAMERA_PX_X) * InGameState.TILE_SIZE + InGameState.INGAME_WINDOW_OFFSET_X, 
+					(drillY - InGameState.CAMERA_PX_Y) * InGameState.TILE_SIZE + InGameState.INGAME_WINDOW_OFFSET_Y, null);
 		}
 	}
 

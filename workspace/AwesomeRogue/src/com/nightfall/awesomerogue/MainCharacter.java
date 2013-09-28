@@ -228,7 +228,7 @@ public class MainCharacter extends Character {
 			//TODO: replace with big green @
 			g2.setColor(Color.green);
 			g2.fillRect((getX() - 1) * InGameState.TILE_SIZE - camX,
-					   ((getY() - 1) * InGameState.TILE_SIZE - camY), 
+					    (getY() - 1) * InGameState.TILE_SIZE - camY, 
 					     InGameState.TILE_SIZE * 3, InGameState.TILE_SIZE * 3);
 		}
 	}

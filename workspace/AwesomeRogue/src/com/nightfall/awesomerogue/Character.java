@@ -119,7 +119,7 @@ public class Character {
 	 */
 	public void draw(Graphics2D g2, int camX, int camY) {
 		g2.setColor(Color.white);
-		g2.drawString(character, (x * InGameState.TILE_SIZE - camX), ((y + 1)*InGameState.TILE_SIZE - camY));
+		g2.drawString(character, x * InGameState.TILE_SIZE - camX, (y + 1)*InGameState.TILE_SIZE - camY);
 		if(drawingAttack) {
 			if(!currentWeapon.draw(g2, camX, camY)) {
 				drawingAttack = false;
