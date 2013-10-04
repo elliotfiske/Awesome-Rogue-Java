@@ -335,7 +335,7 @@ public class LevelGenerator {
 						int type = 0;
 						switch(numGen.nextInt(2)) {
 						case 0:
-							type = Enemy.ANGRY_MUSHROOM;
+							type = Enemy.MUSHROOM;
 							break;
 						case 1:
 							type = Enemy.RAT;
@@ -593,7 +593,7 @@ public class LevelGenerator {
 						int type = 0;
 						switch(numGen.nextInt(2)) {
 						case 0:
-							type = Enemy.ANGRY_MUSHROOM;
+							type = Enemy.MUSHROOM;
 							break;
 						case 1:
 							type = Enemy.RAT;
@@ -701,7 +701,7 @@ public class LevelGenerator {
 		
 		map[(int)Math.floor(ROOM_MIN/2)][5] = new Tile(Tile.CHEST, (int)Math.floor(ROOM_MIN/2), 5);
 		// Create boss mushroom
-		Enemy e = new Enemy((int) (Math.random()*(ROOM_MIN-2)+1),(int) (Math.random()*(ROOM_MIN-2)+1), Enemy.ANGRY_MUSHROOM);
+		Enemy e = new Enemy((int) (Math.random()*(ROOM_MIN-2)+1),(int) (Math.random()*(ROOM_MIN-2)+1), Enemy.MUSHROOM);
 		e.setBounty((int)Math.floor(ROOM_MIN/2), 5, new Tile(Tile.CHEST));
 		enemies.add(e);
 		

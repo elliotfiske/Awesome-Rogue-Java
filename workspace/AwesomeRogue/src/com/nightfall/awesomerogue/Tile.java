@@ -115,7 +115,7 @@ public class Tile {
 		return false;
 	}
 	
-	public boolean isBlocker() {
+	public boolean isNotEmpty() {
 		boolean occupied = (InGameState.getEntities()[x][y] != null);
 		return blocker || occupied;
 	}

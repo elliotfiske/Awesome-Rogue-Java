@@ -145,8 +145,8 @@ public class ImageSFX
 		}
 
 		// adjust top-left (x,y) coord of resized image so it remains centered 
-//		int destX = x + im.getWidth()/2 - destWidth/2;
-//		int destY = y + im.getHeight()/2 - destHeight/2;
+		//		int destX = x + im.getWidth()/2 - destWidth/2;
+		//		int destY = y + im.getHeight()/2 - destHeight/2;
 
 		g2d.drawImage(im, x, y, destWidth, destHeight, null);
 	} // end of drawResizedImage()
@@ -430,12 +430,62 @@ public class ImageSFX
 	LookupTable table = new ShortLookupTable(0, brightenRed);
 	LookupOp brightenRedOp = new LookupOp(table, null);
 
+	g2d.drawImage(brightenRedOp.filter(im, null), x, y, null);
+	}  // end of drawRedderImage() using LookupOp
+
+	public void drawBluerImage(Graphics2D g2d, BufferedImage im, 
+			int x, int y, float brightness)
+	// using LookupOp
+	/* Draw the image with its redness is increased, and its greenness 
+  and blueness decreased. Any alpha channel is left unchanged.
+	 */
+	{ if (im == null) {
+		System.out.println("drawRedderImage: input image is null");
+		return;
+	}
+
+	if (brightness < 0.0f) {
+		System.out.println("Brightness must be >= 0.0f; setting to 0.0f");
+		brightness = 0.0f;
+	}
+	// brightness may be less than 1.0 to make the image less red
+
+	short[] brighten = new short[256];    // for red channel
+	short[] lessen = new short[256];      // for green and blue channels
+	short[] noChange = new short[256];    // for the alpha channel
+
+	for(int i=0; i < 256; i++) {
+		float brightVal = 64.0f + (brightness * i);
+		if (brightVal > 255.0f)
+			brightVal = 255.0f;
+		brighten[i] = (short) brightVal;
+		lessen[i] = (short) ((float)i / brightness);
+		noChange[i] = (short) i;
+	}
+
+	short[][] brightenRed;
+	if (hasAlpha(im)) {
+		brightenRed = new short[6][];
+		brightenRed[0] = brighten;
+		brightenRed[1] = lessen;
+		brightenRed[2] = lessen;
+		brightenRed[3] = noChange;    // without this the LookupOp fails
+		// which is a bug (?)
+	}
+	else {  // not transparent
+		brightenRed = new short[3][];
+		brightenRed[0] = brighten;
+		brightenRed[1] = lessen;
+		brightenRed[2] = lessen;
+	}
+	LookupTable table = new ShortLookupTable(0, brightenRed);
+	LookupOp brightenRedOp = new LookupOp(table, null);
+
 	g2d.drawImage(im, brightenRedOp, x, y);
 	}  // end of drawRedderImage() using LookupOp
 
 
-	/*
-public void drawRedderImage(Graphics2D g2d, BufferedImage im, 
+	public void drawReddererImage(Graphics2D g2d, BufferedImage im, 
                                  int x, int y, float brightness)
 // using RescaleOp
 // Draw the image with its redness is increased, and its greenness 
@@ -454,7 +504,7 @@ public void drawRedderImage(Graphics2D g2d, BufferedImage im,
 
  RescaleOp brigherOp;
  if (hasAlpha(im)) {
-   float[] scaleFactors = {brightness, 1.0f/brightness, 1.0f/brightness, 1.0f}; 
+   float[] scaleFactors = {brightness, 1.0f/brightness, 1.0f/brightness, 0.5f}; 
              // don't change alpha
              // without the 1.0f the RescaleOp fails, which is a bug (?)
    float[] offsets = {64.0f, 0.0f, 0.0f, 0.0f};
@@ -467,7 +517,7 @@ public void drawRedderImage(Graphics2D g2d, BufferedImage im,
  }
  g2d.drawImage(im, brigherOp, x, y);
 }  // end of drawRedderImage() using RescaleOp
-	 */
+
 
 
 

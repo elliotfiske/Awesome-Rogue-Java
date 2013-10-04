@@ -20,8 +20,8 @@ import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
 public class GamePanel extends JPanel implements Runnable {
-	public static final int PHEIGHT = 1200;
-	public static final int PWIDTH = (int) (PHEIGHT * 1.2); //PWIDTH needs to be 1.2 * PHEIGHT
+	public static final int PHEIGHT = 1000;
+	public static final int PWIDTH =  1800;//(int) (PHEIGHT * 1.2); //PWIDTH needs to be 1.2 * PHEIGHT
 	
 	private Thread animator;
 	private volatile boolean running = false;
@@ -163,7 +163,7 @@ public class GamePanel extends JPanel implements Runnable {
 		running = true;
 		while(running) {
 
-			gameUpdate();
+			//gameUpdate();
 			gameRender();
 			paintScreen();
 

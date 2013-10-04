@@ -3,8 +3,9 @@ package com.nightfall.awesomerogue;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.image.BufferedImage;
 
-public class Character {
+public abstract class Character {
 	public static final int VISIONRANGE = 35;
 	
 	protected int x;
@@ -12,6 +13,7 @@ public class Character {
 	
 	protected int room;
 	String character = "default character?!?";
+	String name = "No name :(";
 	
 	private int altitude;	// 0 is default, meaning it's on the ground
 	
@@ -21,11 +23,27 @@ public class Character {
 	private Weapon currentWeapon;
 	private boolean drawingAttack;
 	
+	/** Last wall "touched" by the pathfinding algorithm */
+	public Point lastWallLeft;
+	public Point lastWallRight;
+	
 	protected boolean dead;
 	
+	public boolean usesImage;
+	public BufferedImage image;
+	
+	/** This constructor takes a position and a display-letter */
 	public Character(int x, int y, String character) {
 		initPos(x, y);
 		this.character = character;
+		
+		dead = false;
+	}
+	
+	/** This constructor takes a position and a display-image */
+	public Character(int x, int y, BufferedImage image) {
+		initPos(x, y);
+		this.image = image;
 		
 		dead = false;
 	}
@@ -44,7 +62,7 @@ public class Character {
 		int targetX = x + dx;
 		int targetY = y + dy;
 		
-		if(!InGameState.tileAt(targetX, targetY).isBlocker()) {
+		if(!InGameState.tileAt(targetX, targetY).isNotEmpty()) {
 			moveTo(targetX, targetY, entities, map);
 			room = map[x][y].room;
 		}
@@ -64,7 +82,7 @@ public class Character {
 	public void setCurrentWeapon(Weapon weapon) { currentWeapon = weapon; }
 	public Weapon getCurrentWeapon() { return currentWeapon; }
 	
-	public void takeTurn(MainCharacter mainChar, Tile[][] map) { }
+	public void takeTurn(MainCharacter mainChar) { }
 	
 	// Set the weapon to attack in a certain direction.
 	// This does not do any damage inherently, in case
@@ -86,10 +104,8 @@ public class Character {
 		InGameState.waitOn(new ForceMarch(this, forceMarchTo));
 	}
 	
-	public void update(Tile[][] map, Character[][] entities) {
-		if(drawingAttack) {
-			currentWeapon.update(map, entities);
-		}
+	public void update() {
+		
 	}
 	
 	/**
@@ -181,6 +197,9 @@ public class Character {
 		return toString().substring(toString().length() - 3);
 	}
 	
+	/** What do you want to be drawn as? */
+	public abstract BufferedImage getSprite();
+	
 	/**
 	 * Handles the whole "entities array" thing for us, but doesn't check walls or anything.
 	 * @param newX X location to move to
@@ -188,6 +207,18 @@ public class Character {
 	 */
 	public void moveTo(int newX, int newY) {
 		moveTo(newX, newY, InGameState.getEntities(), InGameState.map);
+	}
+	
+	/** forceMove is a movement made during forced marching. It has a separate "rewind" tracker.
+	 * 
+	 * @param newX
+	 * @param newY
+	 */
+	public void forceMove(int newX, int newY) {
+		InGameState.getEntities()[x][y] = null;
+		InGameState.getEntities()[newX][newY] = this;
+		x = newX;
+		y = newY;
 	}
 	
 	public void moveTo(int newX, int newY, Character[][] entities, Tile[][] map) {

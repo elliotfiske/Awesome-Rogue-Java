@@ -116,7 +116,7 @@ public class ForceMarch extends Effect {
 		}
 
 		//I guess we have no choice left but to move :P
-		mover.moveTo(proposedX, proposedY);
+		mover.forceMove(proposedX, proposedY);
 	}
 
 	public void render(Graphics2D g2) {
@@ -125,7 +125,7 @@ public class ForceMarch extends Effect {
 
 	public void reverse() {
 		//Kinda hard to wrap my brain around.  Just reset to the original point, for now.
-		mover.moveTo(origin.x, origin.y);
+		mover.forceMove(origin.x, origin.y);
 	}
 
 	public String getName() {

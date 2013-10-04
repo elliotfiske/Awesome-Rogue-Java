@@ -1,6 +1,7 @@
 package com.nightfall.awesomerogue;
 
 import java.awt.Point;
+import java.awt.image.BufferedImage;
 
 public class DrillDozer extends Pet {
 	private Point direction;
@@ -72,5 +73,10 @@ public class DrillDozer extends Pet {
 	
 	public int getWeight() {
 		return 1;
+	}
+	
+	@Override
+	public BufferedImage getSprite() {
+		return Sprites.enemyImages[Enemy.ZOMBIE];
 	}
 }

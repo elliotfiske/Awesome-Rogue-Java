@@ -3,6 +3,7 @@ package com.nightfall.awesomerogue;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 
@@ -193,6 +194,16 @@ public class MainCharacter extends Character {
 			}
 		}
 	}
+	
+	/**
+	 * Same as normal forceMove, but also updates camera.
+	 */
+	@Override
+	public void forceMove(int newX, int newY) {
+		super.forceMove(newX, newY);
+		currentGameState.updateCamera();
+		currentGameState.calculateLighting();
+	}
 
 	public void attack(Point direction) {
 		
@@ -231,6 +242,11 @@ public class MainCharacter extends Character {
 					    (getY() - 1) * InGameState.TILE_SIZE - camY, 
 					     InGameState.TILE_SIZE * 3, InGameState.TILE_SIZE * 3);
 		}
+	}
+	
+	@Override
+	public BufferedImage getSprite() {
+		return Sprites.enemyImages[Enemy.ZOMBIE];
 	}
 
 	public void setHulking(boolean willBeHulking) {
@@ -288,7 +304,6 @@ public class MainCharacter extends Character {
 	public void moveTo(int newX, int newY, Character[][] entities, Tile[][] map) {
 		super.moveTo(newX, newY, entities, map);
 		currentGameState.updateCamera();
-		currentGameState.calculateLighting();
 	}
 	
 	public int getHealth() {

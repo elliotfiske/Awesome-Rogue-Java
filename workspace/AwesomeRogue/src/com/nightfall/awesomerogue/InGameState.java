@@ -25,7 +25,7 @@ public class InGameState extends GameState {
 	public static final int INGAME_SCROLL_MINY = INGAME_SCROLL_PADDING;
 	public static final int INGAME_SCROLL_MAXY = INGAME_WINDOW_HEIGHT - INGAME_SCROLL_PADDING;
 
-	public static final int TILE_SIZE = 42;
+	public static final int TILE_SIZE = 48;
 
 	//Enable to debug stuff
 	public static final boolean GODMODE_VISION = false;
@@ -65,7 +65,7 @@ public class InGameState extends GameState {
 
 	private MainCharacter mainChar;
 
-	private ImageSFX imgSFX;
+	public static ImageSFX imgSFX;
 
 	private BufferedImage guiBG;
 
@@ -110,6 +110,8 @@ public class InGameState extends GameState {
 	/** Stores how much time has passed since the last frame.
 	 * Basically, it's my implementation of clock.tick() from python! */
 	long timePassed, beforeTime;
+	
+	long playerMovedTime;
 	
 	private MetaGameState metaGame;
 
@@ -157,7 +159,7 @@ public class InGameState extends GameState {
 		
 		screenShake = 0;
 		elapsedShake = 0;
-
+		
 		texts = new ArrayList<FloatyText>();
 		pastTurns = new ArrayList<Turn>();
 		currentTurn = new Turn();
@@ -187,7 +189,8 @@ public class InGameState extends GameState {
 	public void update() {
 		//Update stuff that's independent of anything (i.e. floatytexts)
 		independentUpdate();
-		
+		return;
+		/*
 		//If effects are happening, NOTHING ELSE IS.
 		if(effects.size() > 0) return;
 		
@@ -199,7 +202,7 @@ public class InGameState extends GameState {
 		case PLAYER_MOVE:
 		case PLAYER_CHOOSE_DIR:
 		case PLAYER_CHOOSE_TILE:
-			//Nothing happens here since we're just waiting for a keypress.
+			//Execute the keypress that happened earlier TODO: Update to new system
 			break;
 
 		case ENEMY_TURN:
@@ -215,7 +218,7 @@ public class InGameState extends GameState {
 			//Does some important stuff
 			beginNewTurn();
 			break;
-		}
+		}*/
 	}
 	
 	public void independentUpdate() {
@@ -257,7 +260,7 @@ public class InGameState extends GameState {
 
 	private void petTurn() {
 		for(Pet p : pets) {
-			p.takeTurn(mainChar, map);
+			p.takeTurn(mainChar);
 		}
 		inputState = NEW_TURN;
 	}
@@ -278,7 +281,7 @@ public class InGameState extends GameState {
 	}
 
 	public void render(Graphics2D g2) {
-		//Update the floatytexts TODO: make it so that hundreds of floaytexts don't slow the game to a crawl
+		//Update the floatytexts
 
 		//draw floaty texts :3
 		for(int f = 0; f < texts.size(); f++) {
@@ -347,15 +350,14 @@ public class InGameState extends GameState {
 
 				} else if(map[i][j].seen) {
 					//The tile is in our memory.  Draw it, but darkened.
-					g2.drawImage(tileImages[ map[i][j].type*2+1 ], i * TILE_SIZE - CAMERA_PX_X,
-							j * TILE_SIZE - SHAKEN_CAMERA_Y, null);
+					imgSFX.drawResizedImage(g2, tileImages[ map[i][j].type*2+1 ], i * TILE_SIZE - CAMERA_PX_X,
+							j * TILE_SIZE - SHAKEN_CAMERA_Y, TILE_SIZE, TILE_SIZE);
 				}
 
 				if(map[i][j].illustrated) {
 					g2.setColor(map[i][j].color);
 					g2.fillRect(i * TILE_SIZE - CAMERA_PX_X, j * TILE_SIZE - SHAKEN_CAMERA_Y, TILE_SIZE, TILE_SIZE);
 				}
-
 			}
 		}
 
@@ -375,16 +377,13 @@ public class InGameState extends GameState {
 
 		//Draw the user character.
 		mainChar.draw(g2, CAMERA_PX_X, SHAKEN_CAMERA_Y);
-
-		//Draw the enemies.
+		
+		//Draw the enemies
 		for(int i = 0; i < enemies.size(); i++) {
-			Character e = enemies.get(i);
-			if(e.dead()) {
-				enemies.remove(i--);
-				continue;
-			}
+			Enemy e = enemies.get(i);
 			if(map[e.getX()][e.getY()].visible || GODMODE_VISION){ 
-				e.draw(g2, CAMERA_PX_X, SHAKEN_CAMERA_Y);
+				g2.drawImage(e.getSprite(), e.getX() * InGameState.TILE_SIZE - CAMERA_PX_X,
+						e.getY() * InGameState.TILE_SIZE - CAMERA_PX_Y, null);
 			} else if(mainChar.hasPassive(Passive.XRAY_GOGGLES)) {
 				g2.setColor(Color.red);
 				g2.drawString("?", e.getX() * TILE_SIZE - CAMERA_PX_X, (e.getY() + 1) * TILE_SIZE - SHAKEN_CAMERA_Y);
@@ -401,7 +400,8 @@ public class InGameState extends GameState {
 			}
 
 			//Gonna make it so that you can see through pet's eyes maybe?
-			p.draw(g2, CAMERA_PX_X, SHAKEN_CAMERA_Y);
+			g2.drawImage(p.getSprite(), p.getX() * InGameState.TILE_SIZE - CAMERA_PX_X,
+					p.getY() * InGameState.TILE_SIZE - CAMERA_PX_Y, null);
 		}
 
 		Graphics2D g = (Graphics2D) mapImg.getGraphics();
@@ -443,7 +443,6 @@ public class InGameState extends GameState {
 		//			LevelInfo.MAX_FEATURES ++;
 		//			initLevel(LevelInfo.ROOMS);
 		//		}
-
 		//DEBUG CODE outside the "input state" switch
 		if(e.getKeyCode() == KeyEvent.VK_S) {
 			System.out.print("Are we suspended? ");
@@ -489,7 +488,7 @@ public class InGameState extends GameState {
 			} else {
 				//Move the main character
 				mainChar.move(p.x, p.y, map, entities);
-
+				
 				//NOTE that we DON'T move the camera here. Instead, it's moved 
 				//after the enemies move to prevent a weird stuttering effect.
 
@@ -500,6 +499,7 @@ public class InGameState extends GameState {
 					}
 				}
 				playerTurnDone();
+				playerMovedTime = System.currentTimeMillis();
 			}
 			break;
 		case PLAYER_CHOOSE_DIR:
@@ -571,24 +571,27 @@ public class InGameState extends GameState {
 	/** All the enemies take a turn */
 	private void enemyTurn() {
 		for(int i = 0; i < enemies.size(); i ++) {
-			Character enemy = enemies.get(i);
+			Enemy enemy = enemies.get(i);
 			if(enemy.dead()) {
 				enemies.remove(enemy);
 				entities[enemy.getX()][enemy.getY()] = null;
 				i--;
 			} else {
 				if(!areEnemiesFrozen) {
-					((Enemy) enemy).takeTurn(mainChar, map);
+					enemy.takeTurn(mainChar);
 				}
 			}
 		}
 
 		inputState = PET_TURN;
 		updateCamera();
+		System.out.println("Time between playermove and camera update: " + (System.currentTimeMillis() - playerMovedTime));
+		beginNewTurn();
 	}
 
 	/** Called at the start of every turn. */
 	public void beginNewTurn() {
+		 independentUpdate(); //TODO: something
 		calculateLighting();
 
 		//Calculate how much health the player lost this turn, display with FloatyText

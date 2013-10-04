@@ -345,7 +345,7 @@ public class LevelInfo {
 		
 		//Plop down some enemies based on the difficulty.
 		if(difficulty == 1) {
-			Enemy bob = new Enemy(25, 10, Enemy.Data.RAT);
+			Enemy bob = Enemy.makeEnemy(25, 10, Enemy.RAT);
 			enemies.add(bob);
 		}
 		
@@ -358,23 +358,24 @@ public class LevelInfo {
 						int monsterX = numGen.nextInt(10) + xTen;
 						int monsterY = numGen.nextInt(10) + yTen;
 						
-						//Choose a type
-						Enemy.Data type = 0;
-						switch(numGen.nextInt(2)) {
-						case 0:
-							type = Enemy.Data.MUSHROOM;
-							break;
-						case 1:
-							type = Enemy.Data.RAT;
-							break;
-						}
-						
 						//if it's on a wall, it's outta luck.  So sad, try again next time.
 						if(map[monsterX][monsterY].type != Tile.FLOOR) {
 							continue;
 						}
 						
-						Enemy newEnemy = new Enemy(monsterX, monsterY, type);
+						//Choose a type
+						int type = 0;
+						switch(numGen.nextInt(2)) {
+						case 0:
+							type = Enemy.MUSHROOM;
+							break;
+						case 1:
+							type = Enemy.RAT;
+							break;
+						}
+						
+						
+						Enemy newEnemy = Enemy.makeEnemy(monsterX, monsterY, type);
 						enemies.add(newEnemy);
 					}
 				
@@ -384,7 +385,7 @@ public class LevelInfo {
 	}
 	
 	private void makeRooms(int width, int height, int difficulty) {
-		enemyTypes = new int[] { Enemy.MUSHROOM, Enemy.RAT, Enemy.ANGRY_MUSHROOM };
+		enemyTypes = new int[] { Enemy.MUSHROOM, Enemy.RAT, Enemy.MUSHROOM };
 		
 		//Create blank map
 		map = new Tile[width][height];
@@ -734,19 +735,19 @@ public class LevelInfo {
 			break;
 		case ROOM_BASIC_ENEMY:
 			for(int i = 0; i < 3; i ++) {
-				Enemy e = new Enemy(numGen.nextInt(w) + topLeft.x, numGen.nextInt(h) + topLeft.y, enemyTypes[0]);
+				Enemy e = Enemy.makeEnemy(numGen.nextInt(w) + topLeft.x, numGen.nextInt(h) + topLeft.y, enemyTypes[0]);
 				enemies.add(e);
 			}
 			break;
 		case ROOM_NORMAL_ENEMY:
 			for(int i = 0; i < 3; i ++) {
-				Enemy e = new Enemy(numGen.nextInt(w) + topLeft.x, numGen.nextInt(h) + topLeft.y, enemyTypes[1]);
+				Enemy e = Enemy.makeEnemy(numGen.nextInt(w) + topLeft.x, numGen.nextInt(h) + topLeft.y, enemyTypes[1]);
 				enemies.add(e);
 			}
 			break;
 		case ROOM_ADVANCED_ENEMY:
 			for(int i = 0; i < 3; i ++) {
-				Enemy e = new Enemy(numGen.nextInt(w) + topLeft.x, numGen.nextInt(h) + topLeft.y, enemyTypes[1]);
+				Enemy e = Enemy.makeEnemy(numGen.nextInt(w) + topLeft.x, numGen.nextInt(h) + topLeft.y, enemyTypes[1]);
 				enemies.add(e);
 			}
 			break;
@@ -1055,7 +1056,7 @@ public class LevelInfo {
 				// Add mushroom?
 				if(i > ROOM_MAX && i < map.length - 1 && j > ROOM_MIN && j < map[0].length - 1) {
 					if(Math.random() > 0.9) {
-						Enemy e = new Enemy(i, j, Enemy.MUSHROOM);
+						Enemy e = Enemy.makeEnemy(i, j, Enemy.MUSHROOM);
 						enemies.add(e);
 					}
 				}
@@ -1081,7 +1082,7 @@ public class LevelInfo {
 		
 		map[(int)Math.floor(ROOM_MIN/2)][5] = new Tile(Tile.CHEST, (int)Math.floor(ROOM_MIN/2), 5);
 		// Create boss mushroom
-		Enemy e = new Enemy((int) (Math.random()*(ROOM_MIN-2)+1),(int) (Math.random()*(ROOM_MIN-2)+1), Enemy.ANGRY_MUSHROOM);
+		Enemy e = Enemy.makeEnemy((int) (Math.random()*(ROOM_MIN-2)+1),(int) (Math.random()*(ROOM_MIN-2)+1), Enemy.MUSHROOM);
 		e.setBounty((int)Math.floor(ROOM_MIN/2), 5, new Tile(Tile.CHEST));
 		enemies.add(e);
 	}

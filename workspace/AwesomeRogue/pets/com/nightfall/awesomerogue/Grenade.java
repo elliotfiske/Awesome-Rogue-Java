@@ -1,6 +1,7 @@
 package com.nightfall.awesomerogue;
 
 import java.awt.Point;
+import java.awt.image.BufferedImage;
 
 public class Grenade extends Pet {
 	private int timer; 
@@ -13,7 +14,8 @@ public class Grenade extends Pet {
 		setAltitude(1);
 	}
 
-	public void takeTurn(MainCharacter mainChar, Tile[][] map) {
+	@Override
+	public void takeTurn(MainCharacter mainChar) {
 		timer --;
 		if(timer <= 0) {
 			die();
@@ -22,20 +24,28 @@ public class Grenade extends Pet {
 			System.out.println("x and y of grenade: " + getX() + ", " + getY());
 		}
 	}
-	
+
+	@Override
 	public int getWeight() {
 		return 5;
 	}
-	
+
+	@Override
 	public String getName() {
 		return "Grenade";
 	}
-	
+
+	@Override
 	public void undoTurn() {
 		timer++;
 		if(timer == 1) {
 			dead = false;
 			InGameState.addPet(this);
 		}
+	}
+	
+	@Override
+	public BufferedImage getSprite() {
+		return Sprites.petImages[Pet.GRENADE];
 	}
 }
