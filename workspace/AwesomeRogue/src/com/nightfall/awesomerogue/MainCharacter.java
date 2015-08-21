@@ -46,7 +46,7 @@ public class MainCharacter extends Character {
 		
 		skills[0] = Active.ICE_CROWN;
 		skills[1] = Active.GRENADE_LAUNCHER;
-		skills[2] = Active.FALCON_PUNCH;
+		skills[2] = Active.HULK_SERUM;
 	}
 	
 	public MainCharacter(int x, int y) {
@@ -158,6 +158,7 @@ public class MainCharacter extends Character {
 				
 				if(walls.size() > 0 || doors.size() > 0) {
 					System.out.println("You smash through the " + wallString + conjunctionJunction + doorString + "!");
+					InGameState.shakeScreen(5);
 				}
 				
 				for(Point p : walls) {
@@ -226,7 +227,9 @@ public class MainCharacter extends Character {
 		} else {
 			//TODO: replace with big green @
 			g2.setColor(Color.green);
-			g2.fillRect((getX()-camX)*12 - 12, ((getY()-camY)*12 - 12), InGameState.TILE_SIZE * 3, InGameState.TILE_SIZE * 3);
+			g2.fillRect((getX() - 1) * InGameState.TILE_SIZE - camX,
+					    (getY() - 1) * InGameState.TILE_SIZE - camY, 
+					     InGameState.TILE_SIZE * 3, InGameState.TILE_SIZE * 3);
 		}
 	}
 
@@ -263,6 +266,7 @@ public class MainCharacter extends Character {
 			
 			if(blewStuffUp) {
 				System.out.println("You smash down the walls around you as you transform!");
+				InGameState.shakeScreen(7);
 			}
 		}
 	}

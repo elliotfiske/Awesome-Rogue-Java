@@ -142,7 +142,7 @@ public class Enemy extends Character {
 	 * @param camX Camera X offset
 	 * @param camY Camera Y offset
 	 */
-	public void draw(Graphics2D g2, int camX, int camY) {
+	public void draw(Graphics2D g2, int camX, int camY, int screenShake) {
 		
 		if(frozen > 0) {
 			g2.setColor(Color.blue);
@@ -150,8 +150,8 @@ public class Enemy extends Character {
 			g2.setColor(Color.white);
 		}
 		
-		g2.drawString(icon, ((x - camX)*12 + 2),
-				((y - camY)*12 + 10));	
+		g2.drawString(icon, ((x - camX) * InGameState.TILE_SIZE + 2),
+				((y - camY) * InGameState.TILE_SIZE + 10 + InGameState.screenShake));	
 	}
 
 	/**
@@ -185,10 +185,12 @@ public class Enemy extends Character {
 	}
 	
 	public void stun(int turns) {
+		if(stunned > turns) return;
 		stunned = turns;
 	}
 	
 	public void freeze(int turns) {
+		if(frozen > turns) return;
 		frozen = turns;
 	}
 	
@@ -220,12 +222,12 @@ public class Enemy extends Character {
 	 */
 	private void moveRandomly(Tile[][] map) {
 		int randDirection = (int) Math.floor(Math.random() * 8);
-		Point randPoint = getPointDirection(randDirection);
+		Point randPoint = Utility.getPointDirection(randDirection);
 		int numTries = 0;
 		
 		while(map[x + randPoint.x][y + randPoint.y].isBlocker() && numTries < 12) {
 			randDirection = (int) Math.floor(Math.random() * 8);
-			randPoint = getPointDirection(randDirection);
+			randPoint = Utility.getPointDirection(randDirection);
 			
 			numTries++;
 		}
@@ -257,7 +259,7 @@ public class Enemy extends Character {
 		
 		while(!(straightPoint.x == targetX && straightPoint.y == targetY)) {
 			//Calculate which direction it would be smart to go in order to walk to the player.
-			walkStraight(straightPoint, new Point(targetX, targetY), 3);
+			Utility.walkStraight(straightPoint, new Point(targetX, targetY), 3);
 
 			straightTiles.add(new Tile( map[straightPoint.x][straightPoint.y].type , 0, straightPoint.x, straightPoint.y));
 
@@ -401,13 +403,13 @@ public class Enemy extends Character {
 
 				/** The step we WOULD take to follow this new path is: */
 				Point firstStep = new Point(finalPath.x, finalPath.y);
-				walkStraight(firstStep, new Point(pointToCheck.x, pointToCheck.y), 3);
+				Utility.walkStraight(firstStep, new Point(pointToCheck.x, pointToCheck.y), 3);
 
 				//optimism!
 				weDidIt = true;
 
 				while(finalPath.x != pointToCheck.x || finalPath.y != pointToCheck.y) {
-					walkStraight(finalPath, pointToCheck, 3);
+					Utility.walkStraight(finalPath, pointToCheck, 3);
 					finalPathPoints.add(new Point(finalPath.x, finalPath.y));
 					//map[finalPath.x][finalPath.y].illustrate(Color.black); //TODO
 					if(map[finalPath.x][finalPath.y].isBlocker()) {
@@ -501,39 +503,6 @@ public class Enemy extends Character {
 	}
 
 	/**
-	 * Converts from point with directional components --> one number representin direction.
-	 * 
-	 * Directions:
-	 * 7 0 1
-	 * 6 X 2
-	 * 5 4 3
-	 * 
-	 * @param delta Point with |x| <= 1 and |y| <= 1 describing direction
-	 * @return Sweet, sweet directional number.
-	 * @throws PANICEVERYTHINGISBROKENERROR OH NO WHAT HAVE YOU DONE OH NOOOOO
-	 */
-	public static int getNumberedDirection(Point delta) {
-		int diffX = delta.x;
-		int diffY = delta.y;
-		int result = -1;
-
-		if(diffX == 0 && diffY == -1)  { result = 0; }
-		if(diffX == 1 && diffY == -1)  { result = 1; }
-		if(diffX == 1 && diffY == 0)   { result = 2; }
-		if(diffX == 1 && diffY == 1)   { result = 3; }
-		if(diffX == 0 && diffY == 1)   { result = 4; }
-		if(diffX == -1 && diffY == 1)  { result = 5; }
-		if(diffX == -1 && diffY == 0)  { result = 6; }
-		if(diffX == -1 && diffY == -1) { result = 7; }
-
-		if(result == -1) {
-			//throw new PANICEVERYTHINGISBROKENERROR("DiffX and DiffY are wrong! They're " + diffX + ", " + diffY);
-		}
-
-		return result;
-	}
-
-	/**
 	 * This method takes a feeler and makes it follow the right wall.
 	 * 
 	 * @param feeler The feeler that will be moved along the wall.
@@ -574,7 +543,7 @@ public class Enemy extends Character {
 		diffX = lastWall.x - feeler.x;
 		diffY = lastWall.y - feeler.y;
 
-		int result = getNumberedDirection(new Point(diffX, diffY));
+		int result = Utility.getNumberedDirection(new Point(diffX, diffY));
 		if(result == -1) {
 			//We're probably stuck in a crowd. Just chill.
 			System.out.println("The guy at " + x + ", " + y + "doesn't like you.  Zooming in now:");
@@ -595,8 +564,8 @@ public class Enemy extends Character {
 				}
 			}
 
-			diffX = getPointDirection(result).x;
-			diffY = getPointDirection(result).y;
+			diffX = Utility.getPointDirection(result).x;
+			diffY = Utility.getPointDirection(result).y;
 
 			//Outta bounds check!
 			if(feeler.x + diffX < 0 || feeler.x + diffX >= map.length ||
@@ -607,7 +576,7 @@ public class Enemy extends Character {
 			if(!map[feeler.x + diffX][feeler.y + diffY].isBlocker()) {
 				//We did it!
 				//Grab the result of this function: the last-touched wall.
-				int wallDirection = getNumberedDirection(new Point(diffX, diffY));
+				int wallDirection = Utility.getNumberedDirection(new Point(diffX, diffY));
 
 				//(it should be one cycle back).
 				if(goingRight) {
@@ -619,7 +588,7 @@ public class Enemy extends Character {
 					wallDirection = (wallDirection + 1) % 8;
 				}
 
-				Point wallDiff = getPointDirection(wallDirection);
+				Point wallDiff = Utility.getPointDirection(wallDirection);
 				Point lastWallTouched = new Point(feeler.x + wallDiff.x, feeler.y + wallDiff.y);
 
 				//Move the feeler to the proper location:
@@ -638,140 +607,6 @@ public class Enemy extends Character {
 		return new Point(0,0);
 	}
 
-	/**
-	 * Converts from a numbered direction style to a "difference" style direction.
-	 * 
-	 * @param numDirection Which direction you'd like converted to coordinates.
-	 * @return A Point containing the two coordinates you had in mind.
-	 */
-	public static Point getPointDirection(int numDirection) {
-		int diffX = 0, diffY = 0;
-
-		switch(numDirection) {
-		case 0:
-			diffX = 0; diffY = -1; 
-			break;
-		case 1:
-			diffX = 1; diffY = -1; 
-			break;
-		case 2:
-			diffX = 1; diffY = 0; 
-			break;
-		case 3:
-			diffX = 1; diffY = 1; 
-			break;
-		case 4:
-			diffX = 0; diffY = 1; 
-			break;
-		case 5:
-			diffX = -1; diffY = 1; 
-			break;
-		case 6:
-			diffX = -1; diffY = 0; 
-			break;
-		case 7:
-			diffX = -1; diffY = -1; 
-			break;
-		}
-
-		if(diffX == 0 && diffY == 0) {
-			throw new PANICEVERYTHINGISBROKENERROR("Oh man.  You put in a direction number outside of 0-7 you dolt.  Entered value: " + numDirection);
-		}
-		return new Point(diffX, diffY);
-
-	}
-
 	private Point lastWallLeft;
 	private Point lastWallRight;
-
-	/**
-	 * Handy helper method.  Calculates the direction an enemy should logically take
-	 * to walk STRAIGHT from (x, y) to (targetX, targetY).
-	 * @param Point straightPoint The Point that is going to be modified to be further down the "straight" path
-	 * @param Point targetPoint The Point that the straightPoint is moving towards.
-	 * @param int smoothness Basically the "slope" that the path follows.  If 1, will always move diagonally if it can.
-	 * @return Point with x from -1 --> 1 saying you should move that far in the x direction, 
-	 * 		   and y from -1 --> 1 saying you should move that far in the y direction
-	 */
-	public void walkStraight(Point straightPoint, Point targetPoint, double smoothness) {
-		Point result = new Point(-100,-100);
-
-		int x = straightPoint.x;
-		int y = straightPoint.y;
-
-		int targetX = targetPoint.x;
-		int targetY = targetPoint.y;
-
-		int diffX = targetX - x;
-		int diffY = targetY - y;
-
-		//Figure out the slope to the target
-		//First, prevent /0 error:
-		if(diffX == 0 && diffY < 0) {
-			straightPoint.x +=  0;
-			straightPoint.y +=  -1;
-			return;
-		}
-
-		if(diffX == 0 && diffY > 0) {
-			straightPoint.x +=  0;
-			straightPoint.y +=  1;
-			return;
-		}
-
-		//Make sure it handles diffy = 0 correctly
-		if(diffY == 0) {
-			straightPoint.x += (int) Math.signum((float) diffX);
-			straightPoint.y +=  0;
-			return;
-		}
-
-		double slope = (double) diffY / diffX;
-
-		//I hand-calculated these values, on some sweet graph paper.
-		//Come look at it sometime.
-
-		//  |      ^
-		//  |  or  |
-		//  v      |
-		if(slope <= -smoothness) {
-			result.x = 0;
-			result.y = 1 * (int) Math.signum((float) diffY);
-		}
-
-		//    /        ^ 
-		//   /   or   /
-		//  L        /
-		if(-smoothness < slope && slope < -1/smoothness) {
-			result.x = 1 * (int) Math.signum((float) diffX);
-			result.y = 1 * (int) Math.signum((float) diffY);
-		}
-
-		//
-		// < - -   or  - - >
-		//
-		if(-1/smoothness <= slope && slope <= 1/smoothness) {
-			result.x = 1 * (int) Math.signum((float) diffX);
-			result.y = 0;
-		}
-
-		// ^       \
-		//  \  or   \
-		//   \       V
-		if(1/smoothness < slope && slope < smoothness) {
-			result.x = 1 * (int) Math.signum((float) diffX);
-			result.y = 1 * (int) Math.signum((float) diffY);
-		}
-
-		//  |      ^
-		//  |  or  |
-		//  v      |
-		if(slope >= smoothness) {
-			result.x = 0;
-			result.y = 1 * (int) Math.signum((float) diffY);
-		}
-
-		straightPoint.x += result.x;
-		straightPoint.y += result.y;
-	}	
 }

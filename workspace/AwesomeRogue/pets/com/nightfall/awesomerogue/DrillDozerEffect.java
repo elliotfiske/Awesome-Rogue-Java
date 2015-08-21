@@ -2,94 +2,90 @@ package com.nightfall.awesomerogue;
 
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 public class DrillDozerEffect extends Effect {
 
 	int x, y;
 	Point direction;
-	Tile[][] map;
-	Character[][] entities;
-	int[][] crackedTiles;
+	ArrayList<Tile> crackingTiles;
 	
+	long elapsedTime;
+	long COOLDOWN = 16;
+	int iterations;
+	private static final int MAX_ITERATIONS = Sprites.cracks.length - 1;
+	
+	
+
 	public DrillDozerEffect(int x, int y, Point direction, Tile[][] map, Character[][] entities) {
 		super("Drill Dozer Drilling");
 		this.x = x;
 		this.y = y;
 		this.direction = direction;
-		this.map = map;
-		this.entities = entities;
-		crackedTiles = new int[map.length][map[0].length];
-	}
-	
-	@Override
-	public void renderAndIterate(Graphics2D g2) {
-		//Look at 3 tiles: the one we're exactly pointed at, the one clockwise around us, and the one counter
-		//clockwise around us.
-		
-		boolean done = true;
-		
+		crackingTiles = new ArrayList<Tile>();
+		iterations = 0;
+
+		//Look at 3 tiles: the one we're exactly pointed at, the one clockwise from that, and the one counter
+		//clockwise from that.
+
 		//Number one:
-		Tile myTile = InGameState.tileAt(x + direction.x, y + direction.y);
-		if(myTile.type == Tile.WALL || myTile.type == Tile.DOOR) {
-			done &= drill(x + direction.x, y + direction.y, g2);
+		Tile tileToCheck = InGameState.tileAt(x + direction.x, y + direction.y);
+		if(tileToCheck.type == Tile.WALL || tileToCheck.type == Tile.DOOR) {
+			crackingTiles.add(tileToCheck);
 		}
-		
+
 		//Number two:
-		int newDirection = (Enemy.getNumberedDirection(direction) + 1) % 8;
-		Point newPoint = Enemy.getPointDirection(newDirection);
-		myTile = InGameState.tileAt(x + newPoint.x, y + newPoint.y);
-		if(myTile.type == Tile.WALL || myTile.type == Tile.DOOR) {
-			done &= drill(x + newPoint.x, y + newPoint.y, g2);
+		int newDirection = (Utility.getNumberedDirection(direction) + 1) % 8;
+		Point newPoint = Utility.getPointDirection(newDirection);
+		tileToCheck = InGameState.tileAt(x + newPoint.x, y + newPoint.y);
+		if(tileToCheck.type == Tile.WALL || tileToCheck.type == Tile.DOOR) {
+			crackingTiles.add(tileToCheck);
 		}
-		
+
 		//Number 3:
-		newDirection = Enemy.getNumberedDirection(direction) - 1;
+		newDirection = Utility.getNumberedDirection(direction) - 1;
 		if(newDirection == -1) { newDirection = 7; }
-		newPoint = Enemy.getPointDirection(newDirection);
-		myTile = InGameState.tileAt(x + newPoint.x, y + newPoint.y);
-		if(myTile.type == Tile.WALL || myTile.type == Tile.DOOR) {
-			done &= drill(x + newPoint.x, y + newPoint.y, g2);
+		newPoint = Utility.getPointDirection(newDirection);
+		tileToCheck = InGameState.tileAt(x + newPoint.x, y + newPoint.y);
+		if(tileToCheck.type == Tile.WALL || tileToCheck.type == Tile.DOOR) {
+			crackingTiles.add(tileToCheck);
 		}
+	}
+
+	@Override
+	public void iterate(long deltaTime) {
+		//Check the cooldown
+		elapsedTime += deltaTime;
+		if(elapsedTime < COOLDOWN) {
+			return;
+		}
+		elapsedTime = 0;
 		
-		//If all the tiles have been drilled, finish drilling for this turn
-		if(done) {
+		iterations++;
+		
+		if(iterations >= MAX_ITERATIONS) {
+			for(Tile crackTile : crackingTiles) {
+				int drillX = crackTile.x;
+				int drillY = crackTile.y;
+				InGameState.demolish(drillX, drillY);
+				InGameState.map[drillX][drillY].seen = true;
+			}
 			setRunning(false);
 		}
 	}
 
-	/**
-	 * "Drills" selected tile.  Will push enemies out of way + damage them, and melt walls that are in the way. Also
-	 * iterates the "cracked tile" effect.
-	 * @param drillX
-	 * @param drillY
-	 * @return true when it's done, false if it's not done displaying the drilling animation.
-	 */
-	private boolean drill(int drillX, int drillY, Graphics2D g2) {
-		if(entities[drillX][drillY] instanceof Enemy) {
-			//force march 'em TODO
-		}
-		
-		crackedTiles[drillX][drillY]++;
-		
-		if(crackedTiles[drillX][drillY] >= Sprites.cracks.length - 1) {
-			InGameState.demolish(drillX, drillY);
-			map[drillX][drillY].seen = true;
-			return true;
-		}
-		
-		g2.drawImage(Sprites.cracks[crackedTiles[drillX][drillY]], (drillX - InGameState.CAMERA_X) * InGameState.TILE_SIZE + InGameState.INGAME_WINDOW_OFFSET_X, 
-				(drillY - InGameState.CAMERA_Y) * InGameState.TILE_SIZE + InGameState.INGAME_WINDOW_OFFSET_Y, null);
-		
-		return false;
-	}
-
 	public void render(Graphics2D g2) {
-		// TODO Auto-generated method stub
-
+		for(Tile crackTile : crackingTiles) {
+			int drillX = crackTile.x;
+			int drillY = crackTile.y;
+			g2.drawImage(Sprites.cracks[iterations], (drillX - InGameState.CAMERA_PX_X) * InGameState.TILE_SIZE + InGameState.INGAME_WINDOW_OFFSET_X, 
+					(drillY - InGameState.CAMERA_PX_Y) * InGameState.TILE_SIZE + InGameState.INGAME_WINDOW_OFFSET_Y, null);
+		}
 	}
 
 	public void reverse() {
-		
+
 	}
 
 }

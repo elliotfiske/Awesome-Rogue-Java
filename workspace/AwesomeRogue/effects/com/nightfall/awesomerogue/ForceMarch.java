@@ -10,13 +10,17 @@ public class ForceMarch extends Effect {
 	Point origin;
 	/** How many milliseconds should elapse between each iteration of the effect? */
 	int timeout;
-
+	
+	final static int COOLDOWN = 32;
+	private int elapsedTime;
+	
 	public ForceMarch(Character mover, Point target) {
 		super("Force March");
 		this.mover = mover;
 		this.target = target;
 		
 		origin = new Point(mover.x, mover.y);
+		elapsedTime = 0;
 		
 		//Stun enemy for one turn, otherwise it gets to move RIGHT after getting forcemarched and it
 		//looks weird
@@ -26,8 +30,14 @@ public class ForceMarch extends Effect {
 		}
 	}
 
-	public void renderAndIterate(Graphics2D g2) {
-
+	public void iterate(long deltaTime) {
+		//Check the cooldown
+		elapsedTime += deltaTime;
+		if(elapsedTime < COOLDOWN) {
+			return;
+		}
+		elapsedTime = 0;
+		
 		Tile[][] map = InGameState.map;
 		Character[][] entities = InGameState.getEntities();
 		

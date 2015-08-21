@@ -37,12 +37,27 @@ public class InGameState extends GameState {
 	public static final boolean GODMODE_EARTHQUAKE = true;
 
 	/**
+	 * Describes the pixel location of the upper lefthand corner of the area
+	 * we render.
+	 */
+	public static int CAMERA_PX_X = 0;
+	public static int CAMERA_PX_Y = 0;
+	
+	/**
 	 * Describes the cell location of the upper lefthand corner of the area
 	 * we render.
 	 */
-	public static int CAMERA_X = 0;
-	public static int CAMERA_Y = 0;
-
+	public static int CAMERA_CELL_X = 0;
+	public static int CAMERA_CELL_Y = 0;
+	
+	/** The PIXEL y value of the camera after screenshake is applied*/
+	public static int SHAKEN_CAMERA_Y = 0;
+	
+	/** I can shake-a my fanny I can shake-a my can */
+	public static int screenShake;
+	private static int elapsedShake;
+	/** Milliseconds between shake iterations */
+	private static final int SHAKE_COOLDOWN = 32;
 
 	public static Tile[][] map;
 	int mapWidth = 0;
@@ -92,6 +107,10 @@ public class InGameState extends GameState {
 	private static Turn currentTurn;
 	public static boolean REWINDING = false;
 
+	/** Stores how much time has passed since the last frame.
+	 * Basically, it's my implementation of clock.tick() from python! */
+	long timePassed, beforeTime;
+	
 	private MetaGameState metaGame;
 
 	public InGameState(GamePanel gameCanvas, int levelType, MetaGameState metaGame, MainCharacter character) throws IOException {
@@ -105,6 +124,7 @@ public class InGameState extends GameState {
 		tileImages = metaGame.getTileImages();
 
 		if(levelType == 0) introLevel = true;
+		
 		initLevel(levelType);
 	}
 
@@ -132,6 +152,11 @@ public class InGameState extends GameState {
 		enemies = new ArrayList<Enemy>();
 
 		pets = new ArrayList<Pet>();
+		
+		beforeTime = System.currentTimeMillis();
+		
+		screenShake = 0;
+		elapsedShake = 0;
 
 		texts = new ArrayList<FloatyText>();
 		pastTurns = new ArrayList<Turn>();
@@ -150,6 +175,8 @@ public class InGameState extends GameState {
 			mainChar = new MainCharacter(10,10,map);
 			mainChar.setLevel(this);
 		}
+		
+		timePassed = beforeTime = 0;
 	}
 
 	public void clearLevel() {
@@ -192,6 +219,10 @@ public class InGameState extends GameState {
 	}
 	
 	public void independentUpdate() {
+		//Calculate the deltatime value
+		timePassed = System.currentTimeMillis() - beforeTime;
+		beforeTime = System.currentTimeMillis();
+		
 		//update floatytexts :3
 		for(int f = 0; f < texts.size(); f++) {
 			FloatyText ft = texts.get(f);
@@ -202,6 +233,17 @@ public class InGameState extends GameState {
 				texts.remove(f--);
 			}
 		}
+		
+		//Iterate screenshake
+		if(screenShake != 0) {
+			elapsedShake += timePassed;
+			if(elapsedShake > SHAKE_COOLDOWN) {
+				screenShake = -(screenShake - Utility.sign(screenShake));
+				elapsedShake = 0;
+			}
+		}
+		
+		SHAKEN_CAMERA_Y = CAMERA_PX_Y * TILE_SIZE + screenShake;
 	}
 
 	/** Called when the game should stop waiting for player input. */
@@ -248,18 +290,24 @@ public class InGameState extends GameState {
 
 		for(int i = 0; i < effects.size(); i++) {
 			Effect e = effects.get(i);
-			e.renderAndIterate(g2);
+			e.iterate(timePassed);
+			e.render(g2);
 			if(!e.running()) {
 				effects.remove(i--); //Decrement i so we don't skip an effect
 			}
 		}
 
 		for(int i = 0; i < ongoingEffects.size(); i++) {
-			OngoingEffect e = ongoingEffects.get(i);
-			e.renderAndIterate(g2);
-			if(!e.running()) {
+			OngoingEffect oe = ongoingEffects.get(i);
+			
+			//Only render an ongoing effect if its intro is done
+			if(!oe.getIntro().running()) {
+				oe.render(g2);
+			}
+			
+			if(!oe.running()) {
 				//Run the outro of the ongoing effect and take it out
-				waitOn(e.getOutro());
+				waitOn(oe.getOutro());
 				ongoingEffects.remove(i--);
 			}
 		}
@@ -276,21 +324,21 @@ public class InGameState extends GameState {
 		g2.setColor(Color.white);
 
 		// Draw the tiles of the map.
-		for(int i = CAMERA_X; i < CAMERA_X + INGAME_WINDOW_WIDTH && i < map.length; i++) {
-			for(int j = CAMERA_Y; j < CAMERA_Y + INGAME_WINDOW_HEIGHT && j < map[0].length; j++) {
+		for(int i = CAMERA_CELL_X; i < CAMERA_CELL_X + INGAME_WINDOW_WIDTH && i < map.length; i++) {
+			for(int j = CAMERA_CELL_Y; j < CAMERA_CELL_Y + INGAME_WINDOW_HEIGHT && j < map[0].length; j++) {
 				// Don't draw the void!!
 				if(map[i][j].type == Tile.VOID) continue; 
 				if(map[i][j].visible || GODMODE_VISION) {
 
 					//Draw the tile image (its type should correspond to the index in tileImages[] that
 					//represents it)
-					g2.drawImage(tileImages[ map[i][j].type*2 ], (i-CAMERA_X)*TILE_SIZE,
-							(j-CAMERA_Y)*TILE_SIZE, null);
+					g2.drawImage(tileImages[ map[i][j].type*2 ], (i-CAMERA_CELL_X)*TILE_SIZE,
+							(j-CAMERA_CELL_Y)*TILE_SIZE, null);
 
 					//Draw the tile illustrations (used for debuggin')
 					if(map[i][j].illustrated) {
 						g2.setColor(map[i][j].color);
-						g2.fillRect((i-CAMERA_X)*TILE_SIZE, (j-CAMERA_Y)*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+						g2.fillRect((i-CAMERA_CELL_X)*TILE_SIZE, (j-CAMERA_CELL_Y)*TILE_SIZE, TILE_SIZE, TILE_SIZE);
 					}
 
 					/*if(map[i][j].getID() != 0 && GODMODE_DRAW_IDS) {
@@ -300,13 +348,13 @@ public class InGameState extends GameState {
 
 				} else if(map[i][j].seen) {
 					//The tile is in our memory.  Draw it, but darkened.
-					g2.drawImage(tileImages[ map[i][j].type*2+1 ], (i-CAMERA_X)*TILE_SIZE,
-							(j-CAMERA_Y)*TILE_SIZE, null);
+					g2.drawImage(tileImages[ map[i][j].type*2+1 ], (i-CAMERA_CELL_X)*TILE_SIZE,
+							(j-CAMERA_CELL_Y)*TILE_SIZE, null);
 				}
 
 				if(map[i][j].illustrated) {
 					g2.setColor(map[i][j].color);
-					g2.fillRect((i-CAMERA_X)*TILE_SIZE, (j-CAMERA_Y)*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+					g2.fillRect((i-CAMERA_CELL_X)*TILE_SIZE, (j-CAMERA_CELL_Y)*TILE_SIZE, TILE_SIZE, TILE_SIZE);
 				}
 
 			}
@@ -327,7 +375,7 @@ public class InGameState extends GameState {
 		}
 
 		//Draw the user character.
-		mainChar.draw(g2, CAMERA_X, CAMERA_Y);
+		mainChar.draw(g2, CAMERA_PX_X, SHAKEN_CAMERA_Y);
 
 		//Draw the enemies.
 		for(int i = 0; i < enemies.size(); i++) {
@@ -337,10 +385,10 @@ public class InGameState extends GameState {
 				continue;
 			}
 			if(map[e.getX()][e.getY()].visible || GODMODE_VISION){ 
-				e.draw(g2, CAMERA_X, CAMERA_Y);
+				e.draw(g2, CAMERA_PX_X, SHAKEN_CAMERA_Y);
 			} else if(mainChar.hasPassive(Passive.XRAY_GOGGLES)) {
 				g2.setColor(Color.red);
-				g2.drawString("?", (e.getX()-CAMERA_X)*TILE_SIZE, (e.getY()-CAMERA_Y)*TILE_SIZE + TILE_SIZE );
+				g2.drawString("?", e.getX() * TILE_SIZE - CAMERA_PX_X, (e.getY() + 1) * TILE_SIZE - SHAKEN_CAMERA_Y);
 			}
 		}
 
@@ -354,7 +402,7 @@ public class InGameState extends GameState {
 			}
 
 			//Gonna make it so that you can see through pet's eyes maybe?
-			p.draw(g2, CAMERA_X, CAMERA_Y);
+			p.draw(g2, CAMERA_PX_X, SHAKEN_CAMERA_Y);
 		}
 
 		Graphics2D g = (Graphics2D) mapImg.getGraphics();
@@ -363,28 +411,35 @@ public class InGameState extends GameState {
 
 	/**
 	 * Character calls this if the camera needs to be moved.
-	 * Also useful for shaking!
 	 * @param dx How much to move the camera by (x)
 	 * @param dy How much to move the camera by (y)
 	 */
 	public void moveCamera(int dx, int dy) {
-		if(CAMERA_X + dx < 0) {
-			CAMERA_X = 0;
-		} else if(CAMERA_X + dx + INGAME_WINDOW_WIDTH > map.length) {                                                             
-			CAMERA_X = map.length - INGAME_WINDOW_WIDTH;
+		System.out.println("mc called");
+		if(CAMERA_CELL_X + dx < 0) {
+			CAMERA_CELL_X = 0;
+		} else if(CAMERA_CELL_X + dx + INGAME_WINDOW_WIDTH > map.length) {                                                             
+			CAMERA_CELL_X = map.length - INGAME_WINDOW_WIDTH;
 		} else {
-			CAMERA_X += dx;
+			CAMERA_CELL_X += dx;
 		}
 
-		if(CAMERA_Y + dy < 0) {
-			CAMERA_Y = 0;
-		} else if(CAMERA_Y + dy + INGAME_WINDOW_HEIGHT > map[0].length) {                                                             
-			CAMERA_Y = map[0].length - INGAME_WINDOW_HEIGHT;
+		if(CAMERA_CELL_Y + dy < 0) {
+			CAMERA_CELL_Y = 0;
+		} else if(CAMERA_CELL_Y + dy + INGAME_WINDOW_HEIGHT > map[0].length) {                                                             
+			CAMERA_CELL_Y = map[0].length - INGAME_WINDOW_HEIGHT;
 		} else {
-			CAMERA_Y += dy;
+			CAMERA_CELL_Y += dy;
 		}
+		
+		CAMERA_PX_X = CAMERA_CELL_X * TILE_SIZE;
+		CAMERA_PX_Y = CAMERA_CELL_Y * TILE_SIZE;
 	}
 
+	public static void shakeScreen(int intensity) {
+		screenShake = intensity;
+	}
+	
 	public void keyPress(KeyEvent e) {
 		//		if(e.getKeyCode() == KeyEvent.VK_SPACE) {
 		//			LevelInfo.MAX_FEATURES ++;
@@ -475,7 +530,7 @@ public class InGameState extends GameState {
 				//Choose random direction
 				int randDirection = (int) (Math.random() * 8);
 				//convert to point coords
-				Point randDirectionP = Enemy.getPointDirection(randDirection);
+				Point randDirectionP = Utility.getPointDirection(randDirection);
 				//Shove 'em!
 				enemies.get(i).forceMarch(randDirectionP.x * 5, randDirectionP.y * 5);
 			}
@@ -505,17 +560,14 @@ public class InGameState extends GameState {
 		int tileX = x / TILE_SIZE;
 		int tileY = y / TILE_SIZE;
 
-		tileX += CAMERA_X;
-		tileY += CAMERA_Y;
+		tileX += CAMERA_PX_X;
+		tileY += CAMERA_PX_Y;
 
 		if(entities[tileX][tileY] != null) {
 			System.out.println("Entity at " + tileX + ", " + tileY + ": " + entities[tileX][tileY].getName());
 		} else {
 			System.out.println("No entity at " + tileX + ", " + tileY);
 		}
-		System.out.println("blocking at " + tileX + ", " + tileY + "? " + map[tileX][tileY].blocker);
-		System.out.println("But isblocker says: " + map[tileX][tileY].isBlocker());
-		System.out.println("TILETYPE: " + map[tileX][tileY].type);
 	}
 
 	/** All the enemies take a turn */
@@ -560,7 +612,10 @@ public class InGameState extends GameState {
 		//Iterate the iterable effects here (the dead ones are removed in render() )
 		for(int i = 0; i < ongoingEffects.size(); i++) {
 			OngoingEffect oe = ongoingEffects.get(i);
-			oe.turnIterate(map, entities);
+			//Only iterate an ongoing effect if its intro is done
+			if(!oe.getIntro().running()) {
+				oe.turnIterate(map, entities);
+			}
 		}
 
 		inputState = PLAYER_MOVE;
@@ -570,21 +625,21 @@ public class InGameState extends GameState {
 	 * Update the camera.  Used for teleporting or force marching
 	 */
 	public void updateCamera() {
-		if(mainChar.getX() - CAMERA_X < INGAME_SCROLL_MINX) {
-			int cameraMoveDistance = INGAME_SCROLL_MINX - (mainChar.getX() - CAMERA_X);
+		if(mainChar.getX() - CAMERA_CELL_X < INGAME_SCROLL_MINX) {
+			int cameraMoveDistance = INGAME_SCROLL_MINX - (mainChar.getX() - CAMERA_CELL_X);
 			moveCamera(-cameraMoveDistance, 0);
 		}
-		else if(mainChar.getX() - CAMERA_X > INGAME_SCROLL_MAXX) {
-			int cameraMoveDistance = mainChar.getX() - CAMERA_X - INGAME_SCROLL_MAXX;
+		else if(mainChar.getX() - CAMERA_CELL_X > INGAME_SCROLL_MAXX) {
+			int cameraMoveDistance = mainChar.getX() - CAMERA_CELL_X - INGAME_SCROLL_MAXX;
 			moveCamera(cameraMoveDistance, 0);
 		}
 
-		if(mainChar.getY() - CAMERA_Y < INGAME_SCROLL_MINY) {
-			int cameraMoveDistance = INGAME_SCROLL_MINY - (mainChar.getY() - CAMERA_Y);
+		if(mainChar.getY() - CAMERA_CELL_Y < INGAME_SCROLL_MINY) {
+			int cameraMoveDistance = INGAME_SCROLL_MINY - (mainChar.getY() - CAMERA_CELL_Y);
 			moveCamera(0, -cameraMoveDistance);
 		}
-		else if(mainChar.getY() - CAMERA_Y > INGAME_SCROLL_MAXY) {
-			int cameraMoveDistance = mainChar.getY() - CAMERA_Y - INGAME_SCROLL_MAXY;
+		else if(mainChar.getY() - CAMERA_CELL_Y > INGAME_SCROLL_MAXY) {
+			int cameraMoveDistance = mainChar.getY() - CAMERA_CELL_Y - INGAME_SCROLL_MAXY;
 			moveCamera(0, cameraMoveDistance);
 		}
 	}
@@ -805,7 +860,7 @@ public class InGameState extends GameState {
 		public void draw(Graphics2D g2) {
 			Color color = new Color(this.color.getRed(), this.color.getGreen(), this.color.getBlue(), alpha);
 			g2.setColor(color);
-			g2.drawString(message, x - CAMERA_X * TILE_SIZE, y - CAMERA_Y * TILE_SIZE);
+			g2.drawString(message, x - CAMERA_PX_X, y - SHAKEN_CAMERA_Y);
 		}
 
 		public void update() {
@@ -817,7 +872,8 @@ public class InGameState extends GameState {
 
 	/** Wall -> floor at destroyX, destroyY. Returns true if a wall/door was destroyed */
 	public static boolean demolish(int destroyX, int destroyY) {
-		if(map[destroyX][destroyY].type == Tile.WALL || map[destroyX][destroyY].type == Tile.FLOOR) {
+		if(map[destroyX][destroyY].type == Tile.WALL || map[destroyX][destroyY].type == Tile.DOOR ||
+				map[destroyX][destroyY].type == Tile.OPEN_DOOR) {
 			map[destroyX][destroyY] = new Tile(Tile.FLOOR, destroyX, destroyY);
 			addEvent(new Event.MapChange(new Tile(Tile.FLOOR, destroyX, destroyY), new Tile(Tile.WALL, destroyX, destroyY)));
 			return true;

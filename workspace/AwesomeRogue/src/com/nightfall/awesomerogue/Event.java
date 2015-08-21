@@ -117,6 +117,36 @@ public abstract class Event implements Undoable {
 		}
 	}
 	
+	/**** Called when somebody gets a status effect on them */
+	public static class StatusEffect extends Event {
+		Character victim;
+		
+		public static int STUN = 0;
+		public static int FREEZE = 1;
+		public static int BURN = 2;
+		
+		public StatusEffect(Character victim, int whichStatus) {
+			
+		}
+		
+		public void undo() {
+			
+		}
+	}
+	
+	/**** Called when somebody has their status effect lifted/times out */
+	public static class StatusEffectLifted extends Event {
+		Character victim;
+		
+		public StatusEffectLifted(Character victim, int whichStatus) {
+			
+		}
+		
+		public void undo() {
+			
+		}
+	}
+	
 	/**** Calls "reverse()" on effects when they come up in the queue.  Gonna have to make a reverse of all the effects I think.
 	 * WHOOO */
 	public static class EffectHappened extends Event {
